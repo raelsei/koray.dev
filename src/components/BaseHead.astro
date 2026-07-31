@@ -1,0 +1,57 @@
+---
+import { Font } from 'astro:assets';
+import { ClientRouter } from 'astro:transitions';
+
+import { SITE } from '../consts';
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+	description: string;
+	/** Absolute or site-relative OG image. */
+	image?: string;
+	/** Articles get `og:type=article`. */
+	article?: boolean;
+}
+
+const { title, description, image = '/og.png', article = false } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(image, Astro.site);
+const fullTitle = Astro.url.pathname === '/' ? `${SITE.title} — ${SITE.tagline}` : `${title} — ${SITE.title}`;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="generator" content={Astro.generator} />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#08090A" />
+
+<link rel="canonical" href={canonical} />
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+<link rel="sitemap" href="/sitemap-index.xml" />
+<link
+	rel="alternate"
+	type="application/rss+xml"
+	title={`${SITE.title} — writing`}
+	href={new URL('rss.xml', Astro.site)}
+/>
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<meta name="author" content={SITE.author} />
+
+<meta property="og:type" content={article ? 'article' : 'website'} />
+<meta property="og:site_name" content={SITE.title} />
+<meta property="og:url" content={canonical} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+
+<Font cssVariable="--font-mono" preload />
+<ClientRouter />

@@ -1,0 +1,21 @@
+---
+import { cn } from '../../lib/cn';
+
+interface Props {
+	/** Trails a line of text rather than sitting in the status line. */
+	inline?: boolean;
+	class?: string;
+}
+
+const { inline = false, class: className } = Astro.props;
+---
+
+<span
+	aria-hidden="true"
+	class={cn(
+		'bg-lime animate-blink w-[7px]',
+		inline ? 'ml-[7px] inline-block h-[13px] align-middle' : 'h-[14px]',
+		className,
+	)}
+>
+</span>

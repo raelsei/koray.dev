@@ -1,0 +1,149 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection, getEntry, render } from 'astro:content';
+
+import CodeBox from '../../components/ui/CodeBox.astro';
+import Panel from '../../components/ui/Panel.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import Longform from '../../components/ui/Longform.astro';
+import Row from '../../components/ui/Row.astro';
+import Section from '../../components/ui/Section.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { cn } from '../../lib/cn';
+import { host, ordinal } from '../../lib/format';
+
+export const getStaticPaths = (async () => {
+	const shelves = (await getCollection('shelves')).sort(
+		(a, b) => a.data.order - b.data.order,
+	);
+	// The first shelf lives at /library so the section has a canonical root.
+	return shelves.map((shelf, i) => ({
+		params: { shelf: i === 0 ? undefined : shelf.id },
+		props: { active: shelf.id },
+	}));
+}) satisfies GetStaticPaths;
+
+const { active } = Astro.props;
+
+const page = await getEntry('pages', 'library')!;
+const { Content } = await render(page);
+
+const shelves = (await getCollection('shelves')).sort(
+	(a, b) => a.data.order - b.data.order,
+);
+const current = shelves.find((s) => s.id === active)!;
+
+/** Item counts are derived, so a tab badge can never disagree with its shelf. */
+const tabs = shelves.map((shelf, i) => ({
+	id: shelf.id,
+	href: i === 0 ? '/library' : `/library/${shelf.id}`,
+	count: ordinal(shelf.data.groups.reduce((n, g) => n + g.items.length, 0) - 1),
+	active: shelf.id === active,
+}));
+---
+
+<BaseLayout
+	title={`${page.data.title} — ${current.id}`}
+	description={page.data.description}
+	route="library"
+>
+	<div class="pt-[52px]">
+		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title}>
+			<Longform measure="max-w-[70ch]" class="animate-rise-in stagger-2 mt-5">
+				<Content />
+			</Longform>
+		</PageHeader>
+
+		<nav aria-label="Shelves" class="rail animate-fade-in stagger-2 mt-10 flex gap-[5px]">
+			{
+				tabs.map((tab) => (
+					<a
+						href={tab.href}
+						aria-current={tab.active ? 'page' : undefined}
+						class={cn(
+							'text-meta tracking-label flex flex-none items-baseline gap-2 border px-3 py-2',
+							'whitespace-nowrap uppercase transition-colors duration-100',
+							tab.active
+								? 'border-edge-lime bg-panel text-lime'
+								: 'border-edge text-soft hover:border-dim hover:text-fg',
+						)}
+					>
+						<span>--{tab.id}</span>
+						<span class="text-micro text-dim">{tab.count}</span>
+					</a>
+				))
+			}
+		</nav>
+
+		{
+			current.data.groups.map((group, gi) => (
+				<Section
+					title={group.title}
+					meta={group.meta}
+					animateRule={gi === 0}
+					class:list={['animate-fade-in stagger-3', gi === 0 ? 'mt-[46px]' : 'mt-13']}
+				>
+					{group.kind === 'link' &&
+						group.items.map((item) => (
+							<Row
+								href={item.href}
+								cols="grid-cols-[minmax(0,1fr)_200px] max-sm:grid-cols-1 max-sm:gap-[7px]"
+							>
+								<span class="text-base text-fg">{item.label}</span>
+								<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
+									{host(item.href)} ↗
+								</span>
+							</Row>
+						))}
+
+					{group.kind === 'repo' &&
+						group.items.map((item) => (
+							<Row
+								href={item.href}
+								pad="md"
+								cols="grid-cols-[minmax(0,1fr)_130px] max-sm:grid-cols-1 max-sm:gap-[7px]"
+							>
+								<span class="flex flex-col gap-[5px]">
+									<span class="text-base text-fg">{item.name}</span>
+									<span class="text-sm leading-row text-soft">{item.description}</span>
+								</span>
+								<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
+									{item.lang}
+								</span>
+							</Row>
+						))}
+
+					{group.kind === 'card' && (
+						<Panel flush cols="grid-cols-2 max-sm:grid-cols-1">
+							{group.items.map((item) => (
+								<a
+									href={item.href}
+									target="_blank"
+									rel="noreferrer"
+									class="hover:bg-panel! flex flex-col gap-[7px] p-5 transition-colors duration-100"
+								>
+									<span class="text-base text-lime">{item.name}</span>
+									<span class="text-sm leading-snug text-soft">{item.description}</span>
+								</a>
+							))}
+						</Panel>
+					)}
+
+					{group.kind === 'code' &&
+						group.items.map((item) => (
+							<div class="border-hair border-b py-[22px]">
+								<CodeBox
+									name={item.name}
+									note={item.note}
+									description={item.description}
+									code={item.code}
+									lang={item.lang}
+									accent={group.accent}
+								/>
+							</div>
+						))}
+				</Section>
+			))
+		}
+	</div>
+</BaseLayout>

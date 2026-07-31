@@ -1,0 +1,11 @@
+- id: building
+  label: building
+  body: Lumi — a finance copilot that categorises, forecasts and nudges. Private beta with 40 households.
+
+- id: reading
+  label: reading
+  body: Designing Data-Intensive Applications, second time around. Slower, with notes.
+
+- id: learning
+  label: learning
+  body: Writing evals before prompts. It changed how I ship LLM features entirely.

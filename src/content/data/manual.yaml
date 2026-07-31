@@ -1,0 +1,7 @@
+- id: name
+  term: NAME
+  body: koray — founder, product engineer, fintech
+
+- id: synopsis
+  term: SYNOPSIS
+  body: koray [--fintech] [--applied-ai] [--small-team] <problem>

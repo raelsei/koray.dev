@@ -1,0 +1,21 @@
+# The four-cell readout under the hero.
+- id: local_time
+  label: local_time
+  live: clock
+  note: GMT+03
+  tone: accent
+
+- id: position
+  label: position
+  value: "İstanbul, TR"
+  note: 41.01°N / 28.98°E
+
+- id: now_shipping
+  label: now_shipping
+  value: lumi — beta
+  note: 40 households
+
+- id: last_commit
+  label: last_commit
+  value: prompt-forge
+  note: "2h — feat: jsonl grader"

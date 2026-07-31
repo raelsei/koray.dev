@@ -1,0 +1,86 @@
+---
+import { getEntry, render } from 'astro:content';
+
+import Cursor from '../../components/primitives/Cursor.astro';
+import Panel from '../../components/ui/Panel.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import Longform from '../../components/ui/Longform.astro';
+import Row from '../../components/ui/Row.astro';
+import Section from '../../components/ui/Section.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { list } from '../../lib/collections';
+import { dotted, monthDay } from '../../lib/format';
+import { byYear, getPosts } from '../../lib/writing';
+
+const page = await getEntry('pages', 'writing')!;
+const { Content } = await render(page);
+
+const [posts, notes] = await Promise.all([getPosts(), list('notes')]);
+const years = byYear(posts);
+---
+
+<BaseLayout title={page.data.title} description={page.data.description} route="writing">
+	<div class="pt-[52px]">
+		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title}>
+			<Longform measure="max-w-[70ch]" class="animate-rise-in stagger-2 mt-5">
+				<Content />
+			</Longform>
+		</PageHeader>
+
+		{
+			years.map((group, gi) => (
+				<Section
+					title={`${group.year}/`}
+					meta={`${group.posts.length} ${group.posts.length === 1 ? 'file' : 'files'}`}
+					animateRule={gi === 0}
+					class:list={['animate-fade-in', gi === 0 ? 'stagger-3 mt-15' : 'stagger-4 mt-14']}
+				>
+					{group.posts.map((post) => (
+						<Row
+							href={`/writing/${post.id}`}
+							pad="lg"
+							cols="grid-cols-[88px_minmax(0,1fr)_74px] max-sm:grid-cols-1 max-sm:gap-[7px]"
+						>
+							<time
+								slot="lead"
+								datetime={post.data.pubDate.toISOString()}
+								class="text-meta text-dim"
+							>
+								{monthDay(post.data.pubDate)}
+							</time>
+							<span class="flex flex-col gap-1.5">
+								<span class="text-lg text-fg font-medium">{post.data.title.toLowerCase()}</span>
+								<span class="text-sm leading-snug text-soft">{post.data.description}</span>
+							</span>
+							<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
+								{post.minutes} min
+							</span>
+						</Row>
+					))}
+				</Section>
+			))
+		}
+
+		<Section
+			title="$ tail -f notes.log"
+			meta="unpolished, on purpose"
+			class="animate-fade-in stagger-5 mt-14"
+		>
+			<Panel flush>
+				{
+					notes.map((note, i) => (
+						<div class="grid grid-cols-[104px_minmax(0,1fr)] gap-[14px] px-4 py-[14px] max-sm:grid-cols-1 max-sm:gap-[7px]">
+							<time datetime={note.data.date.toISOString()} class="text-meta text-dim">
+								{dotted(note.data.date)}
+							</time>
+							<span class="text-note leading-body text-fg">
+								{note.data.body}
+								{i === notes.length - 1 && <Cursor inline />}
+							</span>
+						</div>
+					))
+				}
+			</Panel>
+		</Section>
+	</div>
+</BaseLayout>

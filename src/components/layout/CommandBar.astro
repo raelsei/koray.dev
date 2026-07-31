@@ -1,0 +1,57 @@
+---
+import { SITE } from '../../consts';
+import { list } from '../../lib/collections';
+import { getPosts } from '../../lib/writing';
+
+const [nav, posts] = await Promise.all([list('nav'), getPosts()]);
+
+// The command bar resolves against the same route table the navigation renders.
+const manifest = {
+	routes: nav.map(({ id, data }) => ({
+		id,
+		label: data.label,
+		href: data.href,
+		aliases: data.aliases,
+	})),
+	docs: posts.map((post) => ({
+		id: post.id,
+		title: post.data.title,
+		href: `/writing/${post.id}`,
+	})),
+	email: SITE.email,
+};
+---
+
+<div
+	data-command-bar
+	transition:persist="command-bar"
+	class="bg-void border-edge fixed inset-x-0 bottom-0 z-40 border-t"
+>
+	<script type="application/json" data-manifest set:html={JSON.stringify(manifest)} is:inline />
+
+	<div class="shell">
+		<output
+			data-log
+			hidden
+			class="border-hair flex flex-col gap-1 border-b pt-3 pb-2.5 [&[hidden]]:hidden"
+		>
+		</output>
+
+		<div class="flex h-[46px] items-center gap-2.5">
+			<span aria-hidden="true" class="text-code text-lime">$</span>
+			<input
+				type="text"
+				name="command"
+				autocomplete="off"
+				spellcheck="false"
+				aria-label="Terminal command"
+				placeholder="try: help, ls, cd work, cat post, mail"
+				class="text-code tracking-input text-fg placeholder:text-dim flex-1 bg-transparent
+					outline-none focus-visible:outline-none"
+			/>
+			<span class="text-mini tracking-wide text-dim whitespace-nowrap uppercase max-sm:hidden">
+				↵ run · ⌥/ focus
+			</span>
+		</div>
+	</div>
+</div>

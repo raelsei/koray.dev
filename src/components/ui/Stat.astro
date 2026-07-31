@@ -1,0 +1,26 @@
+---
+import { cn } from '../../lib/cn';
+
+interface Props {
+	label: string;
+	value?: string;
+	note?: string;
+	tone?: 'accent' | 'muted';
+	/** Replaced client-side once per second. */
+	live?: 'clock';
+	class?: string;
+}
+
+const { label, value, note, tone = 'muted', live, class: className } = Astro.props;
+---
+
+<div class={cn('flex flex-col gap-[7px] px-5 py-[18px]', className)}>
+	<span class="text-micro tracking-stat text-subtle uppercase">{label}</span>
+	<span
+		class={cn('font-medium', tone === 'accent' ? 'text-clock text-lime' : 'text-lg text-fg')}
+		{...live === 'clock' ? { 'data-clock': '' } : {}}
+	>
+		{value}
+	</span>
+	{note && <span class="text-nano text-dim">{note}</span>}
+</div>

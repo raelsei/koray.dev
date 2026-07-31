@@ -1,0 +1,28 @@
+order: 1
+meta: people who explain things well
+groups:
+  - kind: link
+    title: reading/
+    meta: people who explain things well
+    items:
+      - label: Julia Evans — debugging, explained kindly
+        href: https://jvns.ca
+      - label: Dan Luu — measurements over opinions
+        href: https://danluu.com
+      - label: Simon Willison — the LLM field notes I trust most
+        href: https://simonwillison.net
+      - label: Stripe Press — books about how things get built
+        href: https://press.stripe.com
+
+  - kind: link
+    title: reference/
+    meta: open weekly
+    items:
+      - label: Anthropic docs — prompt library and tool use
+        href: https://docs.anthropic.com
+      - label: Postgres docs — still the best manual in software
+        href: https://www.postgresql.org/docs/
+      - label: transform.tools — JSON to anything, instantly
+        href: https://transform.tools
+      - label: LLM Visualization — a transformer you can walk through
+        href: https://bbycroft.net/llm

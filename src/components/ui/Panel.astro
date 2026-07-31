@@ -1,0 +1,26 @@
+---
+import { cn } from '../../lib/cn';
+
+interface Props {
+	/** Tailwind `grid-cols-[…]` class; omit for a single column. */
+	cols?: string;
+	/** Drop the top border when a Rule already closes the space above. */
+	flush?: boolean;
+	class?: string;
+}
+
+const { cols, flush = false, class: className } = Astro.props;
+---
+
+{/* One-pixel gaps over an edge-coloured backdrop draw every divider at once,
+    so cells never carry per-position border classes. */}
+<div
+	class={cn(
+		'bg-edge border-edge grid gap-px border [&>*]:bg-void',
+		flush && 'border-t-0',
+		cols,
+		className,
+	)}
+>
+	<slot />
+</div>

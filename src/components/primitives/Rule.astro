@@ -1,0 +1,24 @@
+---
+import { cn } from '../../lib/cn';
+
+interface Props {
+	/** `bright` is a section divider; `edge` is a subordinate hairline. */
+	tone?: 'bright' | 'edge';
+	/** Wipe in from the left on first paint. */
+	animate?: boolean;
+	class?: string;
+}
+
+const { tone = 'bright', animate = false, class: className } = Astro.props;
+---
+
+<div
+	aria-hidden="true"
+	class={cn(
+		'h-px',
+		tone === 'bright' ? 'bg-fg' : 'bg-edge',
+		animate && 'origin-left animate-rule-in',
+		className,
+	)}
+>
+</div>

@@ -1,0 +1,25 @@
+- id: email
+  channel: email
+  handle: id@koray.dev
+  href: mailto:id@koray.dev
+  external: false
+
+- id: github
+  channel: github
+  handle: raelsei
+  href: https://github.com/raelsei
+
+- id: x
+  channel: x
+  handle: raelsei
+  href: https://x.com/raelsei
+
+- id: linkedin
+  channel: linkedin
+  handle: raelsei
+  href: https://linkedin.com/in/raelsei
+
+- id: telegram
+  channel: telegram
+  handle: raelsei
+  href: https://t.me/raelsei

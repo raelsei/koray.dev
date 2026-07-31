@@ -1,0 +1,31 @@
+---
+import PageHeader from '../components/ui/PageHeader.astro';
+import Row from '../components/ui/Row.astro';
+import Section from '../components/ui/Section.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { list } from '../lib/collections';
+
+const nav = await list('nav');
+---
+
+<BaseLayout title="404" description="No such file or directory." route="index">
+	<div class="pt-[52px]">
+		<PageHeader prompt="$ cat ." title="No such file or directory." measure="max-w-[20ch]" />
+
+		<p class="text-body leading-prose text-soft animate-fade-in stagger-2 mt-5 max-w-[60ch]">
+			<span class="text-red">exit 1</span> — the path you followed does not resolve. Everything
+			that does is listed below, or type a section name into the prompt at the bottom of the page.
+		</p>
+
+		<Section title="$ ls" meta="valid paths" animateRule class="animate-fade-in stagger-3 mt-14">
+			{
+				nav.map((item) => (
+					<Row href={item.data.href} cols="grid-cols-[96px_minmax(0,1fr)] gap-[18px]">
+						<span slot="lead" class="text-meta text-dim">~/{item.id}</span>
+						<span class="text-base text-fg">{item.data.href}</span>
+					</Row>
+				))
+			}
+		</Section>
+	</div>
+</BaseLayout>

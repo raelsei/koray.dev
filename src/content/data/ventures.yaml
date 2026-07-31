@@ -1,0 +1,41 @@
+- id: koative
+  name: koative
+  lead: true
+  href: https://koative.com
+  status: founder
+  period: "2026 —"
+  tags: [bootstrapped, "İstanbul"]
+  summary: Applied-AI studio. Fintech products, built in-house.
+  description: >-
+    An applied-AI studio, not an agency. We fund and build our own fintech
+    products, and take on one partner engagement a year to pay for it. Small on
+    purpose: three engineers, one designer, no roadmap theatre.
+
+- id: lumi
+  name: lumi
+  status: beta
+  period: "2026"
+  badge: private beta
+  badgeTone: accent
+  aside: under koative
+  summary: Personal finance copilot. Forecasts, not dashboards.
+  description: >-
+    A finance copilot for households. It reads your accounts, learns the shape of
+    your month, and tells you what will hurt in three weeks — instead of another
+    pie chart of last month.
+  metrics:
+    - { value: "40", label: households, tone: accent }
+    - { value: "94%", label: categorised }
+    - { value: "180ms", label: p95 sync }
+
+- id: bine
+  name: bine
+  status: alpha
+  period: "2026"
+  badge: alpha
+  aside: under koative
+  summary: Invoice reconciliation for small merchants in Türkiye.
+  description: >-
+    Invoice reconciliation for small merchants. Photograph the e-invoice, match it
+    to the bank line, close the month. Boring by design — it runs on a ledger, not
+    on vibes.

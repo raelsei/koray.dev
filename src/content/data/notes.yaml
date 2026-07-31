@@ -1,0 +1,24 @@
+# `$ tail -f notes.log` — newest first.
+- id: context-window-budget
+  date: 2026-07-14
+  body: A context window is a budget, not a bucket. Spend it on examples, not on prose.
+
+- id: structured-output
+  date: 2026-06-29
+  body: Structured output removed more code from my repo than any framework ever did.
+
+- id: cache-the-plan
+  date: 2026-06-02
+  body: Cache the plan, not the answer. Plans are stable; answers are cheap to regenerate.
+
+- id: ten-second-rule
+  date: 2026-05-11
+  body: If a human reviewer can't grade the output in ten seconds, the eval is wrong.
+
+- id: retrieval-is-data-cleaning
+  date: 2026-04-19
+  body: Retrieval quality is a data-cleaning problem wearing a machine-learning costume.
+
+- id: never-let-a-model-move-money
+  date: 2026-03-07
+  body: Never let a model move money. Let it draft the intent; let the ledger decide.

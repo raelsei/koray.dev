@@ -1,0 +1,57 @@
+---
+import Cursor from '../primitives/Cursor.astro';
+import NavRail from './NavRail.astro';
+import { SITE } from '../../consts';
+import { clockNow } from '../../lib/format';
+
+interface Props {
+	route: string;
+	/** Article routes show a reading-progress rule under the navigation. */
+	progress?: boolean;
+}
+
+const { route, progress = false } = Astro.props;
+const { terminal } = SITE;
+---
+
+<div class="bg-void border-edge sticky top-0 z-30 border-b">
+	<div
+		class="shell text-meta tracking-nav text-subtle flex h-[38px] items-center justify-between
+			max-sm:h-auto max-sm:flex-wrap max-sm:gap-y-[7px] max-sm:py-3"
+	>
+		<div class="flex items-center gap-[9px]">
+			<span class="text-soft">{terminal.user}</span>
+			<span>:</span>
+			<span class="text-lime">~/{route}</span>
+			<span class="text-soft">$</span>
+			<Cursor />
+		</div>
+
+		<div class="flex items-center gap-[22px]">
+			<span class="max-sm:hidden">
+				{terminal.timeLabel}
+				<time data-clock>{clockNow()}</time>
+			</span>
+			<span class="text-dim max-sm:hidden">|</span>
+			<span class="max-sm:hidden">{terminal.coordinates}</span>
+			{
+				terminal.availability && (
+					<span class="text-lime flex items-center gap-[7px]">
+						<span aria-hidden="true" class="bg-lime animate-pulse-soft size-1.5" />
+						<span class="max-sm:hidden">{terminal.availability}</span>
+					</span>
+				)
+			}
+		</div>
+	</div>
+
+	<NavRail route={route} />
+
+	{
+		progress && (
+			<div class="bg-hair h-0.5">
+				<div data-progress class="bg-lime h-0.5 w-0 transition-[width] duration-100 ease-linear" />
+			</div>
+		)
+	}
+</div>

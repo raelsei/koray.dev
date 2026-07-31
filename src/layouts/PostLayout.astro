@@ -1,0 +1,109 @@
+---
+import { render } from 'astro:content';
+
+import Longform from '../components/ui/Longform.astro';
+import Row from '../components/ui/Row.astro';
+import Rule from '../components/primitives/Rule.astro';
+import Section from '../components/ui/Section.astro';
+import BaseLayout from './BaseLayout.astro';
+import { iso } from '../lib/format';
+import type { Post } from '../lib/writing';
+
+interface Props {
+	post: Post;
+	next?: Post;
+}
+
+const { post, next } = Astro.props;
+const { Content } = await render(post);
+const { title, description, pubDate, updatedDate, tags, colophon } = post.data;
+---
+
+<BaseLayout
+	title={title}
+	description={description}
+	route="writing"
+	article
+	progress
+>
+	<div class="pt-[52px]">
+		<a
+			href="/writing"
+			class="text-meta tracking-wide text-subtle hover:text-lime animate-fade-in uppercase transition-colors"
+		>
+			← cd ../writing
+		</a>
+
+		<article class="mt-7">
+			<header>
+				<span class="text-meta tracking-prompt text-subtle animate-fade-in stagger-1 block uppercase">
+					$ cat {post.id}.md
+				</span>
+
+				<h1
+					class="text-post tracking-hero leading-hero text-fg animate-rise-in stagger-1
+						mt-4 max-w-[24ch] font-bold text-balance"
+				>
+					{title}
+				</h1>
+
+				<div
+					class="text-meta tracking-caps text-subtle animate-fade-in stagger-3
+						mt-5 flex flex-wrap items-baseline gap-5 uppercase"
+				>
+					<time datetime={iso(pubDate)}>{iso(pubDate)}</time>
+					<span>{post.minutes} min</span>
+					{
+						tags.map((tag, i) => (
+							<span class={i === 0 ? 'text-lime' : undefined}>#{tag}</span>
+						))
+					}
+					{updatedDate && <span class="text-dim">updated {iso(updatedDate)}</span>}
+				</div>
+
+				<Rule tone="edge" animate class="stagger-3 mt-[18px]" />
+			</header>
+
+			<p
+				class="text-lede leading-lede text-fg animate-rise-in stagger-4
+					mt-[30px] max-w-[74ch] text-pretty"
+			>
+				{description}
+			</p>
+
+			<Longform class="animate-fade-in stagger-5 mt-10">
+				<Content />
+			</Longform>
+
+			{
+				colophon && (
+					<div class="animate-fade-in stagger-8 mt-[38px] flex max-w-[78ch] items-center gap-[14px]">
+						<span aria-hidden="true" class="bg-edge h-px w-5" />
+						<span class="text-meta tracking-wide text-dim uppercase">{colophon}</span>
+					</div>
+				)
+			}
+		</article>
+
+		{
+			next && (
+				<Section
+					title="$ next"
+					action="all essays →"
+					actionHref="/writing"
+					class="animate-fade-in stagger-9 mt-16"
+				>
+					<Row href={`/writing/${next.id}`} cols="grid-cols-[minmax(0,1fr)_170px]" pad="lg">
+						<span class="flex flex-col gap-1.5">
+							<span class="text-lg text-fg font-medium">{next.data.title}</span>
+							<span class="text-sm leading-snug text-soft">{next.data.description}</span>
+						</span>
+						<span slot="trail" class="text-meta text-subtle text-right">
+							{iso(next.data.pubDate)} · {next.minutes} min
+						</span>
+					</Row>
+				</Section>
+			)
+		}
+	</div>
+</BaseLayout>

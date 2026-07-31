@@ -1,0 +1,30 @@
+# Drives the top navigation, the command bar's `cd`/`ls`, and the sitemap order.
+- id: index
+  label: index
+  href: /
+  aliases: [home, root, "~"]
+
+- id: work
+  label: work
+  href: /work
+  aliases: [ventures, projects, oss]
+
+- id: writing
+  label: writing
+  href: /writing
+  aliases: [blog, posts, essays]
+
+- id: stack
+  label: stack
+  href: /stack
+  aliases: [tools, setup, dotfiles]
+
+- id: library
+  label: library
+  href: /library
+  aliases: [links, bookmarks, snippets]
+
+- id: about
+  label: about
+  href: /about
+  aliases: [me, cv, whoami]

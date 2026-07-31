@@ -1,0 +1,122 @@
+---
+import { getEntry } from 'astro:content';
+
+import Badge from '../components/primitives/Badge.astro';
+import Metric from '../components/ui/Metric.astro';
+import Panel from '../components/ui/Panel.astro';
+import PageHeader from '../components/ui/PageHeader.astro';
+import Row from '../components/ui/Row.astro';
+import Section from '../components/ui/Section.astro';
+import Tag from '../components/primitives/Tag.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { list } from '../lib/collections';
+import { host, ordinal } from '../lib/format';
+
+const page = await getEntry('pages', 'work')!;
+const [ventures, oss] = await Promise.all([
+	list('ventures'),
+	list('oss'),
+]);
+
+const GITHUB = 'https://github.com/raelsei';
+---
+
+<BaseLayout title={page.data.title} description={page.data.description} route="work">
+	<div class="pt-[52px]">
+		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title} measure="max-w-[26ch]" />
+
+		<Section
+			title="ventures/"
+			meta="koative & co."
+			animateRule
+			class="animate-fade-in stagger-2 mt-16"
+		>
+			{
+				ventures.map((venture, i) => {
+					const v = venture.data;
+					const tags = v.tags.length > 0 ? [v.status, v.period, ...v.tags] : [];
+					return (
+						<div class="border-hair grid grid-cols-[34px_minmax(0,1fr)] gap-4 border-b py-7 max-sm:grid-cols-1 max-sm:gap-[13px]">
+							<span class="text-meta text-dim">{ordinal(i)}</span>
+							<div class="flex flex-col gap-[13px]">
+								<div class="flex items-baseline justify-between gap-[18px]">
+									<h3
+										class:list={[
+											'font-bold',
+											v.lead
+												? 'text-2xl tracking-title text-lime'
+												: 'text-xl tracking-tight text-fg',
+										]}
+									>
+										{v.name}
+										{v.badge && <Badge tone={v.badgeTone}>{v.badge}</Badge>}
+									</h3>
+									{v.href ? (
+										<a
+											href={v.href}
+											target="_blank"
+											rel="noreferrer"
+											class="text-meta text-subtle hover:text-lime whitespace-nowrap transition-colors"
+										>
+											{host(v.href)} ↗
+										</a>
+									) : (
+										v.aside && (
+											<span class="text-meta text-subtle whitespace-nowrap">{v.aside}</span>
+										)
+									)}
+								</div>
+
+								<p class="text-base leading-relaxed text-soft max-w-[72ch] text-pretty">
+									{v.description}
+								</p>
+
+								{tags.length > 0 && (
+									<div class="flex flex-wrap gap-[5px]">
+										{tags.map((tag) => (
+											<Tag>{tag}</Tag>
+										))}
+									</div>
+								)}
+
+								{v.metrics.length > 0 && (
+									<Panel cols="grid-cols-3" class="max-w-[520px]">
+										{v.metrics.map((m) => (
+											<Metric value={m.value} label={m.label} tone={m.tone} />
+										))}
+									</Panel>
+								)}
+							</div>
+						</div>
+					);
+				})
+			}
+		</Section>
+
+		<Section
+			title="open-source/"
+			action={`${host(GITHUB)}/raelsei ↗`}
+			actionHref={GITHUB}
+			class="animate-fade-in stagger-3 mt-16"
+		>
+			{
+				oss.map((repo) => (
+					<Row
+						href={repo.data.href}
+						pad="md"
+						cols="grid-cols-[minmax(0,1fr)_200px] max-sm:grid-cols-1 max-sm:gap-[7px]"
+					>
+						<span class="flex flex-col gap-[5px]">
+							<span class="text-body text-fg">{repo.data.name}</span>
+							<span class="text-sm leading-row text-soft">{repo.data.description}</span>
+						</span>
+						<span slot="trail" class="text-meta text-subtle flex justify-end gap-4 max-sm:justify-start">
+							<span>{repo.data.lang}</span>
+							<span class="text-lime">★ {repo.data.stars}</span>
+						</span>
+					</Row>
+				))
+			}
+		</Section>
+	</div>
+</BaseLayout>

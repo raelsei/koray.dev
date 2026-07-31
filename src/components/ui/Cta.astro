@@ -1,0 +1,45 @@
+---
+import Prompt from '../primitives/Prompt.astro';
+import { cn } from '../../lib/cn';
+
+interface Props {
+	prompt: string;
+	email: string;
+	body: string;
+	aside: string;
+	asideHref?: string;
+	class?: string;
+}
+
+const { prompt, email, body, aside, asideHref, class: className } = Astro.props;
+const asideClass =
+	'text-meta tracking-label text-subtle pb-1.5 whitespace-nowrap uppercase';
+---
+
+<section
+	class={cn(
+		'border-edge-lime flex items-end justify-between gap-7 border px-[26px] py-7',
+		'max-sm:flex-col max-sm:items-start max-sm:gap-[18px]',
+		className,
+	)}
+>
+	<div class="flex flex-col gap-[9px]">
+		<Prompt size="sm">{prompt}</Prompt>
+		<a
+			href={`mailto:${email}`}
+			class="text-3xl tracking-title text-lime font-bold"
+		>
+			{email}
+		</a>
+		<span class="text-sm leading-body text-soft max-w-[74ch]">{body}</span>
+	</div>
+	{
+		asideHref ? (
+			<a href={asideHref} class={cn(asideClass, 'hover:text-lime transition-colors')}>
+				{aside}
+			</a>
+		) : (
+			<span class={asideClass}>{aside}</span>
+		)
+	}
+</section>

@@ -1,0 +1,56 @@
+order: 4
+meta: pasted more than once
+groups:
+  - kind: code
+    title: snippets/
+    meta: pasted more than once
+    items:
+      - name: money.ts
+        note: never store money as a float
+        lang: typescript
+        code: |
+          type Money = { minor: bigint; currency: "TRY" | "USD" | "EUR" };
+
+          const add = (a: Money, b: Money): Money => {
+            if (a.currency !== b.currency) throw new Error("currency mismatch");
+            return { minor: a.minor + b.minor, currency: a.currency };
+          };
+
+          const fmt = ({ minor, currency }: Money, locale = "tr-TR") =>
+            new Intl.NumberFormat(locale, { style: "currency", currency })
+              .format(Number(minor) / 100);
+
+      - name: retry.ts
+        note: backoff with jitter, 14 lines
+        lang: typescript
+        code: |
+          export async function retry<T>(
+            fn: () => Promise<T>,
+            { tries = 5, base = 200, cap = 8000 } = {}
+          ): Promise<T> {
+            let last: unknown;
+            for (let i = 0; i < tries; i++) {
+              try { return await fn(); } catch (e) { last = e; }
+              const wait = Math.min(cap, base * 2 ** i) * (0.5 + Math.random());
+              await new Promise((r) => setTimeout(r, wait));
+            }
+            throw last;
+          }
+
+      - name: ledger.sql
+        note: entries must sum to zero
+        lang: sql
+        code: |
+          create table entry (
+            id          bigserial primary key,
+            tx_id       uuid    not null,
+            account_id  bigint  not null references account(id),
+            amount      bigint  not null,          -- minor units, signed
+            created_at  timestamptz not null default now()
+          );
+
+          create index on entry (tx_id);
+
+          -- balance is a fold, never a column
+          create view balance as
+          select account_id, sum(amount) as minor from entry group by 1;

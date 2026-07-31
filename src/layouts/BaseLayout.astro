@@ -1,0 +1,44 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import CommandBar from '../components/layout/CommandBar.astro';
+import Footer from '../components/layout/Footer.astro';
+import Scanlines from '../components/layout/Scanlines.astro';
+import TopBar from '../components/layout/TopBar.astro';
+import { SITE } from '../consts';
+
+interface Props {
+	title: string;
+	description: string;
+	/** Collection id of the active nav item; also shown in the status line. */
+	route: string;
+	image?: string;
+	article?: boolean;
+	progress?: boolean;
+}
+
+const { title, description, route, image, article, progress } = Astro.props;
+---
+
+<!doctype html>
+<html lang={SITE.locale} class="scroll-smooth">
+	<head>
+		<BaseHead title={title} description={description} image={image} article={article} />
+	</head>
+
+	<body class="bg-void text-fg relative min-h-screen">
+		<Scanlines />
+		<TopBar route={route} progress={progress} />
+
+		{/* Bottom padding clears the fixed command bar. */}
+		<main class="shell pb-[150px] max-sm:pb-[120px]">
+			<slot />
+			<Footer />
+		</main>
+
+		<CommandBar />
+
+		<script>
+			import '../scripts/main';
+		</script>
+	</body>
+</html>

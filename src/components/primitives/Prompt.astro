@@ -1,0 +1,21 @@
+---
+import { cn } from '../../lib/cn';
+
+interface Props {
+	/** `md` heads a page or section; `sm` heads a panel. */
+	size?: 'sm' | 'md';
+	class?: string;
+}
+
+const { size = 'md', class: className } = Astro.props;
+---
+
+<span
+	class={cn(
+		'tracking-prompt text-subtle uppercase',
+		size === 'md' ? 'text-meta' : 'text-nano',
+		className,
+	)}
+>
+	<slot />
+</span>

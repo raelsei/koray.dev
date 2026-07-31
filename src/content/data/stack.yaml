@@ -1,0 +1,44 @@
+- id: editor-and-shell
+  label: editor-and-shell
+  items:
+    - { name: neovim, note: 4 years, still rebuilding }
+    - { name: ghostty, note: the reason this site looks like this }
+    - { name: zsh + fzf }
+    - { name: tmux }
+    - { name: lazygit }
+
+- id: build
+  label: build
+  items:
+    - { name: typescript, note: strict, no exceptions }
+    - { name: bun }
+    - { name: go, note: anything that touches a ledger }
+    - { name: postgres + drizzle }
+    - { name: tailwind }
+
+- id: infra
+  label: infra
+  items:
+    - { name: cloudflare workers }
+    - { name: fly.io }
+    - { name: neon }
+    - { name: grafana }
+    - { name: terraform }
+
+- id: ai
+  label: ai
+  items:
+    - { name: claude code, note: pairs on the boring half }
+    - { name: anthropic sdk }
+    - { name: pgvector }
+    - { name: ollama, note: local evals, no bill }
+    - { name: braintrust }
+
+- id: think-and-draw
+  label: think-and-draw
+  items:
+    - { name: figma }
+    - { name: excalidraw }
+    - { name: obsidian }
+    - { name: linear }
+    - { name: raycast }

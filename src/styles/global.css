@@ -1,0 +1,362 @@
+@import 'tailwindcss';
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Void Terminal — design tokens.
+   Every literal from the design lives here exactly once. Components never
+   hardcode a hex, a size or a duration; they compose these utilities.
+   ───────────────────────────────────────────────────────────────────────── */
+@theme {
+	/* Surfaces — darkest to lightest */
+	--color-void: #08090a; /* page background */
+	--color-scan: #0c100e; /* scanline stripe */
+	--color-panel: #0e1211; /* hover fill, code block */
+
+	/* Strokes */
+	--color-hair: #121614; /* row divider, hairline */
+	--color-edge: #1e2422; /* default border */
+	--color-edge-lime: #24402a; /* accented border */
+
+	/* Ink — dimmest to brightest */
+	--color-dim: #3f4644; /* timestamps, tertiary */
+	--color-subtle: #5d6663; /* labels, secondary */
+	--color-soft: #8e9793; /* body copy */
+	--color-fg: #d9dedb; /* primary text, rules */
+	--color-lime: #b6ff3d; /* accent */
+	--color-red: #e2513b; /* command errors */
+
+	/* Type scale — named by role, not by number */
+	--text-micro: 9.5px; /* stat caption */
+	--text-mini: 10px; /* command-bar hint */
+	--text-nano: 10.5px; /* tag, footer, cta label */
+	--text-meta: 11px; /* nav, section title, row meta */
+	--text-log: 11.5px; /* command-bar output */
+	--text-code: 12.5px; /* pre, prompt input */
+	--text-sm: 13px; /* row description */
+	--text-note: 13.5px; /* note body, base font-size */
+	--text-base: 14px; /* list body */
+	--text-body: 14.5px; /* prose body */
+	--text-md: 15px; /* copy-box title */
+	--text-lg: 16px; /* row title */
+	--text-lede: 17px; /* post lede */
+	--text-stat: 18px; /* metric value */
+	--text-clock: 19px; /* index clock */
+	--text-xl: 20px; /* venture title */
+	--text-2xl: 23px; /* lead venture title */
+	--text-3xl: 27px; /* cta mail address */
+	--text-hero: clamp(30px, 4vw, 50px);
+	--text-title: clamp(26px, 3.2vw, 40px);
+	--text-post: clamp(28px, 3.6vw, 46px);
+
+	/* Tracking */
+	--tracking-hero: -0.035em;
+	--tracking-title: -0.03em;
+	--tracking-tight: -0.025em;
+	--tracking-snug: -0.01em;
+	--tracking-input: 0.02em;
+	--tracking-nav: 0.06em;
+	--tracking-tag: 0.08em;
+	--tracking-label: 0.1em;
+	--tracking-caps: 0.12em;
+	--tracking-wide: 0.14em;
+	--tracking-rule: 0.16em;
+	--tracking-stat: 0.18em;
+	--tracking-prompt: 0.2em;
+
+	/* Leading */
+	--leading-hero: 1.08;
+	--leading-title: 1.1;
+	--leading-row: 1.6;
+	--leading-snug: 1.65;
+	--leading-body: 1.7;
+	--leading-lede: 1.75;
+	--leading-relaxed: 1.8;
+	--leading-prose: 1.85;
+	--leading-loose: 1.9;
+
+	/* Layout */
+	--container-shell: 1180px;
+	--spacing-gutter: 34px;
+
+	/* Motion — the design's four entrances plus two loops */
+	--animate-blink: blink 1.15s steps(1) infinite;
+	--animate-pulse-soft: pulse-soft 2.4s ease-in-out infinite;
+	--animate-fade-in: fade-in 0.7s ease both;
+	--animate-rise-in: rise-in 0.6s cubic-bezier(0.2, 0.7, 0, 1) both;
+	--animate-rule-in: rule-in 0.7s cubic-bezier(0.2, 0.7, 0, 1) both;
+
+	@keyframes blink {
+		0%,
+		49% {
+			opacity: 1;
+		}
+		50%,
+		100% {
+			opacity: 0;
+		}
+	}
+	@keyframes pulse-soft {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.15;
+		}
+	}
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+	@keyframes rise-in {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+	@keyframes rule-in {
+		from {
+			transform: scaleX(0);
+		}
+		to {
+			transform: scaleX(1);
+		}
+	}
+}
+
+@layer base {
+	html {
+		background: var(--color-void);
+		color-scheme: dark;
+		scrollbar-color: var(--color-edge) var(--color-void);
+	}
+
+	body {
+		background: var(--color-void);
+		color: var(--color-fg);
+		font-family: var(--font-mono);
+		font-size: var(--text-note);
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+
+	::selection {
+		background: var(--color-lime);
+		color: var(--color-void);
+	}
+
+	:focus-visible {
+		outline: 1px solid var(--color-lime);
+		outline-offset: 2px;
+	}
+
+	/* The design's entrance animations are decoration, not information. */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			animation-duration: 0.01ms !important;
+			animation-iteration-count: 1 !important;
+			transition-duration: 0.01ms !important;
+			scroll-behavior: auto !important;
+		}
+	}
+}
+
+/* ─── Compound utilities ────────────────────────────────────────────────── */
+
+/** Centred content column with the responsive gutter the design specifies. */
+@utility shell {
+	margin-inline: auto;
+	max-width: var(--container-shell);
+	padding-inline: var(--spacing-gutter);
+
+	@media (width <= 900px) {
+		padding-inline: 20px;
+	}
+}
+
+/** Horizontally scrollable strip with the scrollbar hidden (nav, lib tabs). */
+@utility rail {
+	overflow-x: auto;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+
+	@media (width <= 640px) {
+		-webkit-mask-image: linear-gradient(90deg, #000 86%, transparent);
+		mask-image: linear-gradient(90deg, #000 86%, transparent);
+	}
+}
+
+/** Staggered entrance: `class="animate-fade-in stagger-3"`. */
+@utility stagger-* {
+	animation-delay: calc(--value(integer) * 60ms);
+}
+
+/* ─── Components ────────────────────────────────────────────────────────────
+   Markdown has no class attributes, so the two surfaces it renders into —
+   long-form prose and titled code fences — are typeset by selector. Both
+   `<CodeBox>` and `rehypeCodeBox` emit `[data-code-box]`, so component and
+   Markdown call sites share exactly one rule set.
+   ───────────────────────────────────────────────────────────────────────── */
+@layer components {
+	.longform {
+		display: flex;
+		flex-direction: column;
+		gap: 22px;
+		counter-reset: section;
+		font-size: var(--text-body);
+		line-height: var(--leading-loose);
+		color: var(--color-soft);
+	}
+
+	.longform > * {
+		margin: 0;
+	}
+
+	.longform p {
+		text-wrap: pretty;
+	}
+
+	.longform a {
+		color: var(--color-lime);
+		border-bottom: 1px solid var(--color-edge-lime);
+		transition: border-color 120ms ease;
+	}
+
+	.longform a:hover {
+		border-bottom-color: var(--color-lime);
+	}
+
+	.longform strong {
+		font-weight: 500;
+		color: var(--color-fg);
+	}
+
+	.longform em {
+		font-style: italic;
+	}
+
+	/* Section numbers are counted, never typed — reordering can't desync them. */
+	.longform :is(h2, h3) {
+		font-size: var(--text-meta);
+		font-weight: 500;
+		letter-spacing: var(--tracking-prompt);
+		text-transform: uppercase;
+		color: var(--color-lime);
+		margin-block: 18px -6px;
+	}
+
+	.longform h2 {
+		counter-increment: section;
+	}
+
+	.longform h2::before {
+		content: '## ' counter(section, decimal-leading-zero) ' ';
+	}
+
+	.longform h3::before {
+		content: '### ';
+		color: var(--color-subtle);
+	}
+
+	.longform blockquote {
+		margin-block: 12px;
+		padding: 14px 0 14px 22px;
+		border-left: 2px solid var(--color-lime);
+		font-size: var(--text-lg);
+		line-height: var(--leading-lede);
+		color: var(--color-fg);
+	}
+
+	.longform blockquote p::before {
+		content: '> ';
+	}
+
+	.longform :is(ul, ol) {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding-left: 22px;
+		list-style: none;
+	}
+
+	.longform li {
+		position: relative;
+		text-wrap: pretty;
+	}
+
+	.longform ul > li::before {
+		content: '-';
+		position: absolute;
+		left: -22px;
+		color: var(--color-lime);
+	}
+
+	.longform ol {
+		counter-reset: item;
+	}
+
+	.longform ol > li {
+		counter-increment: item;
+	}
+
+	.longform ol > li::before {
+		content: counter(item, decimal-leading-zero);
+		position: absolute;
+		left: -22px;
+		color: var(--color-dim);
+	}
+
+	.longform hr {
+		border: 0;
+		height: 1px;
+		background: var(--color-edge);
+	}
+
+	/* Inline code, distinct from a fenced block. */
+	.longform :not(pre) > code {
+		font-size: 0.92em;
+		color: var(--color-fg);
+		background: var(--color-panel);
+		border: 1px solid var(--color-edge);
+		padding: 1px 5px;
+	}
+
+	.longform figure[data-code-box] {
+		margin-block: 4px;
+	}
+
+	[data-code-box] pre {
+		margin: 0;
+		padding: 16px 18px;
+		overflow-x: auto;
+		border: 1px solid var(--color-edge);
+		background: var(--color-panel);
+		font-size: var(--text-code);
+		line-height: var(--leading-relaxed);
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+		tab-size: 2;
+	}
+
+	[data-code-box][data-accent] pre {
+		border-left: 2px solid var(--color-lime);
+	}
+}

@@ -1,0 +1,19 @@
+---
+import { cn } from '../../lib/cn';
+
+interface Props {
+	value: string;
+	label: string;
+	tone?: 'accent' | 'muted';
+	class?: string;
+}
+
+const { value, label, tone = 'muted', class: className } = Astro.props;
+---
+
+<div class={cn('flex flex-col gap-1 px-4 py-[14px]', className)}>
+	<span class={cn('text-stat font-medium', tone === 'accent' ? 'text-lime' : 'text-fg')}>
+		{value}
+	</span>
+	<span class="text-micro tracking-wide text-subtle uppercase">{label}</span>
+</div>

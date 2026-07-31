@@ -1,0 +1,55 @@
+---
+import { Code } from 'astro:components';
+
+import CopyButton from './CopyButton.astro';
+import { voidTerminal } from '../../lib/shiki-void';
+import { cn } from '../../lib/cn';
+
+interface Props {
+	name: string;
+	/** Inline, beside the filename. */
+	note?: string;
+	/** Block, under the filename. */
+	description?: string;
+	code: string;
+	lang?: string;
+	/** Lime rule down the left edge. */
+	accent?: boolean;
+	/** `title` for a named entry, `label` for a subordinate caption. */
+	tone?: 'title' | 'label';
+	class?: string;
+}
+
+const {
+	name,
+	note,
+	description,
+	code,
+	lang = 'text',
+	accent = false,
+	tone = 'title',
+	class: className,
+} = Astro.props;
+---
+
+<figure
+	data-code-box
+	data-accent={accent ? '' : undefined}
+	class={cn('flex flex-col gap-3', className)}
+>
+	<figcaption class="flex items-baseline justify-between gap-[18px]">
+		<span class="flex items-baseline gap-3">
+			<span
+				class={tone === 'title'
+					? 'text-md text-fg font-medium'
+					: 'text-meta tracking-wide text-subtle uppercase'}
+			>
+				{name}
+			</span>
+			{note && <span class="text-sm text-soft">{note}</span>}
+		</span>
+		<CopyButton />
+	</figcaption>
+	{description && <p class="text-sm leading-body text-soft max-w-[70ch]">{description}</p>}
+	<Code code={code.trimEnd()} lang={lang as never} theme={voidTerminal} />
+</figure>

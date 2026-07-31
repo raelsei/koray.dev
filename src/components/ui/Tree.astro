@@ -1,0 +1,39 @@
+---
+import { cn } from '../../lib/cn';
+
+interface Props {
+	groups: Array<{
+		label: string;
+		items: Array<{ name: string; note?: string }>;
+	}>;
+	class?: string;
+}
+
+const { groups, class: className } = Astro.props;
+
+// Box-drawing gutters need non-breaking spaces to survive HTML collapsing.
+const NBSP = '\u00a0';
+const branch = (last: boolean) => (last ? '└── ' : '├── ');
+const gutter = (last: boolean) => (last ? NBSP.repeat(4) : `│${NBSP.repeat(3)}`);
+---
+
+<div class={cn('flex flex-col gap-6 overflow-x-auto text-base leading-loose', className)}>
+	{
+		groups.map((group, gi) => {
+			const lastGroup = gi === groups.length - 1;
+			return (
+				<div class="flex flex-col">
+					<span class="text-lime whitespace-nowrap">{branch(lastGroup)}{group.label}/</span>
+					{group.items.map((item, ii) => (
+						<span class="text-fg whitespace-nowrap">
+							{gutter(lastGroup)}
+							{branch(ii === group.items.length - 1)}
+							{item.name}
+							{item.note && <span class="text-dim"> — {item.note}</span>}
+						</span>
+					))}
+				</div>
+			);
+		})
+	}
+</div>

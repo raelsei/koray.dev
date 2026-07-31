@@ -1,0 +1,41 @@
+- id: prompt-forge
+  name: prompt-forge
+  description: Versioned prompt registry with an eval harness attached.
+  lang: typescript
+  stars: 412
+  href: https://github.com/raelsei/prompt-forge
+
+- id: ledger-kit
+  name: ledger-kit
+  description: Double-entry primitives that refuse to lose a cent.
+  lang: go
+  stars: 289
+  href: https://github.com/raelsei/ledger-kit
+
+- id: sse-stream
+  name: sse-stream
+  description: 1.2 kB SSE client for streaming tokens, with backpressure.
+  lang: typescript
+  stars: 174
+  href: https://github.com/raelsei/sse-stream
+
+- id: rag-lab
+  name: rag-lab
+  description: Retrieval experiments, reproducible notebooks, honest numbers.
+  lang: python
+  stars: 143
+  href: https://github.com/raelsei/rag-lab
+
+- id: tr-iban
+  name: tr-iban
+  description: Turkish IBAN validation and bank lookup. Zero deps.
+  lang: typescript
+  stars: 96
+  href: https://github.com/raelsei/tr-iban
+
+- id: dotfiles
+  name: dotfiles
+  description: Neovim, zsh, Ghostty. Rebuilt from scratch every summer.
+  lang: lua
+  stars: 64
+  href: https://github.com/raelsei/dotfiles

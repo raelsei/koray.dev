@@ -1,0 +1,33 @@
+---
+import Prompt from '../primitives/Prompt.astro';
+import { cn } from '../../lib/cn';
+
+interface Props {
+	prompt: string;
+	title: string;
+	/** `hero` is the landing page; `page` is every other route. */
+	size?: 'hero' | 'page';
+	/** Tailwind `max-w-[NNch]` for the headline's measure. */
+	measure?: string;
+	class?: string;
+}
+
+const { prompt, title, size = 'page', measure, class: className } = Astro.props;
+const hero = size === 'hero';
+---
+
+<header class={cn(hero ? 'animate-rise-in flex flex-col gap-[14px]' : '', className)}>
+	<Prompt class={hero ? undefined : 'animate-fade-in block'}>{prompt}</Prompt>
+	<h1
+		class={cn(
+			'text-fg font-bold text-balance',
+			hero
+				? 'text-hero tracking-hero leading-hero'
+				: 'text-title tracking-title leading-title animate-rise-in stagger-1 mt-[14px]',
+			measure,
+		)}
+	>
+		{title}
+	</h1>
+	<slot />
+</header>

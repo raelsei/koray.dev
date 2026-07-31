@@ -1,0 +1,51 @@
+---
+import { getEntry } from 'astro:content';
+
+import Panel from '../components/ui/Panel.astro';
+import PageHeader from '../components/ui/PageHeader.astro';
+import Section from '../components/ui/Section.astro';
+import Tree from '../components/ui/Tree.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { list } from '../lib/collections';
+import { monthYear, ordinal } from '../lib/format';
+
+const page = await getEntry('pages', 'stack')!;
+const [stack, rules] = await Promise.all([
+	list('stack'),
+	list('rules'),
+]);
+
+const groups = stack.map(({ data }) => data);
+---
+
+<BaseLayout title={page.data.title} description={page.data.description} route="stack">
+	<div class="pt-[52px]">
+		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title} measure="max-w-[26ch]" />
+
+		<Section
+			title="daily-drivers/"
+			meta={`audited ${monthYear(new Date())}`}
+			animateRule
+			class="animate-fade-in stagger-2 mt-15"
+		>
+			<Tree groups={groups} class="pt-[26px] pb-2" />
+		</Section>
+
+		<Section
+			title="$ cat rules.txt"
+			meta="non-negotiable"
+			class="animate-fade-in stagger-3 mt-14"
+		>
+			<Panel flush cols="grid-cols-2 max-sm:grid-cols-1">
+				{
+					rules.map((rule, i) => (
+						<div class="flex flex-col gap-[7px] px-5 py-[18px]">
+							<span class="text-nano tracking-rule text-lime uppercase">{ordinal(i)}</span>
+							<span class="text-note leading-body text-fg">{rule.data.body}</span>
+						</div>
+					))
+				}
+			</Panel>
+		</Section>
+	</div>
+</BaseLayout>

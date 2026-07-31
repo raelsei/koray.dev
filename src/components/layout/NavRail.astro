@@ -1,0 +1,36 @@
+---
+import { cn } from '../../lib/cn';
+import { list } from '../../lib/collections';
+import { ordinal } from '../../lib/format';
+
+interface Props {
+	/** Collection id of the active route. */
+	route: string;
+}
+
+const { route } = Astro.props;
+const items = await list('nav');
+---
+
+<nav aria-label="Sections" class="shell rail flex gap-[5px] pb-[11px]">
+	{
+		items.map((item, i) => {
+			const active = item.id === route;
+			return (
+				<a
+					href={item.data.href}
+					aria-current={active ? 'page' : undefined}
+					class={cn(
+						'text-meta tracking-tag flex-none border px-[10px] py-1.5 whitespace-nowrap uppercase',
+						'transition-colors duration-100',
+						active
+							? 'border-edge-lime bg-panel text-lime'
+							: 'border-edge text-soft hover:border-dim hover:text-fg',
+					)}
+				>
+					[{ordinal(i)}] {item.data.label}
+				</a>
+			);
+		})
+	}
+</nav>

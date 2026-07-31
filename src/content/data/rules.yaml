@@ -1,0 +1,12 @@
+# Numbered by position at render time.
+- id: minor-units
+  body: Money is stored in minor units, as integers. Always.
+
+- id: ledger-commits
+  body: A model may draft intent. Only the ledger commits it.
+
+- id: justify-dependencies
+  body: Every dependency must justify its own line in the lockfile.
+
+- id: unattended-year
+  body: If it cannot run unattended for a year, it is not finished.

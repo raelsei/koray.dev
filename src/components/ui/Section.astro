@@ -1,0 +1,49 @@
+---
+import Rule from '../primitives/Rule.astro';
+
+interface Props {
+	/** The `$ command` or `directory/` label on the left. */
+	title: string;
+	/** Passive note on the right, e.g. "4 files". */
+	meta?: string;
+	/** Active link on the right, e.g. "archive →". Wins over `meta`. */
+	action?: string;
+	actionHref?: string;
+	rule?: 'bright' | 'edge' | 'none';
+	animateRule?: boolean;
+	class?: string;
+}
+
+const {
+	title,
+	meta,
+	action,
+	actionHref,
+	rule = 'bright',
+	animateRule = false,
+	class: className,
+} = Astro.props;
+
+const external = actionHref?.startsWith('http');
+---
+
+<section class={className}>
+	<div class="flex items-baseline justify-between gap-4 pb-[11px]">
+		<h2 class="text-meta tracking-prompt text-subtle font-medium uppercase">{title}</h2>
+		{
+			action && actionHref ? (
+				<a
+					href={actionHref}
+					class="text-meta tracking-label text-subtle hover:text-lime whitespace-nowrap uppercase transition-colors"
+					{...external ? { target: '_blank', rel: 'noreferrer' } : {}}
+				>
+					{action}
+				</a>
+			) : (
+				meta && <span class="text-meta text-dim whitespace-nowrap">{meta}</span>
+			)
+		}
+	</div>
+	{rule !== 'none' && <Rule tone={rule} animate={animateRule} />}
+	<slot />
+</section>
