@@ -1,109 +1,83 @@
 ---
 title: Cache the prompt, not the inputs
 description: >-
-  A hand-maintained cache key drifts away from the prompt it is supposed to
-  describe. Hashing the rendered prompt makes the key complete by construction.
+  The key listed the inputs someone believed mattered. The prompt had grown three
+  fields since, and nothing in the system could have noticed.
 pubDate: 2026-06-27
-tags: [llm, caching, cost]
+tags: [llm, caching]
 colophon: written in İstanbul, june 2026 — EOF
 ---
 
 ## the bug that looks like nondeterminism
 
-Generated interpretations were cached per user per day. The key was a tuple of
-the inputs that mattered: the submitted text, the date, the tier.
+A user edited an earlier entry and got the morning's answer back. Then a settings
+change didn't take. From a support ticket both look like the model being flaky.
 
-Then a user changed one detail earlier in the day and got the old interpretation
-back. Then a rename didn't take. Both looked, from a support ticket, like the
-model being flaky.
-
-Neither was. The key listed the inputs someone believed mattered when they wrote
-it, and the prompt template had grown three fields since. A hand-maintained list
-of "the things that go into the answer" drifts out of sync with the prompt on
-every prompt change, silently, with no test that can notice.
+Neither was. Generated summaries were cached per user per day, keyed on a tuple
+of the inputs that mattered — the submitted text, the date, the tier. That list
+was written once and the prompt template had grown three fields since. A
+hand-maintained list of "the things that go into the answer" drifts out of sync
+with the prompt on every prompt change, silently, and no test can notice because
+the test would have to hold the same list.
 
 ## hash what the model actually sees
 
 ```typescript file="key.ts" accent
 // The key is the prompt. Every field the model will read participates by
-// construction — including the ones added after this line was written.
-const rendered = buildPrompt({ entry, profile, baseline, tier, locale });
-const key = fnv1a(rendered) + ':' + locale + ':' + tier;
+// construction, including the ones added after this line was written.
+const rendered = buildPrompt({ entry, settings, context, tier, lang });
+const key = `${userId}:${localDay}:${digest(rendered)}`;
 ```
 
-Call the real assembly function and hash its output. Not a subset, not a
-normalised copy — the actual string that will be sent.
+Call the real assembly function and hash its output — the actual string that will
+be sent, not a subset and not a normalised copy.
 
-This inverts the maintenance burden. Before, adding a field to the prompt
-required remembering to add it to the key. Now, adding a field to the prompt
-*is* adding it to the key. There is nothing to remember, because there is no
-second list.
+This inverts the maintenance burden. Before, adding a field to the prompt meant
+remembering to add it to the key. Now adding a field to the prompt *is* adding it
+to the key.
 
-One deliberate exception: input text is trimmed before hashing, so a resubmit
-that differs only by a trailing newline still hits.
+One deliberate exception: the input text is trimmed before hashing, so a resubmit
+differing only by a trailing newline still hits.
 
 > A cache key derived from the thing it protects cannot fall behind it.
 
-## the throttle I deleted
+## the hash is a security decision, not a sizing one
 
-The other half of the bill is *when* generation is allowed to happen at all.
+My first version used a 32-bit non-cryptographic hash and my first instinct about
+its limits was the birthday bound — around 77,000 entries for an even chance of
+collision, comfortably far away.
 
-The naive placement is lazy: generate on first request, cache the result. That
-puts a slow, quota-bound, failure-prone call on the app's launch path — which is
-also the spikiest path there is. Quota exhausts exactly when the most people are
-looking.
+That was the wrong threat model, and being wrong about it is more interesting
+than the original bug.
 
-The first fix was a per-process throttle. It was wrong twice over. A per-process
-limit is per-instance, so it bounds nothing horizontally; and it throttled the
-scheduled retry too, which is the mechanism that was supposed to recover from
-quota exhaustion in the first place.
+Part of the hashed string is text the user wrote. A non-cryptographic hash is
+trivially invertible, so a collision here is not something you wait for — it is
+something anyone can construct in milliseconds. And the consequence of a
+collision on this cache is serving one user the text generated for another.
 
-What replaced it is not a limit:
+Two corrections, both cheap. Use a truncated cryptographic digest, so a collision
+cannot be *aimed*. And namespace the key by user and day, so even an accidental
+one cannot cross a tenant boundary. The second is what the earlier version was
+missing entirely: it had no user component at all, which made the sizing argument
+doubly irrelevant — it was reasoning about the birthday bound of a namespace it
+had accidentally made global.
 
-```typescript file="daily.ts"
-// The request path does not hold this capability. Only the warmer passes true.
-export async function getOrGenerate(userId: string, allowGenerate: boolean) {
-  const hit = await readCached(userId);
-  if (hit) return hit;
-  if (!allowGenerate) return fallback();   // calm, precomputed, always available
-  ...
-}
-```
-
-The scheduled warmer passes `true`. Every request handler passes `false`. A
-normal app open cannot trigger a model call — not because it is rate-limited out
-of doing so, but because the code path lacks the ability. That is stronger than
-any threshold, because a threshold can be misconfigured and a missing capability
-cannot.
-
-Two details make it hold. Generation failures return the fallback and are
-**not cached**, so the next scheduled run fills the real value once upstream
-recovers. And each user is keyed on their own local day, which makes the warmer
-naturally idempotent — re-running it only spends on users who have rolled over.
-
-## charge before, refund after
-
-Fair-use counters are incremented *before* the call, atomically, so the cap holds
-against concurrent abuse rather than against politely sequential abuse. If
-generation then fails, the charge is refunded: clamped at zero, best-effort, and
-explicitly never allowed to mask the original error.
-
-The refund also has to cover the metering step itself throwing. That sounds
-paranoid until the first time it happens and a user loses a credit to an error
-that never reached the model.
+For the record, 77,000 is also the wrong number to plan against even when the
+threat is accidental. It is the 50% point. The chance is already 1% at nine
+thousand entries, and a 1% chance of leaking a user's private text is not a
+budget anyone would sign off on if it were phrased that way.
 
 ## when this stops working
 
 Hashing the rendered prompt means any template edit invalidates every entry
-globally. That is correct — the old text was generated by a prompt that no longer
-exists — but it is a stampede on deploy, and you should know that before you ship
-a wording tweak on a Friday.
+globally. That is correct — the old text came from a prompt that no longer
+exists — but it is a stampede on the first request after deploy, and it is worth
+knowing that before shipping a wording tweak on a Friday. The single-flight trick
+that fixes exactly this is one post over; I have not applied it here, because the
+regeneration is cheap enough that the stampede has never been the thing that
+hurt.
 
-The hash width matters too. A 32-bit hash has a birthday collision around 77k
-entries, which is comfortable per-user-per-day and would be reckless in a global
-namespace.
-
-And the capability flag pushes cost from engagement onto registrations: warming
-everyone every day scales with the size of the user table, not with who actually
-opened the app. For a product where the daily artifact *is* the product, that
-trade is right. For one where most users are dormant, it is upside down.
+And the key is only as complete as the assembly function is deterministic. Put a
+timestamp, a random id, or an unsorted object in the rendered prompt and the
+cache silently stops working — with a 0% hit rate that looks identical to a cache
+that is merely cold.
