@@ -1,12 +1,12 @@
 ---
 head:
   prompt: $ cd ./writing && ls
-  title: Notes on money, models and small teams.
+  title: Notes from the parts that broke.
 title: Writing
 description: >-
-  Essays on fintech, applied AI and small-team engineering. Long pieces when the
-  thinking is finished, short notes when it isn't.
+  Architecture notes on caching, edge runtimes, applied AI and the small
+  correctness bugs that never raise an exception.
 ---
 
-Long pieces when I have finished thinking, short notes when I haven't. Roughly
-one of each per month.
+Mostly post-mortems with the names filed off: a decision, what forced it, and
+the line where it stops working. Roughly one a month.
