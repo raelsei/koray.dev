@@ -3,8 +3,8 @@ title: fish
 note: interactive config
 description: >-
   Ported off zsh once the plugin list stopped earning its keep. Autosuggestions,
-  syntax highlighting and history search are built in, so what is left is vi
-  mode, aliases, and three tools worth initialising.
+  syntax highlighting and history search ship with the shell, so what is left is
+  vi mode, aliases, and the two tools that need initialising.
 order: 2
 tags: [shell, macos]
 ---
@@ -12,6 +12,10 @@ tags: [shell, macos]
 The reason to move was subtraction. Autosuggestions, syntax highlighting,
 history substring search and completions all ship with fish, which deleted most
 of a zsh plugin manager and the startup cost that came with it.
+
+Below is the interactive block. Machine-specific tails — tool installers
+appending their own `PATH` lines — are left out; they belong to the machine,
+not the config.
 
 Vi mode is set through the variable rather than by calling
 `fish_vi_key_bindings` directly — plugins that listen on
