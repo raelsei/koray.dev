@@ -13,6 +13,9 @@ import { voidTerminal } from './src/lib/shiki-void';
 // https://astro.build/config
 export default defineConfig({
 	site: SITE.url,
+	// Makes the slash-less form a hard 404 in dev, so the link graph cannot
+	// silently drift from the canonical/sitemap form again. See src/lib/urls.ts.
+	trailingSlash: 'always',
 	integrations: [mdx(), sitemap()],
 	// Real routes, SPA-grade feel: prefetch on hover, swap without a full reload.
 	prefetch: { prefetchAll: true, defaultStrategy: 'hover' },

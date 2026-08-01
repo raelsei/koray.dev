@@ -1,6 +1,7 @@
 ---
 import { SITE } from '../../consts';
 import { list } from '../../lib/collections';
+import { post as postPath } from '../../lib/urls';
 import { getPosts } from '../../lib/writing';
 
 const [nav, posts] = await Promise.all([list('nav'), getPosts()]);
@@ -16,7 +17,7 @@ const manifest = {
 	docs: posts.map((post) => ({
 		id: post.id,
 		title: post.data.title,
-		href: `/writing/${post.id}`,
+		href: postPath(post.id),
 	})),
 	email: SITE.email,
 };
@@ -30,12 +31,9 @@ const manifest = {
 	<script type="application/json" data-manifest set:html={JSON.stringify(manifest)} is:inline />
 
 	<div class="shell">
-		<output
-			data-log
-			hidden
-			class="border-hair flex flex-col gap-1 border-b pt-3 pb-2.5 [&[hidden]]:hidden"
-		>
-		</output>
+		{/* Never toggled with `hidden`: a hidden element is out of the accessibility
+		    tree, so mutations to it are not announced. It collapses when empty. */}
+		<output data-log role="status" aria-live="polite" class="flex flex-col gap-1"></output>
 
 		<div class="flex h-[46px] items-center gap-2.5">
 			<span aria-hidden="true" class="text-code text-lime">$</span>
@@ -46,10 +44,10 @@ const manifest = {
 				spellcheck="false"
 				aria-label="Terminal command"
 				placeholder="try: help, ls, cd work, cat post, mail"
-				class="text-code tracking-input text-fg placeholder:text-dim flex-1 bg-transparent
-					outline-none focus-visible:outline-none"
+				class="text-code tracking-input text-fg placeholder:text-subtle flex-1 bg-transparent
+					outline-none"
 			/>
-			<span class="text-mini tracking-wide text-dim whitespace-nowrap uppercase max-sm:hidden">
+			<span class="text-mini tracking-wide text-subtle whitespace-nowrap uppercase max-sm:hidden">
 				↵ run · ⌥/ focus
 			</span>
 		</div>

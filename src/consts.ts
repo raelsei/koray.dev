@@ -14,6 +14,10 @@ export const SITE = {
 	author: 'Koray Güler',
 	email: 'id@koray.dev',
 	locale: 'en',
+	/** Open Graph wants language_TERRITORY, not the bare tag `lang` uses. */
+	ogLocale: 'en_US',
+	/** `@handle` for Twitter card attribution; `null` omits the tags. */
+	twitter: '@raelsei',
 	timeZone: 'Europe/Istanbul',
 
 	/** The status line rendered above the navigation. */

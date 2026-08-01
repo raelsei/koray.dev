@@ -7,6 +7,8 @@ import Rule from '../components/primitives/Rule.astro';
 import Section from '../components/ui/Section.astro';
 import BaseLayout from './BaseLayout.astro';
 import { iso } from '../lib/format';
+import { blogPosting, breadcrumbs } from '../lib/schema';
+import { WRITING, post as postPath } from '../lib/urls';
 import type { Post } from '../lib/writing';
 
 interface Props {
@@ -17,18 +19,31 @@ interface Props {
 const { post, next } = Astro.props;
 const { Content } = await render(post);
 const { title, description, pubDate, updatedDate, tags, colophon } = post.data;
+
+const schema = [
+	blogPosting(post, Astro.site!),
+	breadcrumbs(
+		[
+			{ name: 'Writing', path: '/writing' },
+			{ name: title, path: `/writing/${post.id}/` },
+		],
+		Astro.site!,
+	),
+];
 ---
 
 <BaseLayout
 	title={title}
 	description={description}
 	route="writing"
-	article
+	article={{ published: pubDate, modified: updatedDate ?? pubDate, tags }}
 	progress
+	schema={schema}
 >
 	<div class="pt-[52px]">
 		<a
-			href="/writing"
+			href={WRITING}
+			aria-label="Back to writing"
 			class="text-meta tracking-wide text-subtle hover:text-lime animate-fade-in uppercase transition-colors"
 		>
 			← cd ../writing
@@ -90,13 +105,13 @@ const { title, description, pubDate, updatedDate, tags, colophon } = post.data;
 				<Section
 					title="$ next"
 					action="all essays →"
-					actionHref="/writing"
+					actionHref={WRITING}
 					class="animate-fade-in stagger-9 mt-16"
 				>
-					<Row href={`/writing/${next.id}`} cols="grid-cols-[minmax(0,1fr)_170px]" pad="lg">
+					<Row href={postPath(next.id)} cols="grid-cols-[minmax(0,1fr)_170px]" pad="lg">
 						<span class="flex flex-col gap-1.5">
-							<span class="text-lg text-fg font-medium">{next.data.title}</span>
-							<span class="text-sm leading-snug text-soft">{next.data.description}</span>
+							<span class="text-entry text-fg font-medium">{next.data.title}</span>
+							<span class="text-row leading-snug text-soft">{next.data.description}</span>
 						</span>
 						<span slot="trail" class="text-meta text-subtle text-right">
 							{iso(next.data.pubDate)} · {next.minutes} min

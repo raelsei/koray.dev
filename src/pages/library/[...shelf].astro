@@ -10,7 +10,9 @@ import Row from '../../components/ui/Row.astro';
 import Section from '../../components/ui/Section.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { cn } from '../../lib/cn';
-import { host, ordinal } from '../../lib/format';
+import { host } from '../../lib/format';
+import { breadcrumbs, webPage } from '../../lib/schema';
+import { LIBRARY, shelf as shelfPath } from '../../lib/urls';
 
 export const getStaticPaths = (async () => {
 	const shelves = (await getCollection('shelves')).sort(
@@ -34,18 +36,41 @@ const shelves = (await getCollection('shelves')).sort(
 const current = shelves.find((s) => s.id === active)!;
 
 /** Item counts are derived, so a tab badge can never disagree with its shelf. */
+const path = shelfPath(active, active === shelves[0]!.id);
+const schema = [
+	webPage(
+		{
+			path,
+			title: `${page.data.head.title} — ${current.id}`,
+			description: current.data.description,
+			type: 'CollectionPage',
+		},
+		Astro.site!,
+	),
+	breadcrumbs(
+		path === LIBRARY
+			? [{ name: 'Library', path: LIBRARY }]
+			: [
+					{ name: 'Library', path: LIBRARY },
+					{ name: current.id, path },
+				],
+		Astro.site!,
+	),
+];
+
 const tabs = shelves.map((shelf, i) => ({
 	id: shelf.id,
-	href: i === 0 ? '/library' : `/library/${shelf.id}`,
-	count: ordinal(shelf.data.groups.reduce((n, g) => n + g.items.length, 0) - 1),
+	href: shelfPath(shelf.id, i === 0),
+	count: String(shelf.data.groups.reduce((n, g) => n + g.items.length, 0)).padStart(2, '0'),
 	active: shelf.id === active,
 }));
 ---
 
 <BaseLayout
 	title={`${page.data.title} — ${current.id}`}
-	description={page.data.description}
+	description={current.data.description}
 	route="library"
+	schema={schema}
 >
 	<div class="pt-[52px]">
 		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title}>
@@ -89,7 +114,7 @@ const tabs = shelves.map((shelf, i) => ({
 								href={item.href}
 								cols="grid-cols-[minmax(0,1fr)_200px] max-sm:grid-cols-1 max-sm:gap-[7px]"
 							>
-								<span class="text-base text-fg">{item.label}</span>
+								<span class="text-item text-fg">{item.label}</span>
 								<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
 									{host(item.href)} ↗
 								</span>
@@ -104,8 +129,8 @@ const tabs = shelves.map((shelf, i) => ({
 								cols="grid-cols-[minmax(0,1fr)_130px] max-sm:grid-cols-1 max-sm:gap-[7px]"
 							>
 								<span class="flex flex-col gap-[5px]">
-									<span class="text-base text-fg">{item.name}</span>
-									<span class="text-sm leading-row text-soft">{item.description}</span>
+									<span class="text-item text-fg">{item.name}</span>
+									<span class="text-row leading-row text-soft">{item.description}</span>
 								</span>
 								<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
 									{item.lang}
@@ -122,8 +147,8 @@ const tabs = shelves.map((shelf, i) => ({
 									rel="noreferrer"
 									class="hover:bg-panel! flex flex-col gap-[7px] p-5 transition-colors duration-100"
 								>
-									<span class="text-base text-lime">{item.name}</span>
-									<span class="text-sm leading-snug text-soft">{item.description}</span>
+									<span class="text-item text-lime">{item.name}</span>
+									<span class="text-row leading-snug text-soft">{item.description}</span>
 								</a>
 							))}
 						</Panel>

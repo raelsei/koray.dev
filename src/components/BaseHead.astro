@@ -10,15 +10,29 @@ interface Props {
 	description: string;
 	/** Absolute or site-relative OG image. */
 	image?: string;
-	/** Articles get `og:type=article`. */
-	article?: boolean;
+	/**
+	 * Article metadata. Present → `og:type=article` plus the `article:*` tags
+	 * OG parsers expect; absent → a plain `website`.
+	 */
+	article?: {
+		published: Date;
+		modified: Date;
+		tags: string[];
+	};
+	/**
+	 * Suppresses indexing and the self-referencing canonical. Required for
+	 * `/404`, which is emitted as `404.html` and has no canonical URL of its own
+	 * — pointing one at `/404/` would advertise a path that does not exist.
+	 */
+	noindex?: boolean;
 }
 
-const { title, description, image = '/og.png', article = false } = Astro.props;
+const { title, description, image = '/og.png', article, noindex = false } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL(image, Astro.site);
-const fullTitle = Astro.url.pathname === '/' ? `${SITE.title} — ${SITE.tagline}` : `${title} — ${SITE.title}`;
+const fullTitle =
+	Astro.url.pathname === '/' ? `${SITE.title} — ${SITE.tagline}` : `${title} — ${SITE.title}`;
 ---
 
 <meta charset="utf-8" />
@@ -27,7 +41,7 @@ const fullTitle = Astro.url.pathname === '/' ? `${SITE.title} — ${SITE.tagline
 <meta name="color-scheme" content="dark" />
 <meta name="theme-color" content="#08090A" />
 
-<link rel="canonical" href={canonical} />
+{noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={canonical} />}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="sitemap" href="/sitemap-index.xml" />
 <link
@@ -43,15 +57,35 @@ const fullTitle = Astro.url.pathname === '/' ? `${SITE.title} — ${SITE.tagline
 
 <meta property="og:type" content={article ? 'article' : 'website'} />
 <meta property="og:site_name" content={SITE.title} />
-<meta property="og:url" content={canonical} />
+<meta property="og:locale" content={SITE.ogLocale} />
+{!noindex && <meta property="og:url" content={canonical} />}
 <meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={`${SITE.title} — ${SITE.tagline}`} />
+
+{
+	article && (
+		<>
+			<meta property="article:published_time" content={article.published.toISOString()} />
+			<meta property="article:modified_time" content={article.modified.toISOString()} />
+			<meta property="article:author" content={SITE.author} />
+			{article.tags.map((tag) => (
+				<meta property="article:tag" content={tag} />
+			))}
+		</>
+	)
+}
 
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={fullTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImage} />
+<meta name="twitter:image:alt" content={`${SITE.title} — ${SITE.tagline}`} />
+{SITE.twitter && <meta name="twitter:creator" content={SITE.twitter} />}
+{SITE.twitter && <meta name="twitter:site" content={SITE.twitter} />}
 
 <Font cssVariable="--font-mono" preload />
 <ClientRouter />

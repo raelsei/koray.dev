@@ -5,6 +5,7 @@ import Footer from '../components/layout/Footer.astro';
 import Scanlines from '../components/layout/Scanlines.astro';
 import TopBar from '../components/layout/TopBar.astro';
 import { SITE } from '../consts';
+import { identity } from '../lib/schema';
 
 interface Props {
 	title: string;
@@ -12,28 +13,63 @@ interface Props {
 	/** Collection id of the active nav item; also shown in the status line. */
 	route: string;
 	image?: string;
-	article?: boolean;
+	/** Post metadata; present on article routes only. */
+	article?: { published: Date; modified: Date; tags: string[] };
 	progress?: boolean;
+	/** Excludes the route from indexing and suppresses its canonical. */
+	noindex?: boolean;
+	/**
+	 * Page-specific JSON-LD nodes. The Person, WebSite and Organization are
+	 * added here, so a route only declares what is unique to itself.
+	 */
+	schema?: Array<Record<string, unknown>>;
 }
 
-const { title, description, route, image, article, progress } = Astro.props;
+const { title, description, route, image, article, progress, noindex, schema = [] } = Astro.props;
+
+const graph = {
+	'@context': 'https://schema.org',
+	'@graph': [...(await identity(Astro.site!)), ...schema],
+};
 ---
 
 <!doctype html>
 <html lang={SITE.locale} class="scroll-smooth">
 	<head>
-		<BaseHead title={title} description={description} image={image} article={article} />
+		<BaseHead
+			title={title}
+			description={description}
+			image={image}
+			article={article}
+			noindex={noindex}
+		/>
+		{/* `set:html` on a JSON string: Astro must not HTML-escape the quotes. */}
+		<script type="application/ld+json" is:inline set:html={JSON.stringify(graph)} />
 	</head>
 
-	<body class="bg-void text-fg relative min-h-screen">
+	{/* No background here: `html` carries it, which lets the -z-10 scanline
+	    layer paint above the canvas instead of being buried under an opaque body. */}
+	<body class="text-fg relative min-h-screen">
+		<a
+			href="#main"
+			class="bg-panel text-lime border-edge-lime focus:shell sr-only z-50 border px-4 py-2
+				focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+		>
+			Skip to content
+		</a>
+
 		<Scanlines />
 		<TopBar route={route} progress={progress} />
 
 		{/* Bottom padding clears the fixed command bar. */}
-		<main class="shell pb-[150px] max-sm:pb-[120px]">
+		<main id="main" class="shell pb-[150px] max-sm:pb-[120px]">
 			<slot />
-			<Footer />
 		</main>
+
+		{/* Sibling of `main`, not a descendant — otherwise it exposes no contentinfo. */}
+		<div class="shell pb-[150px] max-sm:pb-[120px]">
+			<Footer />
+		</div>
 
 		<CommandBar />
 

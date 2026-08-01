@@ -24,9 +24,13 @@
     your month, and tells you what will hurt in three weeks — instead of another
     pie chart of last month.
   metrics:
-    - { value: "40", label: households, tone: accent }
-    - { value: "94%", label: categorised }
-    - { value: "180ms", label: p95 sync }
+    - value: "40"
+      label: households
+      tone: accent
+    - value: "94%"
+      label: categorised
+    - value: "180ms"
+      label: p95 sync
 
 - id: bine
   name: bine

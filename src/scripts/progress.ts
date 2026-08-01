@@ -1,20 +1,23 @@
 let onScroll: (() => void) | undefined;
+let pending = 0;
 
 /** Drives the reading-progress rule under the navigation on article routes. */
 export function mountProgress(): void {
+	// See mountClock: a mount can arrive without a preceding unmount.
+	unmountProgress();
+
 	const bar = document.querySelector<HTMLElement>('[data-progress]');
 	if (!bar) return;
 
-	let frame = 0;
 	const measure = () => {
-		frame = 0;
+		pending = 0;
 		const span = document.documentElement.scrollHeight - window.innerHeight;
 		const pct = span > 20 ? Math.min(100, Math.max(0, (window.scrollY / span) * 100)) : 0;
 		bar.style.width = `${pct.toFixed(1)}%`;
 	};
 
 	onScroll = () => {
-		if (frame === 0) frame = requestAnimationFrame(measure);
+		if (pending === 0) pending = requestAnimationFrame(measure);
 	};
 
 	measure();
@@ -23,6 +26,9 @@ export function mountProgress(): void {
 }
 
 export function unmountProgress(): void {
+	// A frame queued at swap time would otherwise write to a detached bar.
+	if (pending !== 0) cancelAnimationFrame(pending);
+	pending = 0;
 	if (!onScroll) return;
 	window.removeEventListener('scroll', onScroll);
 	window.removeEventListener('resize', onScroll);

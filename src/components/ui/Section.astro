@@ -1,5 +1,6 @@
 ---
 import Rule from '../primitives/Rule.astro';
+import { canonical } from '../../lib/urls';
 
 interface Props {
 	/** The `$ command` or `directory/` label on the left. */
@@ -33,7 +34,7 @@ const external = actionHref?.startsWith('http');
 		{
 			action && actionHref ? (
 				<a
-					href={actionHref}
+					href={canonical(actionHref)}
 					class="text-meta tracking-label text-subtle hover:text-lime whitespace-nowrap uppercase transition-colors"
 					{...external ? { target: '_blank', rel: 'noreferrer' } : {}}
 				>

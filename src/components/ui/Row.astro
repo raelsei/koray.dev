@@ -1,5 +1,6 @@
 ---
 import { cn } from '../../lib/cn';
+import { canonical } from '../../lib/urls';
 
 interface Props {
 	/** Present → the row is a link and gains the hover fill. */
@@ -19,7 +20,7 @@ const external = href?.startsWith('http');
 
 const Tag = href ? 'a' : 'div';
 const attrs = href
-	? { href, ...(external ? { target: '_blank', rel: 'noreferrer' } : {}) }
+	? { href: canonical(href), ...(external ? { target: '_blank', rel: 'noreferrer' } : {}) }
 	: {};
 ---
 

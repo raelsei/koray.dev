@@ -10,6 +10,7 @@ import Section from '../components/ui/Section.astro';
 import Tag from '../components/primitives/Tag.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { list } from '../lib/collections';
+import { breadcrumbs, webPage } from '../lib/schema';
 import { host, ordinal } from '../lib/format';
 
 const page = await getEntry('pages', 'work')!;
@@ -19,9 +20,14 @@ const [ventures, oss] = await Promise.all([
 ]);
 
 const GITHUB = 'https://github.com/raelsei';
+
+const schema = [
+	webPage({ path: '/work', title: page.data.head.title, description: page.data.description, type: 'CollectionPage' }, Astro.site!),
+	breadcrumbs([{ name: 'Work', path: '/work' }], Astro.site!),
+];
 ---
 
-<BaseLayout title={page.data.title} description={page.data.description} route="work">
+<BaseLayout title={page.data.title} description={page.data.description} route="work" schema={schema}>
 	<div class="pt-[52px]">
 		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title} measure="max-w-[26ch]" />
 
@@ -44,8 +50,8 @@ const GITHUB = 'https://github.com/raelsei';
 										class:list={[
 											'font-bold',
 											v.lead
-												? 'text-2xl tracking-title text-lime'
-												: 'text-xl tracking-tight text-fg',
+												? 'text-flagship tracking-title text-lime'
+												: 'text-venture tracking-tight text-fg',
 										]}
 									>
 										{v.name}
@@ -67,7 +73,7 @@ const GITHUB = 'https://github.com/raelsei';
 									)}
 								</div>
 
-								<p class="text-base leading-relaxed text-soft max-w-[72ch] text-pretty">
+								<p class="text-item leading-relaxed text-soft max-w-[72ch] text-pretty">
 									{v.description}
 								</p>
 
@@ -108,7 +114,7 @@ const GITHUB = 'https://github.com/raelsei';
 					>
 						<span class="flex flex-col gap-[5px]">
 							<span class="text-body text-fg">{repo.data.name}</span>
-							<span class="text-sm leading-row text-soft">{repo.data.description}</span>
+							<span class="text-row leading-row text-soft">{repo.data.description}</span>
 						</span>
 						<span slot="trail" class="text-meta text-subtle flex justify-end gap-4 max-sm:justify-start">
 							<span>{repo.data.lang}</span>

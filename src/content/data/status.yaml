@@ -1,6 +1,8 @@
 # The four-cell readout under the hero.
 - id: local_time
   label: local_time
+  # `value` is filled in at build time and replaced client-side each second;
+  # without it the cell is blank until window.load, and forever without JS.
   live: clock
   note: GMT+03
   tone: accent

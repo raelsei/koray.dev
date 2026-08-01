@@ -118,6 +118,69 @@ Markdown has no class attributes, so `.longform` and `[data-code-box]` are types
 by selector in `global.css` — the one place both Markdown output and component
 slots are styled.
 
+### Invariants worth knowing before you edit
+
+Each of these is a trap that stays silent — the build goes green and the site
+ships something wrong. All four are load-bearing.
+
+**Type-scale names must stay outside Tailwind's own scale.** `--text-sm`,
+`--text-base`, `--text-lg`, `--text-xl`, `--text-2xl`, `--text-3xl` are Tailwind
+defaults. Redefining one overrides only the font-size: the paired
+`--text-<name>--line-height` survives, and the utility then emits a line-height
+computed from Tailwind's *original* rem size. Hence `--text-row`, `--text-item`,
+`--text-entry`, `--text-venture`, `--text-flagship`, `--text-contact`.
+
+**YAML lists use block mappings, never flow mappings.** `{ note: 4 years, still
+rebuilding }` parses as `note: "4 years"` plus a null-valued key `still
+rebuilding`, which Zod strips without a word. Half the sentence just disappears.
+
+**Internal links go through [`src/lib/urls.ts`](src/lib/urls.ts).** `trailingSlash:
+'always'` makes the slash-less form a hard 404 in dev, so a mistake surfaces on
+the first click instead of in Search Console six weeks later.
+
+**Ordered collections are read with `list()`, never `getCollection()`.** See
+[Ordering](#ordering).
+
+### Colour
+
+The palette lives in the `@theme` block and nowhere else.
+[`src/lib/palette.ts`](src/lib/palette.ts) parses it at build time so the Shiki
+theme derives from the same source — recolouring a token reaches code blocks too.
+
+## Structured data
+
+Every page emits one `application/ld+json` block containing a single `@graph`.
+Entities are declared once with a stable `@id` and referenced by `@id` elsewhere,
+so the Person, WebSite and Organization are never duplicated within a document.
+
+| Route | Nodes |
+| :--- | :--- |
+| all | `Person` · `WebSite` · `Organization` |
+| `/` | `WebPage` |
+| `/work`, `/library/*` | `CollectionPage` · `BreadcrumbList` |
+| `/writing` | `CollectionPage` · `ItemList` · `BreadcrumbList` |
+| `/writing/<slug>` | `BlogPosting` · `BreadcrumbList` |
+| `/about` | `ProfilePage` · `BreadcrumbList` |
+
+Social profiles come from `contacts.yaml`, the studio from `ventures.yaml`, word
+counts and reading time from the Markdown body. Nothing is authored twice. See
+[`src/lib/schema.ts`](src/lib/schema.ts).
+
+## Accessibility
+
+Decisions that are easy to undo by accident:
+
+- `TopBar` renders a `<header>` and `Footer` sits *outside* `<main>` — a
+  `<footer>` nested in `main` exposes no `contentinfo` landmark.
+- The command bar's `<output>` is never toggled with `hidden`; a hidden element
+  is out of the accessibility tree, so mutations to it are not announced.
+- `.longform` lists keep their `list-style` and empty the `::marker` instead.
+  `list-style: none` makes WebKit drop list semantics entirely.
+- Generated content uses the `content: '…' / ''` alt-text form, so screen
+  readers do not read the `##`, `>` and `-` glyphs aloud.
+- `Tree` carries the hierarchy in nested `<ul role="list">`; the box-drawing
+  characters are `aria-hidden` decoration.
+
 ## Command bar
 
 Resolves against the same route table the navigation renders, so `cd work` and

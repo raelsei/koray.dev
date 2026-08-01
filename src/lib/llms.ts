@@ -3,6 +3,7 @@ import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { SITE } from '../consts';
 import { list } from './collections';
 import { iso } from './format';
+import { absolute, post as postPath } from './urls';
 import { getPosts, type Post } from './writing';
 
 /** One entry of a `/library` shelf, discriminated by `kind`. */
@@ -27,17 +28,19 @@ interface Outline {
 export async function outline(site: URL): Promise<Outline> {
 	const [nav, posts] = await Promise.all([list('nav'), getPosts()]);
 
-	const routes = await Promise.all(
-		nav.map(async ({ id, data }) => {
-			// Every nav target is backed by a page entry of the same name; `/` is `index`.
-			const page = await getEntry('pages', id);
-			return {
-				title: page?.data.head.title ?? data.label,
-				href: new URL(data.href, site).href,
-				summary: page?.data.description ?? '',
-			};
-		}),
+	// Every nav target is backed by a page entry of the same name (`/` is `index`).
+	// A route without one is skipped here exactly as `llmsFull` skips it, so the
+	// index can never list something the full text omits.
+	const resolved = await Promise.all(
+		nav.map(async ({ id, data }) => ({ page: await getEntry('pages', id), data })),
 	);
+	const routes = resolved
+		.filter((entry) => entry.page !== undefined)
+		.map(({ page, data }) => ({
+			title: page!.data.title,
+			href: absolute(data.href, site),
+			summary: page!.data.description,
+		}));
 
 	return { posts, routes };
 }
@@ -63,7 +66,7 @@ export function llmsIndex({ posts, routes }: Outline, site: URL): string {
 		links(
 			posts.map((post) => ({
 				title: post.data.title,
-				href: new URL(`/writing/${post.id}/`, site).href,
+				href: absolute(postPath(post.id), site),
 				summary: `${iso(post.data.pubDate)}, ${post.minutes} min. ${post.data.description}`,
 			})),
 		),
@@ -77,12 +80,12 @@ export function llmsIndex({ posts, routes }: Outline, site: URL): string {
 		links([
 			{
 				title: 'Full text',
-				href: new URL('/llms-full.txt', site).href,
+				href: absolute('/llms-full.txt', site),
 				summary: 'Every page and post inlined as Markdown, in one file.',
 			},
 			{
 				title: 'RSS',
-				href: new URL('/rss.xml', site).href,
+				href: absolute('/rss.xml', site),
 				summary: 'Writing feed.',
 			},
 		]),
@@ -251,11 +254,11 @@ export async function llmsFull({ posts }: Outline, site: URL): Promise<string> {
 			'',
 			'---',
 			'',
-			`# ${page.data.head.title}`,
+			`# ${page.data.title}`,
 			'',
 			`> ${page.data.description}`,
 			'',
-			`Source: ${new URL(item.data.href, site).href}`,
+			`Source: ${absolute(item.data.href, site)}`,
 			...(page.body?.trim() ? ['', page.body.trim()] : []),
 			...(await routeData(item.id)).flatMap((line, i) => (i === 0 ? ['', line] : [line])),
 		);
@@ -270,8 +273,14 @@ export async function llmsFull({ posts }: Outline, site: URL): Promise<string> {
 			'',
 			`> ${post.data.description}`,
 			'',
-			`Published ${iso(post.data.pubDate)} · ${post.minutes} min · ${post.data.tags.map((t) => `#${t}`).join(' ')}`,
-			`Source: ${new URL(`/writing/${post.id}/`, site).href}`,
+			[
+				`Published ${iso(post.data.pubDate)}`,
+				`${post.minutes} min`,
+				post.data.tags.map((t) => `#${t}`).join(' '),
+			]
+				.filter(Boolean)
+				.join(' · '),
+			`Source: ${absolute(postPath(post.id), site)}`,
 			'',
 			(post.body ?? '').trim(),
 		);

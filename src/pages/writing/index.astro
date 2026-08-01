@@ -9,6 +9,8 @@ import Row from '../../components/ui/Row.astro';
 import Section from '../../components/ui/Section.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { list } from '../../lib/collections';
+import { breadcrumbs, postList, webPage } from '../../lib/schema';
+import { post as postPath } from '../../lib/urls';
 import { dotted, monthDay } from '../../lib/format';
 import { byYear, getPosts } from '../../lib/writing';
 
@@ -17,9 +19,15 @@ const { Content } = await render(page);
 
 const [posts, notes] = await Promise.all([getPosts(), list('notes')]);
 const years = byYear(posts);
+
+const schema = [
+	webPage({ path: '/writing', title: page.data.head.title, description: page.data.description, type: 'CollectionPage' }, Astro.site!),
+	postList(posts, Astro.site!),
+	breadcrumbs([{ name: 'Writing', path: '/writing' }], Astro.site!),
+];
 ---
 
-<BaseLayout title={page.data.title} description={page.data.description} route="writing">
+<BaseLayout title={page.data.title} description={page.data.description} route="writing" schema={schema}>
 	<div class="pt-[52px]">
 		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title}>
 			<Longform measure="max-w-[70ch]" class="animate-rise-in stagger-2 mt-5">
@@ -37,7 +45,7 @@ const years = byYear(posts);
 				>
 					{group.posts.map((post) => (
 						<Row
-							href={`/writing/${post.id}`}
+							href={postPath(post.id)}
 							pad="lg"
 							cols="grid-cols-[88px_minmax(0,1fr)_74px] max-sm:grid-cols-1 max-sm:gap-[7px]"
 						>
@@ -49,8 +57,8 @@ const years = byYear(posts);
 								{monthDay(post.data.pubDate)}
 							</time>
 							<span class="flex flex-col gap-1.5">
-								<span class="text-lg text-fg font-medium">{post.data.title.toLowerCase()}</span>
-								<span class="text-sm leading-snug text-soft">{post.data.description}</span>
+								<span class="text-entry text-fg font-medium">{post.data.title.toLowerCase()}</span>
+								<span class="text-row leading-snug text-soft">{post.data.description}</span>
 							</span>
 							<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
 								{post.minutes} min

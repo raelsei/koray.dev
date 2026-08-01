@@ -253,6 +253,8 @@ const shelves = defineCollection({
 	schema: z.object({
 		/** Tab order, ascending. */
 		order: z.number(),
+		/** Own meta description; without it all four shelves share the page's. */
+		description: z.string(),
 		meta: z.string(),
 		groups: z.array(shelfGroup),
 	}),

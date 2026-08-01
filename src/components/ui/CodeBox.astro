@@ -2,6 +2,7 @@
 import { Code } from 'astro:components';
 
 import CopyButton from './CopyButton.astro';
+import { codeBox } from '../../lib/code-box';
 import { voidTerminal } from '../../lib/shiki-void';
 import { cn } from '../../lib/cn';
 
@@ -15,8 +16,6 @@ interface Props {
 	lang?: string;
 	/** Lime rule down the left edge. */
 	accent?: boolean;
-	/** `title` for a named entry, `label` for a subordinate caption. */
-	tone?: 'title' | 'label';
 	class?: string;
 }
 
@@ -27,7 +26,6 @@ const {
 	code,
 	lang = 'text',
 	accent = false,
-	tone = 'title',
 	class: className,
 } = Astro.props;
 ---
@@ -35,21 +33,15 @@ const {
 <figure
 	data-code-box
 	data-accent={accent ? '' : undefined}
-	class={cn('flex flex-col gap-3', className)}
+	class={cn(codeBox.figure, className)}
 >
-	<figcaption class="flex items-baseline justify-between gap-[18px]">
+	<figcaption class={codeBox.caption}>
 		<span class="flex items-baseline gap-3">
-			<span
-				class={tone === 'title'
-					? 'text-md text-fg font-medium'
-					: 'text-meta tracking-wide text-subtle uppercase'}
-			>
-				{name}
-			</span>
-			{note && <span class="text-sm text-soft">{note}</span>}
+			<span class="text-md text-fg font-medium">{name}</span>
+			{note && <span class="text-row text-soft">{note}</span>}
 		</span>
-		<CopyButton />
+		<CopyButton label={name} />
 	</figcaption>
-	{description && <p class="text-sm leading-body text-soft max-w-[70ch]">{description}</p>}
+	{description && <p class="text-row leading-body text-soft max-w-[70ch]">{description}</p>}
 	<Code code={code.trimEnd()} lang={lang as never} theme={voidTerminal} />
 </figure>

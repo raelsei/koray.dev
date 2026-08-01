@@ -2,6 +2,8 @@ import type { Element, Root } from 'hast';
 import type { ShikiTransformer } from 'shiki';
 import { SKIP, visit } from 'unist-util-visit';
 
+import { codeBox } from './code-box';
+
 /**
  * Reads the fence's meta string and stamps it onto the `<pre>`:
  *
@@ -48,24 +50,18 @@ export function rehypeCodeBox() {
 				{
 					'data-code-box': '',
 					...(accent ? { 'data-accent': '' } : {}),
-					class: 'flex flex-col gap-3',
+					class: codeBox.figure,
 				},
 				[
-					el('figcaption', { class: 'flex items-baseline justify-between gap-[18px]' }, [
-						el(
-							'span',
-							{ class: 'text-meta tracking-wide text-subtle uppercase' },
-							[text(file)],
-						),
+					el('figcaption', { class: codeBox.caption }, [
+						el('span', { class: codeBox.filename }, [text(file)]),
 						el(
 							'button',
 							{
 								type: 'button',
 								'data-copy': '',
-								class:
-									'border-edge text-subtle hover:border-lime hover:text-lime text-mini tracking-wide ' +
-									'cursor-pointer border px-[11px] py-1.5 uppercase transition-colors ' +
-									'data-[copied]:border-lime data-[copied]:text-lime',
+								'aria-label': `Copy ${file}`,
+								class: codeBox.button,
 							},
 							[text('copy')],
 						),

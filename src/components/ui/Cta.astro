@@ -1,6 +1,7 @@
 ---
 import Prompt from '../primitives/Prompt.astro';
 import { cn } from '../../lib/cn';
+import { canonical } from '../../lib/urls';
 
 interface Props {
 	prompt: string;
@@ -27,15 +28,15 @@ const asideClass =
 		<Prompt size="sm">{prompt}</Prompt>
 		<a
 			href={`mailto:${email}`}
-			class="text-3xl tracking-title text-lime font-bold"
+			class="text-contact tracking-title text-lime font-bold"
 		>
 			{email}
 		</a>
-		<span class="text-sm leading-body text-soft max-w-[74ch]">{body}</span>
+		<span class="text-row leading-body text-soft max-w-[74ch]">{body}</span>
 	</div>
 	{
 		asideHref ? (
-			<a href={asideHref} class={cn(asideClass, 'hover:text-lime transition-colors')}>
+			<a href={canonical(asideHref)} class={cn(asideClass, 'hover:text-lime transition-colors')}>
 				{aside}
 			</a>
 		) : (

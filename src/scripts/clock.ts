@@ -4,6 +4,10 @@ let timer: number | undefined;
 
 /** Keeps every `[data-clock]` in sync with the site's timezone, once a second. */
 export function mountClock(): void {
+	// `astro:page-load` has two producers (the swap pipeline and ClientRouter's
+	// own window load listener), so a mount can arrive without an unmount.
+	unmountClock();
+
 	const nodes = document.querySelectorAll<HTMLElement>('[data-clock]');
 	if (nodes.length === 0) return;
 

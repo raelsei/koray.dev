@@ -62,13 +62,20 @@ export function mountCommandBar(): void {
 				return el;
 			}),
 		);
-		log.hidden = lines.length === 0;
 	};
 
+	// The status line and every reply render locations as `~/work`, so the same
+	// spellings a user can read back must parse: `work`, `./work`, `/work`, `~/work`.
 	const resolve = (name: string): Route | undefined => {
-		const key = name.replace(/^\.\//, '').replace(/\/$/, '').toLowerCase();
+		const key = name
+			.toLowerCase()
+			.replace(/^~?\.?\//, '')
+			.replace(/\/$/, '');
 		return routes.find((r) => r.id === key || r.aliases.includes(key));
 	};
+
+	/** Navigates to a route by id, using its declared href — never a literal path. */
+	const routeHref = (id: string) => routes.find((r) => r.id === id)?.href ?? '/';
 
 	const resolveDoc = (name: string): Doc | undefined => {
 		if (!name || name === 'post') return docs[0];
@@ -103,10 +110,10 @@ export function mountCommandBar(): void {
 			case 'time':
 				return say(`İstanbul ${clockNow()} (GMT+03)`);
 			case 'whoami':
-				return goto('/', 'koray — founder & product engineer, fintech & applied AI');
+				return goto(routeHref('index'), 'koray — founder & product engineer, fintech & applied AI');
 			case 'mail':
 			case 'contact':
-				return goto('/about', `${email} — replies in 24h`, 'accent');
+				return goto(routeHref('about'), `${email} — replies in 24h`, 'accent');
 			case 'cat': {
 				const doc = resolveDoc(arg);
 				if (doc) return goto(doc.href, `opening ${doc.id}.md`);
@@ -117,7 +124,7 @@ export function mountCommandBar(): void {
 			case 'cd':
 			case 'open':
 			case 'goto': {
-				if (arg === '' || arg === '~' || arg === '..') return goto('/', '→ ~/index');
+				if (arg === '' || arg === '~' || arg === '..') return goto(routeHref('index'), '→ ~/index');
 				const route = resolve(arg);
 				if (route) return goto(route.href, `→ ~/${route.id}`);
 				return say(`cd: no such section: ${arg}`, 'error');

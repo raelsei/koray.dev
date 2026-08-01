@@ -24,25 +24,29 @@
 	--color-lime: #b6ff3d; /* accent */
 	--color-red: #e2513b; /* command errors */
 
-	/* Type scale — named by role, not by number */
+	/* Type scale — named by role, not by number.
+	   Every name must stay OUTSIDE Tailwind's built-in scale (xs/sm/base/lg/xl/
+	   2xl…). Reusing one overrides only the font-size: the paired
+	   `--text-<name>--line-height` default survives and the utility then emits a
+	   line-height computed from Tailwind's original rem size. */
 	--text-micro: 9.5px; /* stat caption */
 	--text-mini: 10px; /* command-bar hint */
 	--text-nano: 10.5px; /* tag, footer, cta label */
 	--text-meta: 11px; /* nav, section title, row meta */
 	--text-log: 11.5px; /* command-bar output */
 	--text-code: 12.5px; /* pre, prompt input */
-	--text-sm: 13px; /* row description */
+	--text-row: 13px; /* row description */
 	--text-note: 13.5px; /* note body, base font-size */
-	--text-base: 14px; /* list body */
+	--text-item: 14px; /* list body */
 	--text-body: 14.5px; /* prose body */
 	--text-md: 15px; /* copy-box title */
-	--text-lg: 16px; /* row title */
+	--text-entry: 16px; /* row title */
 	--text-lede: 17px; /* post lede */
 	--text-stat: 18px; /* metric value */
 	--text-clock: 19px; /* index clock */
-	--text-xl: 20px; /* venture title */
-	--text-2xl: 23px; /* lead venture title */
-	--text-3xl: 27px; /* cta mail address */
+	--text-venture: 20px; /* venture title */
+	--text-flagship: 23px; /* lead venture title */
+	--text-contact: 27px; /* cta mail address */
 	--text-hero: clamp(30px, 4vw, 50px);
 	--text-title: clamp(26px, 3.2vw, 40px);
 	--text-post: clamp(28px, 3.6vw, 46px);
@@ -136,10 +140,16 @@
 		background: var(--color-void);
 		color-scheme: dark;
 		scrollbar-color: var(--color-edge) var(--color-void);
+		/* Clears the sticky header and the fixed command bar, so anchor targets
+		   and Tab-scrolled elements are never parked underneath either one. */
+		scroll-padding-top: 84px;
+		scroll-padding-bottom: 60px;
 	}
 
+	/* No background here on purpose: `html` supplies it, and the browser paints
+	   that on the canvas — behind negative-z-index children. An opaque body
+	   background would bury the fixed scanline layer. */
 	body {
-		background: var(--color-void);
 		color: var(--color-fg);
 		font-family: var(--font-mono);
 		font-size: var(--text-note);
@@ -268,12 +278,13 @@
 	}
 
 	.longform h2::before {
-		content: '## ' counter(section, decimal-leading-zero) ' ';
+		/* The `/ ''` alt text keeps the glyphs visual-only. */
+		content: '## ' counter(section, decimal-leading-zero) ' ' / '';
 	}
 
 	.longform h3::before {
-		content: '### ';
-		color: var(--color-subtle);
+		content: '### ' / '';
+		color: var(--color-soft);
 	}
 
 	.longform blockquote {
@@ -286,15 +297,20 @@
 	}
 
 	.longform blockquote p::before {
-		content: '> ';
+		content: '> ' / '';
 	}
 
+	/* `list-style: none` makes WebKit drop list semantics entirely. Emptying the
+	   marker keeps the list a list for VoiceOver while removing the glyph. */
 	.longform :is(ul, ol) {
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
 		padding-left: 22px;
-		list-style: none;
+	}
+
+	.longform :is(ul, ol) > li::marker {
+		content: '';
 	}
 
 	.longform li {
@@ -303,7 +319,7 @@
 	}
 
 	.longform ul > li::before {
-		content: '-';
+		content: '-' / '';
 		position: absolute;
 		left: -22px;
 		color: var(--color-lime);
@@ -318,7 +334,7 @@
 	}
 
 	.longform ol > li::before {
-		content: counter(item, decimal-leading-zero);
+		content: counter(item, decimal-leading-zero) / '';
 		position: absolute;
 		left: -22px;
 		color: var(--color-dim);

@@ -7,6 +7,7 @@ import Section from '../components/ui/Section.astro';
 import Tree from '../components/ui/Tree.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { list } from '../lib/collections';
+import { breadcrumbs, webPage } from '../lib/schema';
 import { monthYear, ordinal } from '../lib/format';
 
 const page = await getEntry('pages', 'stack')!;
@@ -16,9 +17,14 @@ const [stack, rules] = await Promise.all([
 ]);
 
 const groups = stack.map(({ data }) => data);
+
+const schema = [
+	webPage({ path: '/stack', title: page.data.head.title, description: page.data.description }, Astro.site!),
+	breadcrumbs([{ name: 'Stack', path: '/stack' }], Astro.site!),
+];
 ---
 
-<BaseLayout title={page.data.title} description={page.data.description} route="stack">
+<BaseLayout title={page.data.title} description={page.data.description} route="stack" schema={schema}>
 	<div class="pt-[52px]">
 		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title} measure="max-w-[26ch]" />
 
@@ -28,7 +34,7 @@ const groups = stack.map(({ data }) => data);
 			animateRule
 			class="animate-fade-in stagger-2 mt-15"
 		>
-			<Tree groups={groups} class="pt-[26px] pb-2" />
+			<Tree groups={groups} label="Daily drivers" class="pt-[26px] pb-2" />
 		</Section>
 
 		<Section

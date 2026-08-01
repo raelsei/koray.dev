@@ -1,23 +1,22 @@
 ---
 import { cn } from '../../lib/cn';
+import { codeBox } from '../../lib/code-box';
 
 interface Props {
+	/** Names the block being copied; three bare "copy" buttons are ambiguous. */
+	label: string;
 	class?: string;
 }
 
-const { class: className } = Astro.props;
+const { label, class: className } = Astro.props;
 ---
 
 {/* Reads the sibling <pre> inside the enclosing [data-code-box]. */}
 <button
 	type="button"
 	data-copy
-	class={cn(
-		'border-edge text-subtle hover:border-lime hover:text-lime text-mini tracking-wide',
-		'cursor-pointer border px-[11px] py-1.5 uppercase transition-colors',
-		'data-[copied]:border-lime data-[copied]:text-lime',
-		className,
-	)}
+	aria-label={`Copy ${label}`}
+	class={cn(codeBox.button, className)}
 >
 	copy
 </button>

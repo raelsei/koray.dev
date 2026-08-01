@@ -8,7 +8,7 @@ import { list } from '../lib/collections';
 const nav = await list('nav');
 ---
 
-<BaseLayout title="404" description="No such file or directory." route="index">
+<BaseLayout title="404" description="No such file or directory." route="index" noindex>
 	<div class="pt-[52px]">
 		<PageHeader prompt="$ cat ." title="No such file or directory." measure="max-w-[20ch]" />
 
@@ -22,7 +22,7 @@ const nav = await list('nav');
 				nav.map((item) => (
 					<Row href={item.data.href} cols="grid-cols-[96px_minmax(0,1fr)] gap-[18px]">
 						<span slot="lead" class="text-meta text-dim">~/{item.id}</span>
-						<span class="text-base text-fg">{item.data.href}</span>
+						<span class="text-item text-fg">{item.data.href}</span>
 					</Row>
 				))
 			}

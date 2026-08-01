@@ -10,6 +10,8 @@ import Section from '../components/ui/Section.astro';
 import Stat from '../components/ui/Stat.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { list } from '../lib/collections';
+import { webPage } from '../lib/schema';
+import { post as postPath } from '../lib/urls';
 import { iso, monthYear, ordinal } from '../lib/format';
 import { getPosts } from '../lib/writing';
 
@@ -24,9 +26,11 @@ const [status, now, ventures, posts] = await Promise.all([
 ]);
 
 const latest = posts.slice(0, 3);
+
+const schema = [webPage({ path: '/', title: page.data.head.title, description: page.data.description }, Astro.site!)];
 ---
 
-<BaseLayout title={page.data.title} description={page.data.description} route="index">
+<BaseLayout title={page.data.title} description={page.data.description} route="index" schema={schema}>
 	<div class="pt-[52px]">
 		<PageHeader size="hero" prompt={page.data.head.prompt} title={page.data.head.title} measure="max-w-[24ch]">
 			<Longform measure="max-w-[74ch]" class="mt-2">
@@ -60,7 +64,7 @@ const latest = posts.slice(0, 3);
 						<span slot="lead" class="text-meta tracking-label text-dim pt-[3px] uppercase">
 							{item.data.label}
 						</span>
-						<span class="text-base leading-body text-fg">{item.data.body}</span>
+						<span class="text-item leading-body text-fg">{item.data.body}</span>
 					</Row>
 				))
 			}
@@ -81,8 +85,8 @@ const latest = posts.slice(0, 3);
 					>
 						<span slot="lead" class="text-meta text-dim">{ordinal(i)}</span>
 						<span class="flex flex-col gap-1.5">
-							<span class="text-lg tracking-snug text-fg font-medium">{venture.data.name}</span>
-							<span class="text-sm leading-row text-soft">{venture.data.summary}</span>
+							<span class="text-entry tracking-snug text-fg font-medium">{venture.data.name}</span>
+							<span class="text-row leading-row text-soft">{venture.data.summary}</span>
 						</span>
 						<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
 							{venture.data.status}
@@ -103,7 +107,7 @@ const latest = posts.slice(0, 3);
 			{
 				latest.map((post) => (
 					<Row
-						href={`/writing/${post.id}`}
+						href={postPath(post.id)}
 						cols="grid-cols-[minmax(0,1fr)_170px] max-sm:grid-cols-1 max-sm:gap-[7px]"
 					>
 						<span class="text-body text-fg">{post.id}.md</span>

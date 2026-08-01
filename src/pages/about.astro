@@ -8,9 +8,15 @@ import Row from '../components/ui/Row.astro';
 import Section from '../components/ui/Section.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { list } from '../lib/collections';
+import { breadcrumbs, webPage } from '../lib/schema';
 
 const page = await getEntry('pages', 'about')!;
 const { Content } = await render(page);
+
+const schema = [
+	webPage({ path: '/about', title: page.data.head.title, description: page.data.description, type: 'ProfilePage' }, Astro.site!),
+	breadcrumbs([{ name: 'About', path: '/about' }], Astro.site!),
+];
 
 const [manual, timeline, contacts] = await Promise.all([
 	list('manual'),
@@ -19,7 +25,7 @@ const [manual, timeline, contacts] = await Promise.all([
 ]);
 ---
 
-<BaseLayout title={page.data.title} description={page.data.description} route="about">
+<BaseLayout title={page.data.title} description={page.data.description} route="about" schema={schema}>
 	<div class="pt-[52px]">
 		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title} />
 
@@ -28,7 +34,7 @@ const [manual, timeline, contacts] = await Promise.all([
 				manual.map((entry) => (
 					<>
 						<dt class="text-nano tracking-rule text-dim pt-[5px] uppercase">{entry.data.term}</dt>
-						<dd class="text-base leading-relaxed text-fg">{entry.data.body}</dd>
+						<dd class="text-item leading-relaxed text-fg">{entry.data.body}</dd>
 					</>
 				))
 			}
@@ -55,7 +61,7 @@ const [manual, timeline, contacts] = await Promise.all([
 						>
 							{entry.data.period}
 						</span>
-						<span class="text-base text-fg">{entry.data.body}</span>
+						<span class="text-item text-fg">{entry.data.body}</span>
 					</Row>
 				))
 			}
@@ -73,7 +79,7 @@ const [manual, timeline, contacts] = await Promise.all([
 						cols="grid-cols-[96px_minmax(0,1fr)] gap-[18px] max-sm:grid-cols-1 max-sm:gap-[7px]"
 					>
 						<span slot="lead" class="text-meta text-dim">{contact.data.channel}</span>
-						<span class="text-base text-fg">
+						<span class="text-item text-fg">
 							{contact.data.handle}
 							{contact.data.external && ' ↗'}
 						</span>

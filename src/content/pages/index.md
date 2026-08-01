@@ -11,7 +11,7 @@ cta:
   email: id@koray.dev
   body: Fintech, applied AI, or a second pair of hands on something hard.
   aside: ./about →
-  asideHref: /about
+  asideHref: /about/
 ---
 
 Founder of [koative](https://koative.com) — an applied-AI studio shipping fintech

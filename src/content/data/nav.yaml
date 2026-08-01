@@ -6,25 +6,27 @@
 
 - id: work
   label: work
-  href: /work
+  href: /work/
   aliases: [ventures, projects, oss]
 
 - id: writing
   label: writing
-  href: /writing
+  href: /writing/
   aliases: [blog, posts, essays]
 
 - id: stack
   label: stack
-  href: /stack
+  href: /stack/
   aliases: [tools, setup, dotfiles]
 
 - id: library
   label: library
-  href: /library
-  aliases: [links, bookmarks, snippets]
+  href: /library/
+  # Shelf names are deliberately absent: they would all resolve to /library/,
+  # which serves the first shelf, not the shelf the user typed.
+  aliases: [links, shelves]
 
 - id: about
   label: about
-  href: /about
-  aliases: [me, cv, whoami]
+  href: /about/
+  aliases: [me, cv, bio]
