@@ -1,0 +1,12 @@
+description: >-
+  The two config files I would rebuild a machine from: ghostty and fish. Each
+  written up with the reason it looks the way it does, not just dumped.
+order: 4
+groups:
+  # src/content/dotfiles/<name>.md — the code fence carries its own copy button,
+  # so the page offers no whole-document copy.
+  - kind: docs
+    title: dotfiles/
+    meta: open to read, copy the block
+    collection: dotfiles
+    copyDocument: false

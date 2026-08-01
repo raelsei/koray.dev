@@ -18,7 +18,7 @@ import { list } from '../../lib/collections';
 /** A docs group is backed by a collection, so its size comes from there. */
 const documents = {
 	prompts: await list('prompts'),
-	snippets: await list('snippets'),
+	dotfiles: await list('dotfiles'),
 } as const;
 
 const shelfSize = (shelf: CollectionEntry<'shelves'>) =>

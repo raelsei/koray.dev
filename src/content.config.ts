@@ -82,8 +82,8 @@ const prompts = defineCollection({
 	schema: document,
 });
 
-const snippets = defineCollection({
-	loader: glob({ base: './src/content/snippets', pattern: '*.md' }),
+const dotfiles = defineCollection({
+	loader: glob({ base: './src/content/dotfiles', pattern: '*.md' }),
 	schema: document,
 });
 
@@ -257,7 +257,7 @@ const shelfGroup = z.discriminatedUnion('kind', [
 		kind: z.literal('docs'),
 		title: z.string(),
 		meta: z.string(),
-		collection: z.enum(['prompts', 'snippets']),
+		collection: z.enum(['prompts', 'dotfiles']),
 		/**
 		 * Whether the document page offers a copy button for the whole source.
 		 * True for a prompt, where the document *is* the artefact; false for a
@@ -294,7 +294,7 @@ const nav = defineCollection({
 export const collections = {
 	pages,
 	prompts,
-	snippets,
+	dotfiles,
 	writing,
 	status,
 	now,

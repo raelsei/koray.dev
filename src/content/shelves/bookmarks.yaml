@@ -1,20 +1,7 @@
 description: >-
-  Blogs and reference I actually reopen: Julia Evans, Dan Luu, Simon Willison, Stripe Press, and the docs I keep in a pinned tab.
+  Tools I open when I am making something, rather than reading about it.
 order: 1
 groups:
-  - kind: link
-    title: reading/
-    meta: people who explain things well
-    items:
-      - label: Julia Evans — debugging, explained kindly
-        href: https://jvns.ca
-      - label: Dan Luu — measurements over opinions
-        href: https://danluu.com
-      - label: Simon Willison — the LLM field notes I trust most
-        href: https://simonwillison.net
-      - label: Stripe Press — books about how things get built
-        href: https://press.stripe.com
-
   - kind: link
     title: tools/
     meta: open when making something
@@ -23,16 +10,3 @@ groups:
         href: https://shots.so/
       - label: Better-T-Stack — scaffolds an end-to-end type-safe TypeScript project
         href: https://www.better-t-stack.dev/
-
-  - kind: link
-    title: reference/
-    meta: open weekly
-    items:
-      - label: Anthropic docs — prompt library and tool use
-        href: https://docs.anthropic.com
-      - label: Postgres docs — still the best manual in software
-        href: https://www.postgresql.org/docs/
-      - label: transform.tools — JSON to anything, instantly
-        href: https://transform.tools
-      - label: LLM Visualization — a transformer you can walk through
-        href: https://bbycroft.net/llm

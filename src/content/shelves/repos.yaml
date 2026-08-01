@@ -1,36 +1,11 @@
 description: >-
-  Other people's repositories worth reading: the tools I run every day, the
-  runtimes my coding agents live on, and the two SDKs I study for API design.
+  The tools I run every day, and the runtimes my coding agents live on.
 order: 3
 groups:
   - kind: repo
     title: repos-i-love/
     meta: not mine — just excellent
     items:
-      - name: oven-sh/bun
-        description: Proof that developer tooling can be fast and kind at once.
-        lang: zig
-        href: https://github.com/oven-sh/bun
-      - name: tldraw/tldraw
-        description: The canvas nobody needed to reinvent, reinvented properly.
-        lang: typescript
-        href: https://github.com/tldraw/tldraw
-      - name: sqlite/sqlite
-        description: Thirty years of restraint. My benchmark for engineering taste.
-        lang: c
-        href: https://github.com/sqlite/sqlite
-      - name: zed-industries/zed
-        description: Latency treated as a product feature, not a chore.
-        lang: rust
-        href: https://github.com/zed-industries/zed
-      - name: excalidraw/excalidraw
-        description: Deliberately rough output. Half my architecture lives here.
-        lang: typescript
-        href: https://github.com/excalidraw/excalidraw
-      - name: bigskysoftware/htmx
-        description: A good argument, shipped as a library.
-        lang: javascript
-        href: https://github.com/bigskysoftware/htmx
       - name: ghostty-org/ghostty
         description: Native UI and GPU acceleration, and it still starts instantly.
         lang: zig
@@ -60,14 +35,3 @@ groups:
         description: A runtime for the agents themselves — orchestration rather than another CLI.
         lang: rust
         href: https://github.com/herdrdev/herdr
-
-  - kind: card
-    title: read-the-source/
-    meta: where I go to learn
-    items:
-      - name: stripe/stripe-node
-        description: How to version a money API without breaking anyone.
-        href: https://github.com/stripe/stripe-node
-      - name: anthropics/anthropic-sdk-typescript
-        description: Streaming, retries and types done without ceremony.
-        href: https://github.com/anthropics/anthropic-sdk-typescript
