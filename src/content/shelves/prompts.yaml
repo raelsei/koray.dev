@@ -1,41 +1,12 @@
 description: >-
-  Three prompts I run weekly — spec-to-tickets, an adversarial PR reviewer for money-touching code, and an eval writer. Copy-pasteable.
+  Three system prompts I actually run: a landing-page brief generator that
+  refuses to default to the same aesthetic, a niche-and-offer strategist that
+  scores ideas instead of cheering them on, and a validation generator built to
+  kill bad ideas in a week.
 order: 2
 groups:
-  - kind: code
+  # Items come from the `prompts` collection; each one is a Markdown file with
+  # its own page. Adding a prompt means adding src/content/prompts/<name>.md.
+  - kind: docs
     title: prompts/
-    meta: click copy
-    accent: true
-    items:
-      - name: spec-to-tickets.md
-        description: >-
-          Turns a loose product note into ordered, testable work items. Fails
-          loudly when the spec is too vague to slice.
-        code: |
-          You are a staff engineer slicing work.
-          Read the note below. Output 3–7 tickets, ordered by dependency.
-          Each ticket: title, why-now (1 line), acceptance test, risk.
-          If the note is too vague to slice, say what is missing and stop.
-
-          NOTE: """<note>"""
-
-      - name: adversarial-reviewer.md
-        description: >-
-          My PR gate for money-touching code. Ranked by blast radius, no style
-          nitpicks.
-        code: |
-          Review this diff as the engineer who will be paged at 03:00.
-          Rank findings by blast radius: data loss > money > correctness > perf.
-          For each: file:line, the failing scenario, the smallest fix.
-          Ignore style. If it is safe to ship, say so in one line.
-
-      - name: eval-writer.md
-        description: >-
-          Written before the feature exists. Half of these cases end up as real
-          unit tests.
-        code: |
-          Feature: """<feature>"""
-          Write 12 eval cases before any prompt exists.
-          Mix: 4 happy, 4 adversarial, 2 ambiguous, 2 must-refuse.
-          Each case: input, expected behaviour, pass/fail rule a human
-          can judge in under 10 seconds. Output JSONL.
+    meta: open to read, copy to use

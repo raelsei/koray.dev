@@ -63,6 +63,20 @@ const pages = defineCollection({
 	}),
 });
 
+/**
+ * Long-form system prompts. Markdown, not YAML: these run to a hundred lines
+ * and are edited as documents, which a quoted scalar cannot survive.
+ */
+const prompts = defineCollection({
+	loader: glob({ base: './src/content/prompts', pattern: '*.md' }),
+	schema: z.object({
+		title: z.string(),
+		description: z.string(),
+		order: z.number(),
+		tags: z.array(z.string()).default([]),
+	}),
+});
+
 const writing = defineCollection({
 	loader: glob({ base: './src/content/writing', pattern: '**/*.md' }),
 	schema: z.object({
@@ -229,6 +243,12 @@ const shelfGroup = z.discriminatedUnion('kind', [
 		),
 	}),
 	z.object({
+		/** Documents that live as Markdown and get their own page. */
+		kind: z.literal('docs'),
+		title: z.string(),
+		meta: z.string(),
+	}),
+	z.object({
 		kind: z.literal('code'),
 		title: z.string(),
 		meta: z.string(),
@@ -274,6 +294,7 @@ const nav = defineCollection({
 
 export const collections = {
 	pages,
+	prompts,
 	writing,
 	status,
 	now,

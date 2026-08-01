@@ -1,0 +1,93 @@
+---
+import { render } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import CopyButton from '../../../components/ui/CopyButton.astro';
+import Longform from '../../../components/ui/Longform.astro';
+import Rule from '../../../components/primitives/Rule.astro';
+
+import { breadcrumbs, webPage } from '../../../lib/schema';
+import { list } from '../../../lib/collections';
+import { LIBRARY, prompt as promptPath } from '../../../lib/urls';
+
+export const getStaticPaths = (async () => {
+	const prompts = await list('prompts');
+	return prompts.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+
+const source = entry.body ?? '';
+const lines = source.trimEnd().split('\n').length;
+const path = promptPath(entry.id);
+
+const schema = [
+	webPage(
+		{ path, title: entry.data.title, description: entry.data.description },
+		Astro.site!,
+	),
+	breadcrumbs(
+		[
+			{ name: 'Library', path: LIBRARY },
+			{ name: 'Prompts', path: '/library/prompts/' },
+			{ name: entry.data.title, path },
+		],
+		Astro.site!,
+	),
+];
+---
+
+<BaseLayout title={entry.data.title} description={entry.data.description} route="library" schema={schema}>
+	<div class="pt-[52px]">
+		<a
+			href="/library/prompts/"
+			aria-label="Back to prompts"
+			class="text-meta tracking-wide text-subtle hover:text-lime animate-fade-in uppercase transition-colors"
+		>
+			← cd ../prompts
+		</a>
+
+		<article class="mt-7">
+			<header>
+				<span class="text-meta tracking-prompt text-subtle animate-fade-in stagger-1 block uppercase">
+					$ cat {entry.id}.md
+				</span>
+
+				<h1
+					class="text-title tracking-title leading-title text-fg animate-rise-in stagger-1
+						mt-4 max-w-[26ch] font-bold text-balance"
+				>
+					{entry.data.title}
+				</h1>
+
+				<p class="text-body leading-prose text-soft animate-rise-in stagger-3 mt-5 max-w-[74ch] text-pretty">
+					{entry.data.description}
+				</p>
+
+				{/* The button copies the Markdown source, not the rendered page. The
+				    hidden <pre> is that source; copy.ts reads it via [data-copy-source]. */}
+				<div
+					data-code-box
+					class="animate-fade-in stagger-4 mt-6 flex flex-wrap items-center gap-4"
+				>
+					<CopyButton label={`${entry.id}.md`} />
+					<span class="text-meta tracking-wide text-subtle uppercase">
+						{lines} lines · markdown
+					</span>
+					{entry.data.tags.map((tag) => (
+						<span class="text-meta tracking-wide text-dim uppercase">#{tag}</span>
+					))}
+					<pre hidden data-copy-source set:text={source} />
+				</div>
+
+				<Rule tone="edge" animate class="stagger-4 mt-6" />
+			</header>
+
+			<Longform class="animate-fade-in stagger-5 mt-10">
+				<Content />
+			</Longform>
+		</article>
+	</div>
+</BaseLayout>

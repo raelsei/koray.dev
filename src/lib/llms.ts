@@ -171,16 +171,20 @@ async function routeData(id: string): Promise<string[]> {
 
 		case 'library': {
 			const shelves = await list('shelves');
-			return shelves.flatMap(({ id: shelf, data }) => [
-				'',
-				`## ${shelf}`,
-				...data.groups.flatMap((group) => [
-					'',
-					`### ${group.title} — ${group.meta}`,
-					'',
-					...groupToMarkdown(group),
-				]),
-			]);
+			const sections = await Promise.all(
+				shelves.map(async ({ id: shelf, data }) => {
+					const groups = await Promise.all(
+						data.groups.map(async (group) => [
+							'',
+							`### ${group.title} — ${group.meta}`,
+							'',
+							...(await groupToMarkdown(group)),
+						]),
+					);
+					return ['', `## ${shelf}`, ...groups.flat()];
+				}),
+			);
+			return sections.flat();
 		}
 
 		case 'about': {
@@ -209,8 +213,25 @@ async function routeData(id: string): Promise<string[]> {
 	}
 }
 
-/** One shelf group, flattened to Markdown according to its `kind`. */
-function groupToMarkdown(group: ShelfGroup): string[] {
+/**
+ * One shelf group, flattened to Markdown according to its `kind`.
+ *
+ * `docs` groups are backed by a collection rather than inline items, so they
+ * are async — the full text inlines each document's Markdown body.
+ */
+async function groupToMarkdown(group: ShelfGroup): Promise<string[]> {
+	if (group.kind === 'docs') {
+		const entries = await list('prompts');
+		return entries.flatMap((entry) => [
+			`### ${entry.data.title}`,
+			'',
+			`> ${entry.data.description}`,
+			'',
+			(entry.body ?? '').trim(),
+			'',
+		]);
+	}
+
 	switch (group.kind) {
 		case 'link':
 			return group.items.map((i) => `- [${i.label}](${i.href})`);

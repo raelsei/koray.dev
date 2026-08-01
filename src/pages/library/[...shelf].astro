@@ -1,5 +1,5 @@
 ---
-import { getEntry, render } from 'astro:content';
+import { getEntry, render, type CollectionEntry } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -13,8 +13,16 @@ import Section from '../../components/ui/Section.astro';
 import { breadcrumbs, webPage } from '../../lib/schema';
 import { cn } from '../../lib/cn';
 import { host } from '../../lib/format';
-import { LIBRARY, shelf as shelfPath } from '../../lib/urls';
+import { LIBRARY, prompt as promptPath, shelf as shelfPath } from '../../lib/urls';
 import { list } from '../../lib/collections';
+
+/** A docs group is backed by a collection, so its size comes from there. */
+const docs = await list('prompts');
+const shelfSize = (shelf: CollectionEntry<'shelves'>) =>
+	shelf.data.groups.reduce(
+		(n, group) => n + (group.kind === 'docs' ? docs.length : group.items.length),
+		0,
+	);
 
 export const getStaticPaths = (async () => {
 	const shelves = await list('shelves');
@@ -33,7 +41,7 @@ const { Content } = await render(page);
 const shelves = await list('shelves');
 const current = shelves.find((s) => s.id === active)!;
 
-/** Item counts are derived, so a tab badge can never disagree with its shelf. */
+/** Tab counts are derived, so a badge can never disagree with its shelf. */
 const path = shelfPath(active, active === shelves[0]!.id);
 const schema = [
 	webPage(
@@ -59,7 +67,7 @@ const schema = [
 const tabs = shelves.map((shelf, i) => ({
 	id: shelf.id,
 	href: shelfPath(shelf.id, i === 0),
-	count: String(shelf.data.groups.reduce((n, g) => n + g.items.length, 0)).padStart(2, '0'),
+	count: String(shelfSize(shelf)).padStart(2, '0'),
 	active: shelf.id === active,
 }));
 ---
@@ -106,6 +114,23 @@ const tabs = shelves.map((shelf, i) => ({
 					animateRule={gi === 0}
 					class={cn('animate-fade-in stagger-3', gi === 0 ? 'mt-[46px]' : 'mt-13')}
 				>
+					{group.kind === 'docs' &&
+						docs.map((doc) => (
+							<Row
+								href={promptPath(doc.id)}
+								pad="md"
+								cols="grid-cols-[minmax(0,1fr)_130px] max-sm:grid-cols-1 max-sm:gap-[7px]"
+							>
+								<span class="flex flex-col gap-[5px]">
+									<span class="text-item text-fg">{doc.id}.md</span>
+									<span class="text-row leading-row text-soft">{doc.data.description}</span>
+								</span>
+								<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
+									read →
+								</span>
+							</Row>
+						))}
+
 					{group.kind === 'link' &&
 						group.items.map((item) => (
 							<Row

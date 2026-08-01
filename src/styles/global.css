@@ -234,7 +234,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: 22px;
-		counter-reset: section;
 		font-size: var(--text-body);
 		line-height: var(--leading-loose);
 		color: var(--color-soft);
@@ -277,12 +276,21 @@
 		margin-block: 18px -6px;
 	}
 
-	.longform h2 {
+	/* Plain documents get the marker; essays add a running section number. */
+	.longform h2::before {
+		/* The `/ ''` alt text keeps the glyphs visual-only. */
+		content: '## ' / '';
+	}
+
+	.longform--numbered {
+		counter-reset: section;
+	}
+
+	.longform--numbered h2 {
 		counter-increment: section;
 	}
 
-	.longform h2::before {
-		/* The `/ ''` alt text keeps the glyphs visual-only. */
+	.longform--numbered h2::before {
 		content: '## ' counter(section, decimal-leading-zero) ' ' / '';
 	}
 
@@ -310,10 +318,28 @@
 		display: flex;
 		flex-direction: column;
 		gap: 10px;
+	}
+
+	.longform ul {
 		padding-left: 22px;
 	}
 
-	.longform :is(ul, ol) > li::marker {
+	/* Wider than the bullet list: a zero-padded ordinal needs room to breathe. */
+	.longform ol {
+		padding-left: 34px;
+		list-style: decimal-leading-zero;
+	}
+
+	.longform ol > li::marker {
+		color: var(--color-dim);
+		font-variant-numeric: tabular-nums;
+	}
+
+	/* Emptying the marker hides the glyph without dropping list semantics, which
+	   `list-style: none` does in WebKit. Ordered lists keep their native marker
+	   instead — a CSS counter cannot see the `start` attribute Markdown emits
+	   for a list beginning at anything other than 1. */
+	.longform ul > li::marker {
 		content: '';
 	}
 
@@ -329,19 +355,27 @@
 		color: var(--color-lime);
 	}
 
-	.longform ol {
-		counter-reset: item;
+	.longform table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: var(--text-row);
+		line-height: var(--leading-row);
 	}
 
-	.longform ol > li {
-		counter-increment: item;
+	.longform :is(th, td) {
+		border-bottom: 1px solid var(--color-hair);
+		padding: 10px 14px 10px 0;
+		text-align: left;
+		vertical-align: top;
 	}
 
-	.longform ol > li::before {
-		content: counter(item, decimal-leading-zero) / '';
-		position: absolute;
-		left: -22px;
-		color: var(--color-dim);
+	.longform th {
+		font-weight: 500;
+		color: var(--color-fg);
+		border-bottom-color: var(--color-edge);
+		text-transform: uppercase;
+		letter-spacing: var(--tracking-tag);
+		font-size: var(--text-meta);
 	}
 
 	.longform hr {

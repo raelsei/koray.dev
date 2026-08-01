@@ -18,6 +18,9 @@ export const LIBRARY = '/library/';
 /** A post's canonical path. */
 export const post = (slug: string) => `/writing/${slug}/`;
 
+/** A prompt document's canonical path. */
+export const prompt = (slug: string) => `/library/prompts/${slug}/`;
+
 /** A shelf's path. The first shelf is served at `/library/`, not `/library/<id>/`. */
 export const shelf = (id: string, isDefault: boolean) =>
 	isDefault ? LIBRARY : `/library/${id}/`;

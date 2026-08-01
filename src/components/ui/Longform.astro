@@ -4,14 +4,16 @@ import { cn } from '../../lib/cn';
 interface Props {
 	/** Tailwind `max-w-[NNch]` measure. */
 	measure?: string;
+	/** Prefix `h2`s with a running `01`, `02` … Essays want this; documents do not. */
+	numbered?: boolean;
 	class?: string;
 }
 
-const { measure = 'max-w-[78ch]', class: className } = Astro.props;
+const { measure = 'max-w-[78ch]', numbered = false, class: className } = Astro.props;
 ---
 
 {/* Element styles live in global.css under `.longform` so Markdown output and
     hand-written slots are typeset by exactly one rule set. */}
-<div class={cn('longform', measure, className)}>
+<div class={cn('longform', numbered && 'longform--numbered', measure, className)}>
 	<slot />
 </div>
