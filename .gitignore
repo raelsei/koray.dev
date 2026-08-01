@@ -1,4 +1,4 @@
-# build output
+# build output — docs/ is deliberately NOT ignored: GitHub Pages serves it
 dist/
 # generated types
 .astro/
