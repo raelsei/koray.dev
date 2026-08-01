@@ -12,10 +12,6 @@ import { voidTerminal } from './src/lib/shiki-void';
 // https://astro.build/config
 export default defineConfig({
 	site: SITE.url,
-	// GitHub Pages serves this branch directly, and its branch mode offers only
-	// `/` or `/docs` as the source folder — so the build output is committed
-	// to docs/ rather than the usual dist/.
-	outDir: './docs',
 	// Makes the slash-less form a hard 404 in dev, so the link graph cannot
 	// silently drift from the canonical/sitemap form again. See src/lib/urls.ts.
 	trailingSlash: 'always',

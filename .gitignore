@@ -1,4 +1,4 @@
-# build output — docs/ is deliberately NOT ignored: GitHub Pages serves it
+# build output — published to the gh-pages branch, never committed to main
 dist/
 # generated types
 .astro/

@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://koray.dev/sitemap-index.xml
-
-# Structured for language models — see https://llmstxt.org
-# https://koray.dev/llms.txt
-# https://koray.dev/llms-full.txt
