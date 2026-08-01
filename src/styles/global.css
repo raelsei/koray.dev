@@ -16,13 +16,17 @@
 	--color-edge: #1e2422; /* default border */
 	--color-edge-lime: #24402a; /* accented border */
 
-	/* Ink — dimmest to brightest */
-	--color-dim: #3f4644; /* timestamps, tertiary */
-	--color-subtle: #5d6663; /* labels, secondary */
-	--color-soft: #8e9793; /* body copy */
-	--color-fg: #d9dedb; /* primary text, rules */
-	--color-lime: #b6ff3d; /* accent */
-	--color-red: #e2513b; /* command errors */
+	/* Ink — dimmest to brightest.
+	   Every level clears WCAG AA for normal text (4.5:1) against both --color-void
+	   and --color-panel. The whole ramp is used at 9.5–17px, so the 3:1 large-text
+	   exemption never applies; a new level must be checked at 4.5:1, not 3:1.
+	   Ratios against --color-void are noted per token. */
+	--color-dim: #73807c; /* 4.85:1 void · 4.59:1 panel — timestamps, tertiary */
+	--color-subtle: #83908b; /* 6.00:1 — labels, secondary */
+	--color-soft: #a1aca7; /* 8.52:1 — body copy */
+	--color-fg: #d9dedb; /* 14.63:1 — primary text, rules */
+	--color-lime: #b6ff3d; /* 16.47:1 — accent */
+	--color-red: #e2513b; /* 5.19:1 — command errors */
 
 	/* Type scale — named by role, not by number.
 	   Every name must stay OUTSIDE Tailwind's built-in scale (xs/sm/base/lg/xl/
