@@ -4,15 +4,15 @@ import CommandBar from '../components/layout/CommandBar.astro';
 import Footer from '../components/layout/Footer.astro';
 import Scanlines from '../components/layout/Scanlines.astro';
 import TopBar from '../components/layout/TopBar.astro';
-import { SITE } from '../consts';
+
 import { identity } from '../lib/schema';
+import { SITE } from '../consts';
 
 interface Props {
 	title: string;
 	description: string;
 	/** Collection id of the active nav item; also shown in the status line. */
 	route: string;
-	image?: string;
 	/** Post metadata; present on article routes only. */
 	article?: { published: Date; modified: Date; tags: string[] };
 	progress?: boolean;
@@ -25,7 +25,7 @@ interface Props {
 	schema?: Array<Record<string, unknown>>;
 }
 
-const { title, description, route, image, article, progress, noindex, schema = [] } = Astro.props;
+const { title, description, route, article, progress, noindex, schema = [] } = Astro.props;
 
 const graph = {
 	'@context': 'https://schema.org',
@@ -39,7 +39,6 @@ const graph = {
 		<BaseHead
 			title={title}
 			description={description}
-			image={image}
 			article={article}
 			noindex={noindex}
 		/>

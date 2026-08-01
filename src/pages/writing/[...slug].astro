@@ -2,6 +2,7 @@
 import type { GetStaticPaths } from 'astro';
 
 import PostLayout from '../../layouts/PostLayout.astro';
+
 import { getPosts, nextPost } from '../../lib/writing';
 
 export const getStaticPaths = (async () => {

@@ -1,7 +1,6 @@
 description: >-
   Blogs and reference I actually reopen: Julia Evans, Dan Luu, Simon Willison, Stripe Press, and the docs I keep in a pinned tab.
 order: 1
-meta: people who explain things well
 groups:
   - kind: link
     title: reading/

@@ -1,23 +1,23 @@
 ---
+import { getEntry, render } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
-import { getCollection, getEntry, render } from 'astro:content';
 
+import BaseLayout from '../../layouts/BaseLayout.astro';
 import CodeBox from '../../components/ui/CodeBox.astro';
-import Panel from '../../components/ui/Panel.astro';
-import PageHeader from '../../components/ui/PageHeader.astro';
 import Longform from '../../components/ui/Longform.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import Panel from '../../components/ui/Panel.astro';
 import Row from '../../components/ui/Row.astro';
 import Section from '../../components/ui/Section.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
+
+import { breadcrumbs, webPage } from '../../lib/schema';
 import { cn } from '../../lib/cn';
 import { host } from '../../lib/format';
-import { breadcrumbs, webPage } from '../../lib/schema';
 import { LIBRARY, shelf as shelfPath } from '../../lib/urls';
+import { list } from '../../lib/collections';
 
 export const getStaticPaths = (async () => {
-	const shelves = (await getCollection('shelves')).sort(
-		(a, b) => a.data.order - b.data.order,
-	);
+	const shelves = await list('shelves');
 	// The first shelf lives at /library so the section has a canonical root.
 	return shelves.map((shelf, i) => ({
 		params: { shelf: i === 0 ? undefined : shelf.id },
@@ -30,9 +30,7 @@ const { active } = Astro.props;
 const page = await getEntry('pages', 'library')!;
 const { Content } = await render(page);
 
-const shelves = (await getCollection('shelves')).sort(
-	(a, b) => a.data.order - b.data.order,
-);
+const shelves = await list('shelves');
 const current = shelves.find((s) => s.id === active)!;
 
 /** Item counts are derived, so a tab badge can never disagree with its shelf. */
@@ -106,7 +104,7 @@ const tabs = shelves.map((shelf, i) => ({
 					title={group.title}
 					meta={group.meta}
 					animateRule={gi === 0}
-					class:list={['animate-fade-in stagger-3', gi === 0 ? 'mt-[46px]' : 'mt-13']}
+					class={cn('animate-fade-in stagger-3', gi === 0 ? 'mt-[46px]' : 'mt-13')}
 				>
 					{group.kind === 'link' &&
 						group.items.map((item) => (
@@ -145,7 +143,7 @@ const tabs = shelves.map((shelf, i) => ({
 									href={item.href}
 									target="_blank"
 									rel="noreferrer"
-									class="hover:bg-panel! flex flex-col gap-[7px] p-5 transition-colors duration-100"
+									class="hover:bg-panel flex flex-col gap-[7px] p-5 transition-colors duration-100"
 								>
 									<span class="text-item text-lime">{item.name}</span>
 									<span class="text-row leading-snug text-soft">{item.description}</span>

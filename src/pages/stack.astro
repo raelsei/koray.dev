@@ -1,13 +1,14 @@
 ---
 import { getEntry } from 'astro:content';
 
-import Panel from '../components/ui/Panel.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHeader from '../components/ui/PageHeader.astro';
+import Panel from '../components/ui/Panel.astro';
 import Section from '../components/ui/Section.astro';
 import Tree from '../components/ui/Tree.astro';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { list } from '../lib/collections';
+
 import { breadcrumbs, webPage } from '../lib/schema';
+import { list } from '../lib/collections';
 import { monthYear, ordinal } from '../lib/format';
 
 const page = await getEntry('pages', 'stack')!;

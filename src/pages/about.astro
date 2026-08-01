@@ -1,14 +1,16 @@
 ---
 import { getEntry, render } from 'astro:content';
 
+import BaseLayout from '../layouts/BaseLayout.astro';
 import Cta from '../components/ui/Cta.astro';
-import PageHeader from '../components/ui/PageHeader.astro';
 import Longform from '../components/ui/Longform.astro';
+import PageHeader from '../components/ui/PageHeader.astro';
 import Row from '../components/ui/Row.astro';
 import Section from '../components/ui/Section.astro';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { list } from '../lib/collections';
+
 import { breadcrumbs, webPage } from '../lib/schema';
+import { cn } from '../lib/cn';
+import { list } from '../lib/collections';
 
 const page = await getEntry('pages', 'about')!;
 const { Content } = await render(page);
@@ -54,10 +56,7 @@ const [manual, timeline, contacts] = await Promise.all([
 					<Row cols="grid-cols-[96px_minmax(0,1fr)] gap-[18px] max-sm:grid-cols-1 max-sm:gap-[7px]">
 						<span
 							slot="lead"
-							class:list={[
-								'text-meta',
-								entry.data.tone === 'accent' ? 'text-lime' : 'text-dim',
-							]}
+							class={cn('text-meta', entry.data.tone === 'accent' ? 'text-lime' : 'text-dim')}
 						>
 							{entry.data.period}
 						</span>

@@ -40,8 +40,6 @@ export function monthYear(d: Date): string {
 	return `${MONTHS[get('month') - 1]} ${get('year')}`;
 }
 
-export const year = (d: Date) => d.getUTCFullYear();
-
 /** `01`, `02` … — ordinal labels derived from position, never hand-written. */
 export const ordinal = (i: number) => String(i + 1).padStart(2, '0');
 

@@ -64,7 +64,7 @@ const pages = defineCollection({
 });
 
 const writing = defineCollection({
-	loader: glob({ base: './src/content/writing', pattern: '**/*.{md,mdx}' }),
+	loader: glob({ base: './src/content/writing', pattern: '**/*.md' }),
 	schema: z.object({
 		title: z.string(),
 		/** Rendered as the post lede and as the list-row description. */
@@ -255,7 +255,6 @@ const shelves = defineCollection({
 		order: z.number(),
 		/** Own meta description; without it all four shelves share the page's. */
 		description: z.string(),
-		meta: z.string(),
 		groups: z.array(shelfGroup),
 	}),
 });

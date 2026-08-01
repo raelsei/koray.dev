@@ -1,18 +1,20 @@
 ---
 import { getEntry, render } from 'astro:content';
 
+import BaseLayout from '../../layouts/BaseLayout.astro';
 import Cursor from '../../components/primitives/Cursor.astro';
-import Panel from '../../components/ui/Panel.astro';
-import PageHeader from '../../components/ui/PageHeader.astro';
 import Longform from '../../components/ui/Longform.astro';
+import PageHeader from '../../components/ui/PageHeader.astro';
+import Panel from '../../components/ui/Panel.astro';
 import Row from '../../components/ui/Row.astro';
 import Section from '../../components/ui/Section.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { list } from '../../lib/collections';
+
 import { breadcrumbs, postList, webPage } from '../../lib/schema';
-import { post as postPath } from '../../lib/urls';
-import { dotted, monthDay } from '../../lib/format';
 import { byYear, getPosts } from '../../lib/writing';
+import { cn } from '../../lib/cn';
+import { dotted, monthDay } from '../../lib/format';
+import { list } from '../../lib/collections';
+import { post as postPath } from '../../lib/urls';
 
 const page = await getEntry('pages', 'writing')!;
 const { Content } = await render(page);
@@ -41,7 +43,7 @@ const schema = [
 					title={`${group.year}/`}
 					meta={`${group.posts.length} ${group.posts.length === 1 ? 'file' : 'files'}`}
 					animateRule={gi === 0}
-					class:list={['animate-fade-in', gi === 0 ? 'stagger-3 mt-15' : 'stagger-4 mt-14']}
+					class={cn('animate-fade-in', gi === 0 ? 'stagger-3 mt-15' : 'stagger-4 mt-14')}
 				>
 					{group.posts.map((post) => (
 						<Row

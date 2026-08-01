@@ -2,17 +2,15 @@
 import { cn } from '../../lib/cn';
 
 interface Props {
-	tone?: 'accent' | 'muted';
 	class?: string;
 }
 
-const { tone = 'muted', class: className } = Astro.props;
+const { class: className } = Astro.props;
 ---
 
 <span
 	class={cn(
-		'text-nano tracking-tag border-edge border px-[9px] py-[5px] uppercase',
-		tone === 'accent' ? 'text-lime' : 'text-soft',
+		'text-nano tracking-tag border-edge text-soft border px-[9px] py-[5px] uppercase',
 		className,
 	)}
 >

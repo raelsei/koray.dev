@@ -19,6 +19,8 @@ export const SITE = {
 	/** `@handle` for Twitter card attribution; `null` omits the tags. */
 	twitter: '@raelsei',
 	timeZone: 'Europe/Istanbul',
+	/** Browser chrome colour. Mirrors `--color-void`; a <meta> cannot read a CSS variable. */
+	themeColor: '#08090A',
 
 	/** The status line rendered above the navigation. */
 	terminal: {

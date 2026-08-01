@@ -2,9 +2,10 @@
 import { Code } from 'astro:components';
 
 import CopyButton from './CopyButton.astro';
+
+import { cn } from '../../lib/cn';
 import { codeBox } from '../../lib/code-box';
 import { voidTerminal } from '../../lib/shiki-void';
-import { cn } from '../../lib/cn';
 
 interface Props {
 	name: string;

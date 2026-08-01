@@ -1,15 +1,16 @@
 ---
 import { render } from 'astro:content';
 
+import BaseLayout from './BaseLayout.astro';
 import Longform from '../components/ui/Longform.astro';
 import Row from '../components/ui/Row.astro';
 import Rule from '../components/primitives/Rule.astro';
 import Section from '../components/ui/Section.astro';
-import BaseLayout from './BaseLayout.astro';
-import { iso } from '../lib/format';
+
 import { blogPosting, breadcrumbs } from '../lib/schema';
-import { WRITING, post as postPath } from '../lib/urls';
+import { iso } from '../lib/format';
 import type { Post } from '../lib/writing';
+import { WRITING, post as postPath } from '../lib/urls';
 
 interface Props {
 	post: Post;

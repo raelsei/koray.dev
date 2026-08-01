@@ -1,7 +1,6 @@
 // @ts-check
 
 import { unified } from '@astrojs/markdown-remark';
-import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig, fontProviders } from 'astro/config';
@@ -16,7 +15,7 @@ export default defineConfig({
 	// Makes the slash-less form a hard 404 in dev, so the link graph cannot
 	// silently drift from the canonical/sitemap form again. See src/lib/urls.ts.
 	trailingSlash: 'always',
-	integrations: [mdx(), sitemap()],
+	integrations: [sitemap()],
 	// Real routes, SPA-grade feel: prefetch on hover, swap without a full reload.
 	prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
 	vite: { plugins: [tailwindcss()] },

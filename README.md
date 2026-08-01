@@ -147,6 +147,18 @@ The palette lives in the `@theme` block and nowhere else.
 [`src/lib/palette.ts`](src/lib/palette.ts) parses it at build time so the Shiki
 theme derives from the same source — recolouring a token reaches code blocks too.
 
+### Deliberately absent
+
+The site has one rule about this in `rules.txt`: *every dependency must justify
+its own line in the lockfile*. These three are omitted on purpose, not by
+oversight — each is one command away if it ever earns its place.
+
+| Package | Why not |
+| :--- | :--- |
+| `sharp` | Astro's image service. The design has no images; the aesthetic is pure type. Add an image and Astro says exactly what to install. |
+| `@astrojs/mdx` | Zero `.mdx` files. Code blocks already get their chrome from `rehype-code-box`, so nothing needs component syntax yet. `astro add mdx` restores it. |
+| `@tailwindcss/typography` | Its `.prose` ships a full type scale, colour set and spacing that this design would have to override wholesale — more CSS to undo defaults than `.longform` costs to write. Measured: +12.6 kB, +51%. |
+
 ## Structured data
 
 Every page emits one `application/ld+json` block containing a single `@graph`.

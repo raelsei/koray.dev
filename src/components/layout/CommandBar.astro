@@ -1,8 +1,8 @@
 ---
-import { SITE } from '../../consts';
+import { getPosts } from '../../lib/writing';
 import { list } from '../../lib/collections';
 import { post as postPath } from '../../lib/urls';
-import { getPosts } from '../../lib/writing';
+import { SITE } from '../../consts';
 
 const [nav, posts] = await Promise.all([list('nav'), getPosts()]);
 

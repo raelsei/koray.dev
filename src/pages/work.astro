@@ -2,16 +2,18 @@
 import { getEntry } from 'astro:content';
 
 import Badge from '../components/primitives/Badge.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 import Metric from '../components/ui/Metric.astro';
-import Panel from '../components/ui/Panel.astro';
 import PageHeader from '../components/ui/PageHeader.astro';
+import Panel from '../components/ui/Panel.astro';
 import Row from '../components/ui/Row.astro';
 import Section from '../components/ui/Section.astro';
 import Tag from '../components/primitives/Tag.astro';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { list } from '../lib/collections';
+
 import { breadcrumbs, webPage } from '../lib/schema';
+import { cn } from '../lib/cn';
 import { host, ordinal } from '../lib/format';
+import { list } from '../lib/collections';
 
 const page = await getEntry('pages', 'work')!;
 const [ventures, oss] = await Promise.all([
@@ -20,6 +22,8 @@ const [ventures, oss] = await Promise.all([
 ]);
 
 const GITHUB = 'https://github.com/raelsei';
+// Label derived from the constant, so the two cannot drift.
+const githubLabel = `${host(GITHUB)}${new URL(GITHUB).pathname} ↗`;
 
 const schema = [
 	webPage({ path: '/work', title: page.data.head.title, description: page.data.description, type: 'CollectionPage' }, Astro.site!),
@@ -47,12 +51,12 @@ const schema = [
 							<div class="flex flex-col gap-[13px]">
 								<div class="flex items-baseline justify-between gap-[18px]">
 									<h3
-										class:list={[
+										class={cn(
 											'font-bold',
 											v.lead
 												? 'text-flagship tracking-title text-lime'
 												: 'text-venture tracking-tight text-fg',
-										]}
+										)}
 									>
 										{v.name}
 										{v.badge && <Badge tone={v.badgeTone}>{v.badge}</Badge>}
@@ -101,7 +105,7 @@ const schema = [
 
 		<Section
 			title="open-source/"
-			action={`${host(GITHUB)}/raelsei ↗`}
+			action={githubLabel}
 			actionHref={GITHUB}
 			class="animate-fade-in stagger-3 mt-16"
 		>

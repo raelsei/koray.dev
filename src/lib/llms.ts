@@ -1,4 +1,4 @@
-import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
+import { getEntry, type CollectionEntry } from 'astro:content';
 
 import { SITE } from '../consts';
 import { list } from './collections';
@@ -170,9 +170,7 @@ async function routeData(id: string): Promise<string[]> {
 		}
 
 		case 'library': {
-			const shelves = (await getCollection('shelves')).sort(
-				(a, b) => a.data.order - b.data.order,
-			);
+			const shelves = await list('shelves');
 			return shelves.flatMap(({ id: shelf, data }) => [
 				'',
 				`## ${shelf}`,

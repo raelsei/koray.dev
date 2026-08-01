@@ -1,19 +1,20 @@
 ---
 import { getEntry, render } from 'astro:content';
 
+import BaseLayout from '../layouts/BaseLayout.astro';
 import Cta from '../components/ui/Cta.astro';
-import Panel from '../components/ui/Panel.astro';
 import Longform from '../components/ui/Longform.astro';
 import PageHeader from '../components/ui/PageHeader.astro';
+import Panel from '../components/ui/Panel.astro';
 import Row from '../components/ui/Row.astro';
 import Section from '../components/ui/Section.astro';
 import Stat from '../components/ui/Stat.astro';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { list } from '../lib/collections';
-import { webPage } from '../lib/schema';
-import { post as postPath } from '../lib/urls';
-import { iso, monthYear, ordinal } from '../lib/format';
+
 import { getPosts } from '../lib/writing';
+import { iso, monthYear, ordinal } from '../lib/format';
+import { list } from '../lib/collections';
+import { post as postPath } from '../lib/urls';
+import { webPage } from '../lib/schema';
 
 const page = await getEntry('pages', 'index')!;
 const { Content } = await render(page);

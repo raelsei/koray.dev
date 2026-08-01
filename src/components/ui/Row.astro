@@ -1,6 +1,6 @@
 ---
-import { cn } from '../../lib/cn';
 import { canonical } from '../../lib/urls';
+import { cn } from '../../lib/cn';
 
 interface Props {
 	/** Present → the row is a link and gains the hover fill. */
@@ -9,11 +9,10 @@ interface Props {
 	cols: string;
 	/** `sm` single-line · `md` two-line · `lg` archive. */
 	pad?: 'sm' | 'md' | 'lg';
-	divider?: boolean;
 	class?: string;
 }
 
-const { href, cols, pad = 'sm', divider = true, class: className } = Astro.props;
+const { href, cols, pad = 'sm', class: className } = Astro.props;
 
 const PAD = { sm: 'py-[14px]', md: 'py-[16px]', lg: 'py-[18px]' } as const;
 const external = href?.startsWith('http');
@@ -30,7 +29,7 @@ const attrs = href
 		'grid items-baseline gap-4',
 		cols,
 		PAD[pad],
-		divider && 'border-hair border-b',
+		'border-hair border-b',
 		// Links bleed their hover fill past the text column.
 		href && '-mx-3 px-3 transition-colors duration-100 hover:bg-panel',
 		className,

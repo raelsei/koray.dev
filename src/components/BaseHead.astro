@@ -1,9 +1,9 @@
 ---
-import { Font } from 'astro:assets';
 import { ClientRouter } from 'astro:transitions';
+import { Font } from 'astro:assets';
 
-import { SITE } from '../consts';
 import '../styles/global.css';
+import { SITE } from '../consts';
 
 interface Props {
 	title: string;
@@ -39,7 +39,7 @@ const fullTitle =
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="generator" content={Astro.generator} />
 <meta name="color-scheme" content="dark" />
-<meta name="theme-color" content="#08090A" />
+<meta name="theme-color" content={SITE.themeColor} />
 
 {noindex ? <meta name="robots" content="noindex, follow" /> : <link rel="canonical" href={canonical} />}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

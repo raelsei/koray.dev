@@ -1,7 +1,6 @@
 description: >-
   Three prompts I run weekly — spec-to-tickets, an adversarial PR reviewer for money-touching code, and an eval writer. Copy-pasteable.
 order: 2
-meta: click copy
 groups:
   - kind: code
     title: prompts/
