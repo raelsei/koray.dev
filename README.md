@@ -6,6 +6,28 @@ Every route is a real, statically generated page. The only client JavaScript is
 a ~3 kB bundle: a clock, a reading-progress rule, copy buttons, and the command
 bar at the bottom of the screen.
 
+## Deploying
+
+Cloudflare Pages, connected to this repository. `koray.dev` is already a zone
+in the same Cloudflare account, so the custom domain wires itself up — no DNS
+records to add by hand and no `CNAME` file in the repo.
+
+| Setting | Value |
+| :--- | :--- |
+| Framework preset | Astro |
+| Build command | `bun run build` |
+| Build output directory | `dist` |
+| Production branch | `main` |
+
+Every push to `main` triggers a build; other branches get preview URLs. There
+is no workflow file and no build output committed anywhere — `dist/` stays
+ignored.
+
+> GitHub Pages was the previous target and is switched off. It only serves `/`
+> or `/docs` from a branch, which meant either committing the build or naming a
+> directory after something it is not. The old static site that lived here
+> before the rebuild is kept at the `archive/pages-site-2021` tag.
+
 ## Generated files
 
 Nothing in this table is hand-maintained. Each is an endpoint under
@@ -19,7 +41,7 @@ can drift from what is actually published.
 | `/robots.txt`        | `src/pages/robots.txt.ts`       | Allow-all plus absolute sitemap and llms links   |
 | `/llms.txt`          | `src/pages/llms.txt.ts`         | [llmstxt.org](https://llmstxt.org) index         |
 | `/llms-full.txt`     | `src/pages/llms-full.txt.ts`    | Every page, post *and dataset* inlined as Markdown |
-| `/og.png`            | `public/og.png`                 | Static social card — the one asset checked in    |
+| `/og.png`            | `public/og.png`                 | Static social card — one of two assets checked in |
 
 `llms-full.txt` inlines the YAML collections too, not just Markdown bodies —
 otherwise `/work`, `/stack` and `/library` would ship as empty headings and the
