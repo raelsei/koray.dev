@@ -18,8 +18,8 @@ export const LIBRARY = '/library/';
 /** A post's canonical path. */
 export const post = (slug: string) => `/writing/${slug}/`;
 
-/** A prompt document's canonical path. */
-export const prompt = (slug: string) => `/library/prompts/${slug}/`;
+/** A Markdown document's canonical path, under the shelf that lists it. */
+export const doc = (shelf: string, slug: string) => `/library/${shelf}/${slug}/`;
 
 /** A shelf's path. The first shelf is served at `/library/`, not `/library/<id>/`. */
 export const shelf = (id: string, isDefault: boolean) =>

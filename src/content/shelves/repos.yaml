@@ -1,5 +1,6 @@
 description: >-
-  Other people's repositories worth reading: bun, tldraw, sqlite, zed, excalidraw, htmx, and the two SDKs I study for API design.
+  Other people's repositories worth reading: the tools I run every day, the
+  runtimes my coding agents live on, and the two SDKs I study for API design.
 order: 3
 groups:
   - kind: repo
@@ -30,6 +31,35 @@ groups:
         description: A good argument, shipped as a library.
         lang: javascript
         href: https://github.com/bigskysoftware/htmx
+      - name: ghostty-org/ghostty
+        description: Native UI and GPU acceleration, and it still starts instantly.
+        lang: zig
+        href: https://github.com/ghostty-org/ghostty
+      - name: fish-shell/fish-shell
+        description: Sane defaults as a design position. Rewritten in Rust without a rewrite's usual scars.
+        lang: rust
+        href: https://github.com/fish-shell/fish-shell
+      - name: TwiN/gatus
+        description: A status page you configure in YAML and then forget about.
+        lang: go
+        href: https://github.com/TwiN/gatus
+
+  - kind: repo
+    title: agent-runtimes/
+    meta: the layer coding agents run on
+    items:
+      - name: earendil-works/pi
+        description: Unified LLM API, agent loop, TUI and coding CLI in one toolkit.
+        lang: typescript
+        href: https://github.com/earendil-works/pi
+      - name: can1357/oh-my-pi
+        description: Terminal coding agent with hash-anchored edits, LSP and subagents. This site was built in it.
+        lang: typescript
+        href: https://github.com/can1357/oh-my-pi
+      - name: herdrdev/herdr
+        description: A runtime for the agents themselves — orchestration rather than another CLI.
+        lang: rust
+        href: https://github.com/herdrdev/herdr
 
   - kind: card
     title: read-the-source/

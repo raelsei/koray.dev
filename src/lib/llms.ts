@@ -221,7 +221,7 @@ async function routeData(id: string): Promise<string[]> {
  */
 async function groupToMarkdown(group: ShelfGroup): Promise<string[]> {
 	if (group.kind === 'docs') {
-		const entries = await list('prompts');
+		const entries = await list(group.collection);
 		return entries.flatMap((entry) => [
 			`### ${entry.data.title}`,
 			'',
@@ -241,16 +241,6 @@ async function groupToMarkdown(group: ShelfGroup): Promise<string[]> {
 			);
 		case 'card':
 			return group.items.map((i) => `- [${i.name}](${i.href}) — ${i.description}`);
-		case 'code':
-			return group.items.flatMap((i) => [
-				`#### ${i.name}${i.note ? ` — ${i.note}` : ''}`,
-				...(i.description ? ['', i.description] : []),
-				'',
-				`\`\`\`${i.lang}`,
-				i.code.trimEnd(),
-				'```',
-				'',
-			]);
 	}
 }
 

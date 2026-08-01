@@ -5,8 +5,10 @@ description: >-
   kill bad ideas in a week.
 order: 2
 groups:
-  # Items come from the `prompts` collection; each one is a Markdown file with
-  # its own page. Adding a prompt means adding src/content/prompts/<name>.md.
+  # Items come from the `prompts` collection; each is a Markdown file with its
+  # own page. Adding one means adding src/content/prompts/<name>.md.
   - kind: docs
     title: prompts/
     meta: open to read, copy to use
+    collection: prompts
+    copyDocument: true

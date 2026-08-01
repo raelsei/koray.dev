@@ -64,17 +64,27 @@ const pages = defineCollection({
 });
 
 /**
- * Long-form system prompts. Markdown, not YAML: these run to a hundred lines
- * and are edited as documents, which a quoted scalar cannot survive.
+ * Documents that live as Markdown rather than YAML, because they are edited as
+ * documents: prose, headings, tables, and code that whitespace matters in.
+ * Each one gets its own page under the shelf that lists it.
  */
+const document = z.object({
+	title: z.string(),
+	/** Inline, beside the title in listings. */
+	note: z.string().optional(),
+	description: z.string(),
+	order: z.number(),
+	tags: z.array(z.string()).default([]),
+});
+
 const prompts = defineCollection({
 	loader: glob({ base: './src/content/prompts', pattern: '*.md' }),
-	schema: z.object({
-		title: z.string(),
-		description: z.string(),
-		order: z.number(),
-		tags: z.array(z.string()).default([]),
-	}),
+	schema: document,
+});
+
+const snippets = defineCollection({
+	loader: glob({ base: './src/content/snippets', pattern: '*.md' }),
+	schema: document,
 });
 
 const writing = defineCollection({
@@ -243,28 +253,17 @@ const shelfGroup = z.discriminatedUnion('kind', [
 		),
 	}),
 	z.object({
-		/** Documents that live as Markdown and get their own page. */
+		/** Markdown documents from a collection; each gets its own page. */
 		kind: z.literal('docs'),
 		title: z.string(),
 		meta: z.string(),
-	}),
-	z.object({
-		kind: z.literal('code'),
-		title: z.string(),
-		meta: z.string(),
-		/** Accented blocks get the lime rule down their left edge. */
-		accent: z.boolean().default(false),
-		items: z.array(
-			z.object({
-				name: z.string(),
-				/** Inline, beside the filename. */
-				note: z.string().optional(),
-				/** Block, under the filename. */
-				description: z.string().optional(),
-				lang: z.string().default('text'),
-				code: z.string(),
-			}),
-		),
+		collection: z.enum(['prompts', 'snippets']),
+		/**
+		 * Whether the document page offers a copy button for the whole source.
+		 * True for a prompt, where the document *is* the artefact; false for a
+		 * snippet, where the code fence carries its own copy button.
+		 */
+		copyDocument: z.boolean().default(false),
 	}),
 ]);
 
@@ -295,6 +294,7 @@ const nav = defineCollection({
 export const collections = {
 	pages,
 	prompts,
+	snippets,
 	writing,
 	status,
 	now,

@@ -3,7 +3,6 @@ import { getEntry, render, type CollectionEntry } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import CodeBox from '../../components/ui/CodeBox.astro';
 import Longform from '../../components/ui/Longform.astro';
 import PageHeader from '../../components/ui/PageHeader.astro';
 import Panel from '../../components/ui/Panel.astro';
@@ -13,14 +12,19 @@ import Section from '../../components/ui/Section.astro';
 import { breadcrumbs, webPage } from '../../lib/schema';
 import { cn } from '../../lib/cn';
 import { host } from '../../lib/format';
-import { LIBRARY, prompt as promptPath, shelf as shelfPath } from '../../lib/urls';
+import { doc as docPath, LIBRARY, shelf as shelfPath } from '../../lib/urls';
 import { list } from '../../lib/collections';
 
 /** A docs group is backed by a collection, so its size comes from there. */
-const docs = await list('prompts');
+const documents = {
+	prompts: await list('prompts'),
+	snippets: await list('snippets'),
+} as const;
+
 const shelfSize = (shelf: CollectionEntry<'shelves'>) =>
 	shelf.data.groups.reduce(
-		(n, group) => n + (group.kind === 'docs' ? docs.length : group.items.length),
+		(n, group) =>
+			n + (group.kind === 'docs' ? documents[group.collection].length : group.items.length),
 		0,
 	);
 
@@ -115,15 +119,20 @@ const tabs = shelves.map((shelf, i) => ({
 					class={cn('animate-fade-in stagger-3', gi === 0 ? 'mt-[46px]' : 'mt-13')}
 				>
 					{group.kind === 'docs' &&
-						docs.map((doc) => (
+						documents[group.collection].map((entry) => (
 							<Row
-								href={promptPath(doc.id)}
+								href={docPath(current.id, entry.id)}
 								pad="md"
 								cols="grid-cols-[minmax(0,1fr)_130px] max-sm:grid-cols-1 max-sm:gap-[7px]"
 							>
 								<span class="flex flex-col gap-[5px]">
-									<span class="text-item text-fg">{doc.id}.md</span>
-									<span class="text-row leading-row text-soft">{doc.data.description}</span>
+									<span class="flex flex-wrap items-baseline gap-3">
+										<span class="text-item text-fg">{entry.data.title}</span>
+										{entry.data.note && (
+											<span class="text-row text-subtle">{entry.data.note}</span>
+										)}
+									</span>
+									<span class="text-row leading-row text-soft">{entry.data.description}</span>
 								</span>
 								<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
 									read →
@@ -177,19 +186,6 @@ const tabs = shelves.map((shelf, i) => ({
 						</Panel>
 					)}
 
-					{group.kind === 'code' &&
-						group.items.map((item) => (
-							<div class="border-hair border-b py-[22px]">
-								<CodeBox
-									name={item.name}
-									note={item.note}
-									description={item.description}
-									code={item.code}
-									lang={item.lang}
-									accent={group.accent}
-								/>
-							</div>
-						))}
 				</Section>
 			))
 		}

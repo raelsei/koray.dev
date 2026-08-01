@@ -16,6 +16,15 @@ groups:
         href: https://press.stripe.com
 
   - kind: link
+    title: tools/
+    meta: open when making something
+    items:
+      - label: Shots — mockups and animated device frames, in a click
+        href: https://shots.so/
+      - label: Better-T-Stack — scaffolds an end-to-end type-safe TypeScript project
+        href: https://www.better-t-stack.dev/
+
+  - kind: link
     title: reference/
     meta: open weekly
     items:
