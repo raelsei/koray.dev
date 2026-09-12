@@ -21,6 +21,12 @@ import config from "./astro-paper.config";
 
 export default defineConfig({
   site: config.site.url,
+  // Every canonical URL, sitemap entry and internal link already ends in a
+  // slash; without this, Astro's `paginate()` emits `/posts/2` and a strict
+  // static host answers with a 301 to `/posts/2/`. It also makes the dev server
+  // reject the slash-less form, so the mismatch surfaces locally instead of in
+  // production. Routes with a file extension (`/rss.xml`) are exempt.
+  trailingSlash: "always",
   integrations: [
     mdx(),
     sitemap({

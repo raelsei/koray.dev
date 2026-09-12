@@ -86,6 +86,25 @@ The branch-based limitation that made GitHub Pages a bad fit before — it only
 served `/` or `/docs` from a branch, so you had to commit the build — does not
 apply to the Actions flow.
 
+### URL shape
+
+`trailingSlash: "always"` in `astro.config.ts`, because a static host is
+stricter than the dev server and the difference is easy to miss. `astro dev`
+and `astro preview` both normalise a URL that a plain file host would reject,
+so a link shape can look fine locally and cost a redirect — or a 404 — once
+published. Two things this setting buys:
+
+- Astro's `paginate()` stops emitting `/posts/2` while the sitemap and the
+  canonical tag say `/posts/2/`. Every internal link, canonical URL and sitemap
+  entry now agrees on one form.
+- The dev server rejects the slash-less form, so the mismatch surfaces while
+  you are working rather than after a deploy.
+
+Routes with a file extension are exempt, so `/rss.xml` stays slash-less — which
+matters, because `/rss.xml/` is a 404 on a real file host. The RSS
+autodiscovery link in `Layout.astro` strips the slash that
+`getRelativeLocaleUrl` appends for exactly that reason.
+
 ### Custom domain
 
 [`public/CNAME`](public/CNAME) contains `koray.dev`, which is what binds the

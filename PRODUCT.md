@@ -113,6 +113,11 @@ Technical facts that stay true regardless:
   OG images are all derived from the posts at build time.
 - Colour lives only in `src/styles/theme.css`, as seven role tokens per theme.
   Components reference roles, never values.
+- `trailingSlash: 'always'`. Every internal link, canonical URL and sitemap
+  entry ends in a slash, and the dev server rejects the slash-less form so a
+  mismatch surfaces locally rather than after a deploy. Routes with a file
+  extension are exempt, so `/rss.xml` stays slash-less — `/rss.xml/` is a 404
+  on a real file host even though `astro preview` normalises it.
 
 **Terminology.** *ventures* (things built, not clients) · *advisory slots* ·
 *colophon* (the signed-off line closing a post).
