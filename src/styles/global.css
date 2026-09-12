@@ -303,7 +303,7 @@
 		margin-block: 12px;
 		padding: 14px 0 14px 22px;
 		border-left: 2px solid var(--color-lime);
-		font-size: var(--text-lg);
+		font-size: var(--text-lede);
 		line-height: var(--leading-lede);
 		color: var(--color-fg);
 	}

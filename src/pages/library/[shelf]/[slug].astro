@@ -7,7 +7,7 @@ import CopyButton from '../../../components/ui/CopyButton.astro';
 import Longform from '../../../components/ui/Longform.astro';
 import Rule from '../../../components/primitives/Rule.astro';
 
-import { breadcrumbs, webPage } from '../../../lib/schema';
+import { pageSchema } from '../../../lib/schema';
 import { doc as docPath, LIBRARY, shelf as shelfPath } from '../../../lib/urls';
 import { list } from '../../../lib/collections';
 
@@ -46,17 +46,17 @@ const source = entry.body ?? '';
 const lines = source.trimEnd().split('\n').length;
 const path = docPath(shelfId, entry.id);
 
-const schema = [
-	webPage({ path, title: entry.data.title, description: entry.data.description }, Astro.site!),
-	breadcrumbs(
-		[
+const schema = pageSchema(
+	{ path, title: entry.data.title, description: entry.data.description },
+	Astro.site!,
+	{
+		breadcrumbs: [
 			{ name: 'Library', path: LIBRARY },
 			{ name: shelfId, path: shelfHref },
 			{ name: entry.data.title, path },
 		],
-		Astro.site!,
-	),
-];
+	},
+);
 ---
 
 <BaseLayout
@@ -65,58 +65,56 @@ const schema = [
 	route="library"
 	schema={schema}
 >
-	<div class="pt-[52px]">
-		<a
-			href={shelfHref}
-			aria-label={`Back to ${shelfId}`}
-			class="text-meta tracking-wide text-subtle hover:text-lime animate-fade-in uppercase transition-colors"
-		>
-			← cd ../{shelfId}
-		</a>
+	<a
+		href={shelfHref}
+		aria-label={`Back to ${shelfId}`}
+		class="text-meta tracking-wide text-subtle hover:text-lime animate-fade-in uppercase transition-colors"
+	>
+		← cd ../{shelfId}
+	</a>
 
-		<article class="mt-7">
-			<header>
-				<span class="text-meta tracking-prompt text-subtle animate-fade-in stagger-1 block uppercase">
-					$ cat {entry.id}.md
-				</span>
+	<article class="mt-7">
+		<header>
+			<span class="text-meta tracking-prompt text-subtle animate-fade-in stagger-1 block uppercase">
+				$ cat {entry.id}.md
+			</span>
 
-				<h1
-					class="text-title tracking-title leading-title text-fg animate-rise-in stagger-1
-						mt-4 max-w-[26ch] font-bold text-balance"
-				>
-					{entry.data.title}
-					{entry.data.note && (
-						<span class="text-body tracking-normal text-soft ml-3 font-normal">
-							{entry.data.note}
-						</span>
-					)}
-				</h1>
-
-				<p class="text-body leading-prose text-soft animate-rise-in stagger-3 mt-5 max-w-[74ch] text-pretty">
-					{entry.data.description}
-				</p>
-
-				<div
-					data-code-box={copyDocument ? '' : undefined}
-					class="animate-fade-in stagger-4 mt-6 flex flex-wrap items-center gap-4"
-				>
-					{copyDocument && <CopyButton label={`${entry.id}.md`} />}
-					<span class="text-meta tracking-wide text-subtle uppercase">
-						{lines} lines · markdown
+			<h1
+				class="text-title tracking-title leading-title text-fg animate-rise-in stagger-1
+					mt-4 max-w-[26ch] font-bold text-balance"
+			>
+				{entry.data.title}
+				{entry.data.note && (
+					<span class="text-body tracking-normal text-soft ml-3 font-normal">
+						{entry.data.note}
 					</span>
-					{entry.data.tags.map((tag) => (
-						<span class="text-meta tracking-wide text-dim uppercase">#{tag}</span>
-					))}
-					{/* The button copies the Markdown source, not the rendered page. */}
-					{copyDocument && <pre hidden data-copy-source set:text={source} />}
-				</div>
+				)}
+			</h1>
 
-				<Rule tone="edge" animate class="stagger-4 mt-6" />
-			</header>
+			<p class="text-body leading-prose text-soft animate-rise-in stagger-3 mt-5 max-w-[74ch] text-pretty">
+				{entry.data.description}
+			</p>
 
-			<Longform class="animate-fade-in stagger-5 mt-10">
-				<Content />
-			</Longform>
-		</article>
-	</div>
+			<div
+				data-code-box={copyDocument ? '' : undefined}
+				class="animate-fade-in stagger-4 mt-6 flex flex-wrap items-center gap-4"
+			>
+				{copyDocument && <CopyButton label={`${entry.id}.md`} />}
+				<span class="text-meta tracking-wide text-subtle uppercase">
+					{lines} {lines === 1 ? 'line' : 'lines'} · markdown
+				</span>
+				{entry.data.tags.map((tag) => (
+					<span class="text-meta tracking-wide text-dim uppercase">#{tag}</span>
+				))}
+				{/* The button copies the Markdown source, not the rendered page. */}
+				{copyDocument && <pre hidden data-copy-source set:text={source} />}
+			</div>
+
+			<Rule tone="edge" animate class="stagger-4 mt-6" />
+		</header>
+
+		<Longform class="animate-fade-in stagger-5 mt-10">
+			<Content />
+		</Longform>
+	</article>
 </BaseLayout>

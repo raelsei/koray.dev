@@ -5,6 +5,21 @@ const MONTHS = [
 	'jul', 'aug', 'sep', 'oct', 'nov', 'dec',
 ] as const;
 
+/** Formatters are stateless, so they are built once at module scope. */
+const monthFormatter = new Intl.DateTimeFormat('en-GB', {
+	timeZone: SITE.timeZone,
+	year: 'numeric',
+	month: 'numeric',
+});
+
+const clockFormatter = new Intl.DateTimeFormat('en-GB', {
+	timeZone: SITE.timeZone,
+	hour: '2-digit',
+	minute: '2-digit',
+	second: '2-digit',
+	hour12: false,
+});
+
 /**
  * Dates are authored as plain `YYYY-MM-DD` and parsed as UTC midnight.
  * Every formatter reads UTC fields so output never shifts with the build host.
@@ -31,11 +46,7 @@ export const dotted = (d: Date) =>
  * of an İstanbul month.
  */
 export function monthYear(d: Date): string {
-	const parts = new Intl.DateTimeFormat('en-GB', {
-		timeZone: SITE.timeZone,
-		year: 'numeric',
-		month: 'numeric',
-	}).formatToParts(d);
+	const parts = monthFormatter.formatToParts(d);
 	const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
 	return `${MONTHS[get('month') - 1]} ${get('year')}`;
 }
@@ -59,6 +70,13 @@ export function wordCount(markdown: string): number {
 		.replace(/`[^`]*`/g, ' ')
 		// Keep the link text, drop the URL — it is not prose.
 		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+		// Line-start list markers are scaffolding, not prose.
+		.replace(/^\s*[-+*]\s+/gm, ' ')
+		.replace(/^\s*\d+\.\s+/gm, ' ')
+		// Table separator rows (`| --- | --- |`) are rules, not prose.
+		.replace(/^\s*\|[\s:|-]+\|\s*$/gm, ' ')
+		// Table cells are pipe-delimited; the pipes are not words.
+		.replace(/\|/g, ' ')
 		// Emphasis and heading marks only; hyphens and underscores are word-internal.
 		.replace(/[#>*]/g, ' ');
 	return prose.split(/\s+/).filter(Boolean).length;
@@ -74,11 +92,5 @@ export function readingTime(markdown: string): number {
 
 /** Current wall-clock time in the site's timezone, as `HH:MM:SS`. */
 export function clockNow(now: Date = new Date()): string {
-	return new Intl.DateTimeFormat('en-GB', {
-		timeZone: SITE.timeZone,
-		hour: '2-digit',
-		minute: '2-digit',
-		second: '2-digit',
-		hour12: false,
-	}).format(now);
+	return clockFormatter.format(now);
 }

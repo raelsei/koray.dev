@@ -1,18 +1,18 @@
 ---
-import { canonical } from '../../lib/urls';
+import { canonical, linkAttrs } from '../../lib/urls';
 import { cn } from '../../lib/cn';
 import Prompt from '../primitives/Prompt.astro';
+import { SITE } from '../../consts';
 
 interface Props {
 	prompt: string;
-	email: string;
 	body: string;
 	aside: string;
 	asideHref?: string;
 	class?: string;
 }
 
-const { prompt, email, body, aside, asideHref, class: className } = Astro.props;
+const { prompt, body, aside, asideHref, class: className } = Astro.props;
 const asideClass =
 	'text-meta tracking-label text-subtle pb-1.5 whitespace-nowrap uppercase';
 ---
@@ -27,16 +27,20 @@ const asideClass =
 	<div class="flex flex-col gap-[9px]">
 		<Prompt size="sm">{prompt}</Prompt>
 		<a
-			href={`mailto:${email}`}
+			href={`mailto:${SITE.email}`}
 			class="text-contact tracking-title text-lime font-bold"
 		>
-			{email}
+			{SITE.email}
 		</a>
 		<span class="text-row leading-body text-soft max-w-[74ch]">{body}</span>
 	</div>
 	{
 		asideHref ? (
-			<a href={canonical(asideHref)} class={cn(asideClass, 'hover:text-lime transition-colors')}>
+			<a
+				href={canonical(asideHref)}
+				class={cn(asideClass, 'hover:text-lime transition-colors')}
+				{...linkAttrs(asideHref)}
+			>
 				{aside}
 			</a>
 		) : (

@@ -1,5 +1,4 @@
 - id: koative
-  name: koative
   lead: true
   href: https://koative.com
   status: founder
@@ -12,7 +11,6 @@
     purpose: three engineers, one designer, no roadmap theatre.
 
 - id: lumi
-  name: lumi
   status: beta
   period: "2026"
   badge: private beta
@@ -33,7 +31,6 @@
       label: p95 sync
 
 - id: bine
-  name: bine
   status: alpha
   period: "2026"
   badge: alpha

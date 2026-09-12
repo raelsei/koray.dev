@@ -8,17 +8,18 @@ import PageHeader from '../components/ui/PageHeader.astro';
 import Row from '../components/ui/Row.astro';
 import Section from '../components/ui/Section.astro';
 
-import { breadcrumbs, webPage } from '../lib/schema';
+import { pageSchema } from '../lib/schema';
 import { cn } from '../lib/cn';
 import { list } from '../lib/collections';
 
 const page = await getEntry('pages', 'about')!;
 const { Content } = await render(page);
 
-const schema = [
-	webPage({ path: '/about', title: page.data.head.title, description: page.data.description, type: 'ProfilePage' }, Astro.site!),
-	breadcrumbs([{ name: 'About', path: '/about' }], Astro.site!),
-];
+const schema = pageSchema(
+	{ path: '/about', title: page.data.head.title, description: page.data.description },
+	Astro.site!,
+	{ type: 'ProfilePage', breadcrumbs: [{ name: 'About', path: '/about' }] },
+);
 
 const [manual, timeline, contacts] = await Promise.all([
 	list('manual'),
@@ -28,65 +29,60 @@ const [manual, timeline, contacts] = await Promise.all([
 ---
 
 <BaseLayout title={page.data.title} description={page.data.description} route="about" schema={schema}>
-	<div class="pt-[52px]">
-		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title} />
+	<PageHeader prompt={page.data.head.prompt} title={page.data.head.title} />
 
-		<dl class="animate-fade-in stagger-2 mt-11 grid grid-cols-[120px_minmax(0,1fr)] gap-x-[22px] gap-y-[14px] max-sm:grid-cols-1 max-sm:gap-y-[7px]">
-			{
-				manual.map((entry) => (
-					<>
-						<dt class="text-nano tracking-rule text-dim pt-[5px] uppercase">{entry.data.term}</dt>
-						<dd class="text-item leading-relaxed text-fg">{entry.data.body}</dd>
-					</>
-				))
-			}
-		</dl>
+	<dl class="animate-fade-in stagger-2 mt-11 grid grid-cols-[120px_minmax(0,1fr)] gap-x-[22px] gap-y-[14px] max-sm:grid-cols-1 max-sm:gap-y-[7px]">
+		{
+			manual.map((entry) => (
+				<>
+					<dt class="text-nano tracking-rule text-dim pt-[5px] uppercase">{entry.data.term}</dt>
+					<dd class="text-item leading-relaxed text-fg">{entry.data.body}</dd>
+				</>
+			))
+		}
+	</dl>
 
-		<Longform class="animate-fade-in stagger-3 mt-11">
-			<Content />
-		</Longform>
+	<Longform class="animate-fade-in stagger-3 mt-11">
+		<Content />
+	</Longform>
 
-		<Section
-			title="$ git log --oneline"
-			meta={`${timeline.length} commits`}
-			class="animate-fade-in stagger-4 mt-15"
-		>
-			{
-				timeline.map((entry) => (
-					<Row cols="grid-cols-[96px_minmax(0,1fr)] gap-[18px] max-sm:grid-cols-1 max-sm:gap-[7px]">
-						<span
-							slot="lead"
-							class={cn('text-meta', entry.data.tone === 'accent' ? 'text-lime' : 'text-dim')}
-						>
-							{entry.data.period}
-						</span>
-						<span class="text-item text-fg">{entry.data.body}</span>
-					</Row>
-				))
-			}
-		</Section>
-
-		<Section
-			title="$ cat ~/.contacts"
-			meta="elsewhere"
-			class="animate-fade-in stagger-5 mt-14"
-		>
-			{
-				contacts.map((contact) => (
-					<Row
-						href={contact.data.href}
-						cols="grid-cols-[96px_minmax(0,1fr)] gap-[18px] max-sm:grid-cols-1 max-sm:gap-[7px]"
+	<Section
+		title="$ git log --oneline"
+		meta={`${timeline.length} commits`}
+		class="animate-fade-in stagger-4 mt-15"
+	>
+		{
+			timeline.map((entry) => (
+				<Row>
+					<span
+						slot="lead"
+						class={cn('text-meta', entry.data.tone === 'accent' ? 'text-lime' : 'text-dim')}
 					>
-						<span slot="lead" class="text-meta text-dim">{contact.data.channel}</span>
-						<span class="text-item text-fg">
-							{contact.data.handle}
-							{contact.data.external && ' ↗'}
-						</span>
-					</Row>
-				))
-			}
-		</Section>
+						{entry.data.period}
+					</span>
+					<span class="text-item text-fg">{entry.data.body}</span>
+				</Row>
+			))
+		}
+	</Section>
 
-		{page.data.cta && <Cta {...page.data.cta} class="animate-fade-in stagger-6 mt-16" />}
-	</div>
+	<Section
+		title="$ cat ~/.contacts"
+		meta="elsewhere"
+		class="animate-fade-in stagger-5 mt-14"
+	>
+		{
+			contacts.map((contact) => (
+				<Row href={contact.data.href}>
+					<span slot="lead" class="text-meta text-dim">{contact.data.channel}</span>
+					<span class="text-item text-fg">
+						{contact.data.handle}
+						{contact.data.external && ' ↗'}
+					</span>
+				</Row>
+			))
+		}
+	</Section>
+
+	{page.data.cta && <Cta {...page.data.cta} class="animate-fade-in stagger-6 mt-16" />}
 </BaseLayout>

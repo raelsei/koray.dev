@@ -1,17 +1,16 @@
 import { navigate } from 'astro:transitions/client';
 
+import { SITE } from '../consts';
 import { clockNow } from '../lib/format';
 
 interface Route {
 	id: string;
-	label: string;
 	href: string;
 	aliases: string[];
 }
 
 interface Doc {
 	id: string;
-	title: string;
 	href: string;
 }
 
@@ -108,7 +107,7 @@ export function mountCommandBar(): void {
 			case 'clear':
 				return print([]);
 			case 'time':
-				return say(`İstanbul ${clockNow()} (GMT+03)`);
+				return say(`${SITE.terminal.city} ${clockNow()} (${SITE.terminal.offsetLabel})`);
 			case 'whoami':
 				return goto(routeHref('index'), 'koray — founder & product engineer, fintech & applied AI');
 			case 'mail':

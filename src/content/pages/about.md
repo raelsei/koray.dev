@@ -8,7 +8,6 @@ description: >-
   fintech from İstanbul.
 cta:
   prompt: $ hire --slots 2
-  email: id@koray.dev
   body: >-
     Best fit: fintech teams putting an LLM somewhere near real money, or founders
     who need a first engineer's judgement for six weeks.

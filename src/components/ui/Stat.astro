@@ -1,30 +1,65 @@
 ---
 import { clockNow } from '../../lib/format';
 import { cn } from '../../lib/cn';
+import type { Tone, LiveMode } from '../../lib/cn';
 
 interface Props {
 	label: string;
 	value?: string;
 	note?: string;
-	tone?: 'accent' | 'muted';
+	tone?: Tone;
+	/** Which line renders first: the label (default) or the value. */
+	order?: 'label-first' | 'value-first';
+	/**
+	 * `cell` is the index clock grid (label on top, wider padding);
+	 * `stat` is the tighter work-page metric with a larger value.
+	 */
+	variant?: 'cell' | 'stat';
 	/** Replaced client-side once per second. */
-	live?: 'clock';
+	live?: LiveMode;
 	class?: string;
 }
 
-const { label, value, note, tone = 'muted', live, class: className } = Astro.props;
+const {
+	label,
+	value,
+	note,
+	tone = 'muted',
+	order = 'label-first',
+	variant = 'cell',
+	live,
+	class: className,
+} = Astro.props;
 
 // A live cell still renders a real value, so it is never blank before hydration.
 const shown = live === 'clock' ? clockNow() : value;
+
+const CELL = {
+	cell: {
+		box: 'gap-[7px] px-5 py-[18px]',
+		label: 'tracking-stat',
+		value: tone === 'accent' ? 'text-clock text-lime' : 'text-entry text-fg',
+	},
+	stat: {
+		box: 'gap-1 px-4 py-[14px]',
+		label: 'tracking-wide',
+		value: cn('text-stat', tone === 'accent' ? 'text-lime' : 'text-fg'),
+	},
+} as const;
 ---
 
-<div class={cn('flex flex-col gap-[7px] px-5 py-[18px]', className)}>
-	<span class="text-micro tracking-stat text-subtle uppercase">{label}</span>
+<div class={cn('flex flex-col', CELL[variant].box, className)}>
+	{order === 'label-first' && (
+		<span class={cn('text-micro text-subtle uppercase', CELL[variant].label)}>{label}</span>
+	)}
 	<span
-		class={cn('font-medium', tone === 'accent' ? 'text-clock text-lime' : 'text-entry text-fg')}
+		class={cn('font-medium', CELL[variant].value)}
 		{...live === 'clock' ? { 'data-clock': '' } : {}}
 	>
 		{shown}
 	</span>
+	{order === 'value-first' && (
+		<span class={cn('text-micro text-subtle uppercase', CELL[variant].label)}>{label}</span>
+	)}
 	{note && <span class="text-nano text-dim">{note}</span>}
 </div>

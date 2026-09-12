@@ -11,7 +11,6 @@
  * regression surfaces on the first click rather than in Search Console.
  */
 
-export const HOME = '/';
 export const WRITING = '/writing/';
 export const LIBRARY = '/library/';
 
@@ -47,3 +46,10 @@ export function canonical(href: string): string {
 
 /** Absolute URL for an internal path, normalised first. */
 export const absolute = (href: string, site: URL) => new URL(canonical(href), site).href;
+
+/**
+ * Link behaviour for an external target: open in a new tab, without letting
+ * the opener see this page. Internal links get nothing.
+ */
+export const linkAttrs = (href: string): Record<string, string> =>
+	href.startsWith('http') ? { target: '_blank', rel: 'noreferrer' } : {};

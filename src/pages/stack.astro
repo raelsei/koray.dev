@@ -7,7 +7,7 @@ import Panel from '../components/ui/Panel.astro';
 import Section from '../components/ui/Section.astro';
 import Tree from '../components/ui/Tree.astro';
 
-import { breadcrumbs, webPage } from '../lib/schema';
+import { pageSchema } from '../lib/schema';
 import { list } from '../lib/collections';
 import { monthYear, ordinal } from '../lib/format';
 
@@ -19,40 +19,39 @@ const [stack, rules] = await Promise.all([
 
 const groups = stack.map(({ data }) => data);
 
-const schema = [
-	webPage({ path: '/stack', title: page.data.head.title, description: page.data.description }, Astro.site!),
-	breadcrumbs([{ name: 'Stack', path: '/stack' }], Astro.site!),
-];
+const schema = pageSchema(
+	{ path: '/stack', title: page.data.head.title, description: page.data.description },
+	Astro.site!,
+	{ breadcrumbs: [{ name: 'Stack', path: '/stack' }] },
+);
 ---
 
 <BaseLayout title={page.data.title} description={page.data.description} route="stack" schema={schema}>
-	<div class="pt-[52px]">
-		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title} measure="max-w-[26ch]" />
+	<PageHeader prompt={page.data.head.prompt} title={page.data.head.title} measure="max-w-[26ch]" />
 
-		<Section
-			title="daily-drivers/"
-			meta={`audited ${monthYear(new Date())}`}
-			animateRule
-			class="animate-fade-in stagger-2 mt-15"
-		>
-			<Tree groups={groups} label="Daily drivers" class="pt-[26px] pb-2" />
-		</Section>
+	<Section
+		title="daily-drivers/"
+		meta={`audited ${monthYear(new Date())}`}
+		animateRule
+		class="animate-fade-in stagger-2 mt-15"
+	>
+		<Tree groups={groups} label="Daily drivers" class="pt-[26px] pb-2" />
+	</Section>
 
-		<Section
-			title="$ cat rules.txt"
-			meta="non-negotiable"
-			class="animate-fade-in stagger-3 mt-14"
-		>
-			<Panel flush cols="grid-cols-2 max-sm:grid-cols-1">
-				{
-					rules.map((rule, i) => (
-						<div class="flex flex-col gap-[7px] px-5 py-[18px]">
-							<span class="text-nano tracking-rule text-lime uppercase">{ordinal(i)}</span>
-							<span class="text-note leading-body text-fg">{rule.data.body}</span>
-						</div>
-					))
-				}
-			</Panel>
-		</Section>
-	</div>
+	<Section
+		title="$ cat rules.txt"
+		meta="non-negotiable"
+		class="animate-fade-in stagger-3 mt-14"
+	>
+		<Panel flush cols="grid-cols-2 max-sm:grid-cols-1">
+			{
+				rules.map((rule, i) => (
+					<div class="flex flex-col gap-[7px] px-5 py-[18px]">
+						<span class="text-nano tracking-rule text-lime uppercase">{ordinal(i)}</span>
+						<span class="text-note leading-body text-fg">{rule.data.body}</span>
+					</div>
+				))
+			}
+		</Panel>
+	</Section>
 </BaseLayout>

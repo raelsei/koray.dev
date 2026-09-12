@@ -27,8 +27,13 @@ export const SITE = {
 		user: 'koray@dev',
 		city: 'İstanbul',
 		timeLabel: 'IST',
+		/** Offset label rendered by the command-bar clock; mirrors the status readout. */
+		offsetLabel: 'GMT+03',
 		coordinates: '41.01°N 28.98°E',
 		/** Set to `null` to hide the availability indicator. */
 		availability: '2 ADVISORY SLOTS',
 	},
 } as const;
+
+/** Feed title for the RSS and atom documents. */
+export const FEED_TITLE = `${SITE.title} — writing`;

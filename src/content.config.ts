@@ -2,6 +2,8 @@ import { defineCollection } from 'astro:content';
 import { file, glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import yaml from 'js-yaml';
+import { SITE } from './consts';
+import { LIVE_MODES, TONES } from './lib/cn';
 
 /* ─── Loaders ────────────────────────────────────────────────────────────── */
 
@@ -11,6 +13,8 @@ import yaml from 'js-yaml';
  * `getCollection` runs. This loader stamps each item's position in the file as
  * `order`, which `list()` in `lib/collections.ts` sorts by — the YAML stays
  * free of bookkeeping and the file reads top-to-bottom exactly as it renders.
+ * It also fills `label`/`name` from `id` when authored values merely repeat it,
+ * so those redundant lines can be dropped from the YAML.
  */
 const ordered = (path: string) =>
 	file(path, {
@@ -19,7 +23,12 @@ const ordered = (path: string) =>
 			if (!Array.isArray(items)) {
 				throw new Error(`${path} must contain a YAML array.`);
 			}
-			return items.map((item, order) => ({ ...item, order }));
+			return items.map((item, order) => ({
+				...item,
+				label: item.label ?? item.id,
+				name: item.name ?? item.id,
+				order,
+			}));
 		},
 	});
 
@@ -38,14 +47,13 @@ const heading = z.object({
 const cta = z
 	.object({
 		prompt: z.string(),
-		email: z.string(),
 		body: z.string(),
 		aside: z.string(),
 		asideHref: z.string().optional(),
 	})
 	.optional();
 
-const tone = z.enum(['accent', 'muted']).default('muted');
+const tone = z.enum(TONES).default('muted');
 
 /* ─── Prose ──────────────────────────────────────────────────────────────── */
 
@@ -57,7 +65,7 @@ const pages = defineCollection({
 	loader: glob({ base: './src/content/pages', pattern: '*.md' }),
 	schema: z.object({
 		head: heading,
-		title: z.string(),
+		title: z.string().default(SITE.title),
 		description: z.string(),
 		cta,
 	}),
@@ -114,7 +122,7 @@ const status = defineCollection({
 		value: z.string().optional(),
 		note: z.string(),
 		/** Hydrated client-side; `clock` ticks in the site's timezone. */
-		live: z.literal('clock').optional(),
+		live: z.enum(LIVE_MODES).optional(),
 		tone,
 	}),
 });
@@ -170,7 +178,7 @@ const oss = defineCollection({
 
 const notes = defineCollection({
 	loader: ordered('./src/content/data/notes.yaml'),
-	schema: z.object({ ...withOrder, date: z.coerce.date(), body: z.string() }),
+	schema: z.object({ ...withOrder, pubDate: z.coerce.date(), body: z.string() }),
 });
 
 /* ─── Stack ──────────────────────────────────────────────────────────────── */

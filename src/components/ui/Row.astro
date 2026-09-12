@@ -1,26 +1,31 @@
 ---
-import { canonical } from '../../lib/urls';
+import { canonical, linkAttrs } from '../../lib/urls';
 import { cn } from '../../lib/cn';
 
 interface Props {
 	/** Present → the row is a link and gains the hover fill. */
 	href?: string;
-	/** Tailwind `grid-cols-[…]` class. Owned by the page: it is layout, not chrome. */
-	cols: string;
+	/**
+	 * Tailwind `grid-cols-[…]` class. Pages override it for bespoke columns;
+	 * the default is the label/value pair used across the site.
+	 */
+	cols?: string;
 	/** `sm` single-line · `md` two-line · `lg` archive. */
 	pad?: 'sm' | 'md' | 'lg';
 	class?: string;
 }
 
-const { href, cols, pad = 'sm', class: className } = Astro.props;
+const {
+	href,
+	cols = 'grid-cols-[96px_minmax(0,1fr)] gap-[18px] max-sm:grid-cols-1 max-sm:gap-[7px]',
+	pad = 'sm',
+	class: className,
+} = Astro.props;
 
 const PAD = { sm: 'py-[14px]', md: 'py-[16px]', lg: 'py-[18px]' } as const;
-const external = href?.startsWith('http');
 
 const Tag = href ? 'a' : 'div';
-const attrs = href
-	? { href: canonical(href), ...(external ? { target: '_blank', rel: 'noreferrer' } : {}) }
-	: {};
+const attrs = href ? { href: canonical(href), ...linkAttrs(href) } : {};
 ---
 
 <Tag

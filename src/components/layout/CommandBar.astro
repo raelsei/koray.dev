@@ -2,6 +2,7 @@
 import { getPosts } from '../../lib/writing';
 import { list } from '../../lib/collections';
 import { post as postPath } from '../../lib/urls';
+import { toJsonScript } from '../../lib/json';
 import { SITE } from '../../consts';
 
 const [nav, posts] = await Promise.all([list('nav'), getPosts()]);
@@ -10,13 +11,11 @@ const [nav, posts] = await Promise.all([list('nav'), getPosts()]);
 const manifest = {
 	routes: nav.map(({ id, data }) => ({
 		id,
-		label: data.label,
 		href: data.href,
 		aliases: data.aliases,
 	})),
 	docs: posts.map((post) => ({
 		id: post.id,
-		title: post.data.title,
 		href: postPath(post.id),
 	})),
 	email: SITE.email,
@@ -28,7 +27,7 @@ const manifest = {
 	transition:persist="command-bar"
 	class="bg-void border-edge fixed inset-x-0 bottom-0 z-40 border-t"
 >
-	<script type="application/json" data-manifest set:html={JSON.stringify(manifest)} is:inline />
+	<script type="application/json" data-manifest set:html={toJsonScript(manifest)} is:inline />
 
 	<div class="shell">
 		{/* Never toggled with `hidden`: a hidden element is out of the accessibility

@@ -24,7 +24,7 @@ interface Ref {
 type Node = Record<string, unknown> & { '@type': string; '@id'?: string };
 
 /** Stable graph identifiers, so cross-page references reconcile. */
-export const id = {
+const id = {
 	person: (site: URL) => new URL('/#person', site).href,
 	website: (site: URL) => new URL('/#website', site).href,
 	studio: (site: URL) => new URL('/#studio', site).href,
@@ -150,6 +150,25 @@ export function breadcrumbs(trail: Array<{ name: string; path: string }>, site: 
 			item: absolute(crumb.path, site),
 		})),
 	};
+}
+
+/**
+ * The node set a plain page asserts: the page itself, plus breadcrumbs for
+ * nested routes. `type` and `breadcrumbs` are optional because a top-level
+ * page usually has neither.
+ */
+export function pageSchema(
+	{ path, title, description }: { path: string; title: string; description: string },
+	site: URL,
+	options?: {
+		type?: 'WebPage' | 'CollectionPage' | 'ProfilePage' | 'AboutPage';
+		breadcrumbs?: Array<{ name: string; path: string }>;
+	},
+): Node[] {
+	return [
+		webPage({ path, title, description, ...(options?.type ? { type: options.type } : {}) }, site),
+		...(options?.breadcrumbs ? [breadcrumbs(options.breadcrumbs, site)] : []),
+	];
 }
 
 /** An ordered index of posts, for `/writing`. */

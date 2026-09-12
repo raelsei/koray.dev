@@ -18,13 +18,7 @@ import { resolve } from 'node:path';
 const STYLESHEET = resolve(process.cwd(), 'src/styles/global.css');
 
 const TOKENS = [
-	'void',
-	'scan',
 	'panel',
-	'hair',
-	'edge',
-	'edge-lime',
-	'dim',
 	'subtle',
 	'soft',
 	'fg',

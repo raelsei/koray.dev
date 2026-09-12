@@ -1,5 +1,5 @@
 ---
-import { canonical } from '../../lib/urls';
+import { canonical, linkAttrs } from '../../lib/urls';
 import { cn } from '../../lib/cn';
 import Rule from '../primitives/Rule.astro';
 
@@ -23,8 +23,6 @@ const {
 	animateRule = false,
 	class: className,
 } = Astro.props;
-
-const external = actionHref?.startsWith('http');
 ---
 
 <section class={cn(className)}>
@@ -35,7 +33,7 @@ const external = actionHref?.startsWith('http');
 				<a
 					href={canonical(actionHref)}
 					class="text-meta tracking-label text-subtle hover:text-lime whitespace-nowrap uppercase transition-colors"
-					{...external ? { target: '_blank', rel: 'noreferrer' } : {}}
+					{...linkAttrs(actionHref)}
 				>
 					{action}
 				</a>

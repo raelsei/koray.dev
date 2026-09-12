@@ -1,4 +1,5 @@
 import { getEntry, type CollectionEntry } from 'astro:content';
+import type { APIRoute } from 'astro';
 
 import { SITE } from '../consts';
 import { list } from './collections';
@@ -16,9 +17,31 @@ interface Link {
 	summary: string;
 }
 
+/** A nav target with the page entry backing it, resolved once for both consumers. */
+interface ResolvedNav {
+	data: CollectionEntry<'nav'>['data'];
+	page: CollectionEntry<'pages'> | undefined;
+}
+
+/**
+ * Every nav target with its backing page entry.
+ *
+ * The only place the `nav` → `pages` lookup happens: `outline` builds the index
+ * from it and `llmsFull` inlines the pages from it, so a route without a page
+ * entry is dropped from both in the same place and the two can never disagree.
+ */
+async function resolveNav(): Promise<ResolvedNav[]> {
+	const nav = await list('nav');
+	return Promise.all(
+		nav.map(async ({ id, data }) => ({ page: await getEntry('pages', id), data })),
+	);
+}
+
 interface Outline {
 	posts: Post[];
 	routes: Link[];
+	/** Resolved nav entries, for consumers that inline the pages. */
+	pages: ResolvedNav[];
 }
 
 /**
@@ -26,15 +49,11 @@ interface Outline {
  * from, so the index can never list something the full text omits.
  */
 export async function outline(site: URL): Promise<Outline> {
-	const [nav, posts] = await Promise.all([list('nav'), getPosts()]);
+	const [pages, posts] = await Promise.all([resolveNav(), getPosts()]);
 
 	// Every nav target is backed by a page entry of the same name (`/` is `index`).
-	// A route without one is skipped here exactly as `llmsFull` skips it, so the
-	// index can never list something the full text omits.
-	const resolved = await Promise.all(
-		nav.map(async ({ id, data }) => ({ page: await getEntry('pages', id), data })),
-	);
-	const routes = resolved
+	// Entries without one are dropped from the index and skipped by `llmsFull`.
+	const routes = pages
 		.filter((entry) => entry.page !== undefined)
 		.map(({ page, data }) => ({
 			title: page!.data.title,
@@ -42,7 +61,7 @@ export async function outline(site: URL): Promise<Outline> {
 			summary: page!.data.description,
 		}));
 
-	return { posts, routes };
+	return { posts, routes, pages };
 }
 
 const links = (items: Link[]) =>
@@ -148,7 +167,7 @@ async function routeData(id: string): Promise<string[]> {
 			return [
 				'## Notes',
 				'',
-				...notes.map(({ data }) => `- ${iso(data.date)}: ${data.body}`),
+				...notes.map(({ data }) => `- ${iso(data.pubDate)}: ${data.body}`),
 			];
 		}
 
@@ -245,9 +264,7 @@ async function groupToMarkdown(group: ShelfGroup): Promise<string[]> {
 }
 
 /** `/llms-full.txt` — the same inventory with every body and dataset inlined. */
-export async function llmsFull({ posts }: Outline, site: URL): Promise<string> {
-	const nav = await list('nav');
-
+export async function llmsFull({ posts, pages }: Outline, site: URL): Promise<string> {
 	const sections = [
 		`# ${SITE.title} — full text`,
 		'',
@@ -256,8 +273,7 @@ export async function llmsFull({ posts }: Outline, site: URL): Promise<string> {
 		`Generated from source at build time. Canonical site: ${site.href}`,
 	];
 
-	for (const item of nav) {
-		const page = await getEntry('pages', item.id);
+	for (const { page, data } of pages) {
 		if (!page) continue;
 		sections.push(
 			'',
@@ -267,9 +283,9 @@ export async function llmsFull({ posts }: Outline, site: URL): Promise<string> {
 			'',
 			`> ${page.data.description}`,
 			'',
-			`Source: ${absolute(item.data.href, site)}`,
+			`Source: ${absolute(data.href, site)}`,
 			...(page.body?.trim() ? ['', page.body.trim()] : []),
-			...(await routeData(item.id)).flatMap((line, i) => (i === 0 ? ['', line] : [line])),
+			...(await routeData(page.id)).flatMap((line, i) => (i === 0 ? ['', line] : [line])),
 		);
 	}
 
@@ -296,4 +312,19 @@ export async function llmsFull({ posts }: Outline, site: URL): Promise<string> {
 	}
 
 	return `${sections.join('\n')}\n`;
+}
+
+/**
+ * An `llms*.txt` endpoint: builds the payload from the shared outline and
+ * serves it with the content type both files already use.
+ */
+export function llmsHandler(
+	build: (outline: Outline, site: URL) => string | Promise<string>,
+): APIRoute {
+	return async ({ site }) => {
+		const body = await build(await outline(site!), site!);
+		return new Response(body, {
+			headers: { 'Content-Type': 'text/markdown; charset=utf-8' },
+		});
+	};
 }

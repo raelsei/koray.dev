@@ -6,6 +6,7 @@ import Scanlines from '../components/layout/Scanlines.astro';
 import TopBar from '../components/layout/TopBar.astro';
 
 import { identity } from '../lib/schema';
+import { toJsonScript } from '../lib/json';
 import { SITE } from '../consts';
 
 interface Props {
@@ -43,7 +44,7 @@ const graph = {
 			noindex={noindex}
 		/>
 		{/* `set:html` on a JSON string: Astro must not HTML-escape the quotes. */}
-		<script type="application/ld+json" is:inline set:html={JSON.stringify(graph)} />
+		<script type="application/ld+json" is:inline set:html={toJsonScript(graph)} />
 	</head>
 
 	{/* No background here: `html` carries it, which lets the -z-10 scanline
@@ -61,7 +62,7 @@ const graph = {
 		<TopBar route={route} progress={progress} />
 
 		{/* Bottom padding clears the fixed command bar. */}
-		<main id="main" class="shell pb-[150px] max-sm:pb-[120px]">
+		<main id="main" class="shell pt-[52px] pb-[150px] max-sm:pb-[120px]">
 			<slot />
 		</main>
 

@@ -2,7 +2,6 @@
 # silently truncates at the comma and turns the tail into a null-valued key,
 # which Zod then strips without complaint.
 - id: editor-and-shell
-  label: editor-and-shell
   items:
     - name: neovim
       note: 4 years, still rebuilding
@@ -13,7 +12,6 @@
     - name: lazygit
 
 - id: build
-  label: build
   items:
     - name: typescript
       note: strict, no exceptions
@@ -24,7 +22,6 @@
     - name: tailwind
 
 - id: infra
-  label: infra
   items:
     - name: cloudflare workers
     - name: fly.io
@@ -33,7 +30,6 @@
     - name: terraform
 
 - id: ai
-  label: ai
   items:
     - name: claude code
       note: pairs on the boring half
@@ -44,7 +40,6 @@
     - name: braintrust
 
 - id: think-and-draw
-  label: think-and-draw
   items:
     - name: figma
     - name: excalidraw

@@ -17,7 +17,12 @@ export function byYear(posts: Post[]): Array<{ year: number; posts: Post[] }> {
 	const groups = new Map<number, Post[]>();
 	for (const post of posts) {
 		const y = post.data.pubDate.getUTCFullYear();
-		(groups.get(y) ?? groups.set(y, []).get(y)!).push(post);
+		const group = groups.get(y);
+		if (group) {
+			group.push(post);
+		} else {
+			groups.set(y, [post]);
+		}
 	}
 	return [...groups.entries()]
 		.sort((a, b) => b[0] - a[0])

@@ -3,13 +3,11 @@ import { ClientRouter } from 'astro:transitions';
 import { Font } from 'astro:assets';
 
 import '../styles/global.css';
-import { SITE } from '../consts';
+import { SITE, FEED_TITLE } from '../consts';
 
 interface Props {
 	title: string;
 	description: string;
-	/** Absolute or site-relative OG image. */
-	image?: string;
 	/**
 	 * Article metadata. Present → `og:type=article` plus the `article:*` tags
 	 * OG parsers expect; absent → a plain `website`.
@@ -27,10 +25,11 @@ interface Props {
 	noindex?: boolean;
 }
 
-const { title, description, image = '/og.png', article, noindex = false } = Astro.props;
+const { title, description, article, noindex = false } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL(image, Astro.site);
+const ogImage = new URL('/og.png', Astro.site);
+const imageAlt = `${SITE.title} — ${SITE.tagline}`;
 const fullTitle =
 	Astro.url.pathname === '/' ? `${SITE.title} — ${SITE.tagline}` : `${title} — ${SITE.title}`;
 ---
@@ -47,7 +46,7 @@ const fullTitle =
 <link
 	rel="alternate"
 	type="application/rss+xml"
-	title={`${SITE.title} — writing`}
+	title={FEED_TITLE}
 	href={new URL('rss.xml', Astro.site)}
 />
 
@@ -64,7 +63,7 @@ const fullTitle =
 <meta property="og:image" content={ogImage} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content={`${SITE.title} — ${SITE.tagline}`} />
+<meta property="og:image:alt" content={imageAlt} />
 
 {
 	article && (
@@ -83,9 +82,15 @@ const fullTitle =
 <meta name="twitter:title" content={fullTitle} />
 <meta name="twitter:description" content={description} />
 <meta name="twitter:image" content={ogImage} />
-<meta name="twitter:image:alt" content={`${SITE.title} — ${SITE.tagline}`} />
-{SITE.twitter && <meta name="twitter:creator" content={SITE.twitter} />}
-{SITE.twitter && <meta name="twitter:site" content={SITE.twitter} />}
+<meta name="twitter:image:alt" content={imageAlt} />
+{
+	SITE.twitter && (
+		<>
+			<meta name="twitter:creator" content={SITE.twitter} />
+			<meta name="twitter:site" content={SITE.twitter} />
+		</>
+	)
+}
 
 <Font cssVariable="--font-mono" preload />
 <ClientRouter />
