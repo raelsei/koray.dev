@@ -1,319 +1,37 @@
-import { defineCollection } from 'astro:content';
-import { file, glob } from 'astro/loaders';
-import { z } from 'astro/zod';
-import yaml from 'js-yaml';
-import { SITE } from './consts';
-import { LIVE_MODES, TONES } from './lib/cn';
+import { defineCollection } from "astro:content";
+import { z } from "astro/zod";
+import { glob } from "astro/loaders";
+import config from "@/config";
 
-/* ─── Loaders ────────────────────────────────────────────────────────────── */
+export const BLOG_PATH = "src/content/posts";
 
-/**
- * Astro's data store re-sorts every collection by `id` when it serialises
- * (`data-store-writer.ts`), so authored array order is lost by the time
- * `getCollection` runs. This loader stamps each item's position in the file as
- * `order`, which `list()` in `lib/collections.ts` sorts by — the YAML stays
- * free of bookkeeping and the file reads top-to-bottom exactly as it renders.
- * It also fills `label`/`name` from `id` when authored values merely repeat it,
- * so those redundant lines can be dropped from the YAML.
- */
-const ordered = (path: string) =>
-	file(path, {
-		parser: (text) => {
-			const items = yaml.load(text);
-			if (!Array.isArray(items)) {
-				throw new Error(`${path} must contain a YAML array.`);
-			}
-			return items.map((item, order) => ({
-				...item,
-				label: item.label ?? item.id,
-				name: item.name ?? item.id,
-				order,
-			}));
-		},
-	});
-
-/** Every ordered collection carries this. Never authored by hand. */
-const withOrder = { order: z.number() };
-
-/* ─── Shared shapes ──────────────────────────────────────────────────────── */
-
-/** A `$ command` eyebrow plus the heading it introduces. */
-const heading = z.object({
-	prompt: z.string(),
-	title: z.string(),
+const posts = defineCollection({
+  loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: `./${BLOG_PATH}` }),
+  schema: ({ image }) =>
+    z.object({
+      author: z.string().default(config.site.author),
+      pubDatetime: z.date(),
+      modDatetime: z.date().optional().nullable(),
+      title: z.string(),
+      featured: z.boolean().optional(),
+      draft: z.boolean().optional(),
+      tags: z.array(z.string()).default(["others"]),
+      ogImage: image().or(z.string()).optional(),
+      description: z.string(),
+      canonicalURL: z.string().optional(),
+      hideEditPost: z.boolean().optional(),
+      timezone: z.string().optional(),
+    }),
 });
 
-/** The bordered "get in touch" panel used on `/` and `/about`. */
-const cta = z
-	.object({
-		prompt: z.string(),
-		body: z.string(),
-		aside: z.string(),
-		asideHref: z.string().optional(),
-	})
-	.optional();
-
-const tone = z.enum(TONES).default('muted');
-
-/* ─── Prose ──────────────────────────────────────────────────────────────── */
-
-/**
- * One file per route. The body is the page's long-form copy; frontmatter
- * carries the chrome (eyebrow, heading, CTA) so no page hardcodes a string.
- */
 const pages = defineCollection({
-	loader: glob({ base: './src/content/pages', pattern: '*.md' }),
-	schema: z.object({
-		head: heading,
-		title: z.string().default(SITE.title),
-		description: z.string(),
-		cta,
-	}),
+  loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: "./src/content/pages" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    ogImage: z.string().optional(),
+    canonicalURL: z.string().optional(),
+  }),
 });
 
-/**
- * Documents that live as Markdown rather than YAML, because they are edited as
- * documents: prose, headings, tables, and code that whitespace matters in.
- * Each one gets its own page under the shelf that lists it.
- */
-const document = z.object({
-	title: z.string(),
-	/** Inline, beside the title in listings. */
-	note: z.string().optional(),
-	description: z.string(),
-	order: z.number(),
-	tags: z.array(z.string()).default([]),
-});
-
-const prompts = defineCollection({
-	loader: glob({ base: './src/content/prompts', pattern: '*.md' }),
-	schema: document,
-});
-
-const dotfiles = defineCollection({
-	loader: glob({ base: './src/content/dotfiles', pattern: '*.md' }),
-	schema: document,
-});
-
-const writing = defineCollection({
-	loader: glob({ base: './src/content/writing', pattern: '**/*.md' }),
-	schema: z.object({
-		title: z.string(),
-		/** Rendered as the post lede and as the list-row description. */
-		description: z.string(),
-		pubDate: z.coerce.date(),
-		updatedDate: z.coerce.date().optional(),
-		tags: z.array(z.string()).default([]),
-		/** Closing line under the article, e.g. "written in İstanbul, june 2026". */
-		colophon: z.string().optional(),
-		draft: z.boolean().default(false),
-	}),
-});
-
-/* ─── Index ──────────────────────────────────────────────────────────────── */
-
-/** The four-cell readout under the hero. */
-const status = defineCollection({
-	loader: ordered('./src/content/data/status.yaml'),
-	schema: z.object({
-		...withOrder,
-		label: z.string(),
-		/** Omitted when `live` supplies the value at runtime. */
-		value: z.string().optional(),
-		note: z.string(),
-		/** Hydrated client-side; `clock` ticks in the site's timezone. */
-		live: z.enum(LIVE_MODES).optional(),
-		tone,
-	}),
-});
-
-const now = defineCollection({
-	loader: ordered('./src/content/data/now.yaml'),
-	schema: z.object({ ...withOrder, label: z.string(), body: z.string() }),
-});
-
-/* ─── Work ───────────────────────────────────────────────────────────────── */
-
-const ventures = defineCollection({
-	loader: ordered('./src/content/data/ventures.yaml'),
-	schema: z.object({
-		...withOrder,
-		name: z.string(),
-		/** Full pitch, shown on `/work`. */
-		description: z.string(),
-		/** One-line pitch, shown in the index preview. */
-		summary: z.string(),
-		/** Short status shown in the index preview, e.g. "beta". */
-		status: z.string(),
-		/** Years shown in the index preview, e.g. "2026 —". */
-		period: z.string(),
-		/** Longer status shown beside the title on `/work`, e.g. "private beta". */
-		badge: z.string().optional(),
-		badgeTone: tone,
-		/** Right-hand note on `/work`, e.g. "under koative". */
-		aside: z.string().optional(),
-		href: z.url().optional(),
-		/** The flagship entry renders larger and in the accent colour. */
-		lead: z.boolean().default(false),
-		tags: z.array(z.string()).default([]),
-		metrics: z
-			.array(z.object({ value: z.string(), label: z.string(), tone }))
-			.default([]),
-	}),
-});
-
-const oss = defineCollection({
-	loader: ordered('./src/content/data/oss.yaml'),
-	schema: z.object({
-		...withOrder,
-		name: z.string(),
-		description: z.string(),
-		lang: z.string(),
-		stars: z.number(),
-		href: z.url(),
-	}),
-});
-
-/* ─── Writing ────────────────────────────────────────────────────────────── */
-
-const notes = defineCollection({
-	loader: ordered('./src/content/data/notes.yaml'),
-	schema: z.object({ ...withOrder, pubDate: z.coerce.date(), body: z.string() }),
-});
-
-/* ─── Stack ──────────────────────────────────────────────────────────────── */
-
-const stack = defineCollection({
-	loader: ordered('./src/content/data/stack.yaml'),
-	schema: z.object({
-		...withOrder,
-		label: z.string(),
-		items: z.array(z.object({ name: z.string(), note: z.string().optional() })),
-	}),
-});
-
-const rules = defineCollection({
-	loader: ordered('./src/content/data/rules.yaml'),
-	schema: z.object({ ...withOrder, body: z.string() }),
-});
-
-/* ─── About ──────────────────────────────────────────────────────────────── */
-
-/** `man`-page style term/definition pairs. */
-const manual = defineCollection({
-	loader: ordered('./src/content/data/manual.yaml'),
-	schema: z.object({ ...withOrder, term: z.string(), body: z.string() }),
-});
-
-const timeline = defineCollection({
-	loader: ordered('./src/content/data/timeline.yaml'),
-	schema: z.object({ ...withOrder, period: z.string(), body: z.string(), tone }),
-});
-
-const contacts = defineCollection({
-	loader: ordered('./src/content/data/contacts.yaml'),
-	schema: z.object({
-		...withOrder,
-		channel: z.string(),
-		handle: z.string(),
-		href: z.string(),
-		external: z.boolean().default(true),
-	}),
-});
-
-/* ─── Library ────────────────────────────────────────────────────────────── */
-
-/**
- * Every shelf is a list of groups; a group's `kind` picks its renderer.
- * Adding a shelf means adding a YAML file — no route or component changes.
- */
-const shelfGroup = z.discriminatedUnion('kind', [
-	z.object({
-		kind: z.literal('link'),
-		title: z.string(),
-		meta: z.string(),
-		/** Host label is derived from `href` — never written twice. */
-		items: z.array(z.object({ label: z.string(), href: z.url() })),
-	}),
-	z.object({
-		kind: z.literal('repo'),
-		title: z.string(),
-		meta: z.string(),
-		items: z.array(
-			z.object({
-				name: z.string(),
-				description: z.string(),
-				lang: z.string(),
-				href: z.url(),
-			}),
-		),
-	}),
-	z.object({
-		kind: z.literal('card'),
-		title: z.string(),
-		meta: z.string(),
-		items: z.array(
-			z.object({
-				name: z.string(),
-				description: z.string(),
-				href: z.url(),
-			}),
-		),
-	}),
-	z.object({
-		/** Markdown documents from a collection; each gets its own page. */
-		kind: z.literal('docs'),
-		title: z.string(),
-		meta: z.string(),
-		collection: z.enum(['prompts', 'dotfiles']),
-		/**
-		 * Whether the document page offers a copy button for the whole source.
-		 * True for a prompt, where the document *is* the artefact; false for a
-		 * snippet, where the code fence carries its own copy button.
-		 */
-		copyDocument: z.boolean().default(false),
-	}),
-]);
-
-const shelves = defineCollection({
-	loader: glob({ base: './src/content/shelves', pattern: '*.yaml' }),
-	schema: z.object({
-		/** Tab order, ascending. */
-		order: z.number(),
-		/** Own meta description; without it all four shelves share the page's. */
-		description: z.string(),
-		groups: z.array(shelfGroup),
-	}),
-});
-
-/* ─── Navigation ─────────────────────────────────────────────────────────── */
-
-const nav = defineCollection({
-	loader: ordered('./src/content/data/nav.yaml'),
-	schema: z.object({
-		...withOrder,
-		label: z.string(),
-		href: z.string(),
-		/** Command-bar aliases that resolve to this route. */
-		aliases: z.array(z.string()).default([]),
-	}),
-});
-
-export const collections = {
-	pages,
-	prompts,
-	dotfiles,
-	writing,
-	status,
-	now,
-	ventures,
-	oss,
-	notes,
-	stack,
-	rules,
-	manual,
-	timeline,
-	contacts,
-	shelves,
-	nav,
-};
+export const collections = { posts, pages };

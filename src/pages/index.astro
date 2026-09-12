@@ -1,127 +1,135 @@
 ---
-import { getEntry, render } from 'astro:content';
+import { getCollection, getEntry, render } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import IconRss from "@/assets/icons/IconRss.svg";
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Socials from "@/components/Socials.astro";
+import Card from "@/components/Card.astro";
+import LinkButton from "@/components/LinkButton.astro";
+import { getSortedPosts } from "@/utils/getSortedPosts";
+import { useTranslations } from "@/i18n";
+import config from "@/config";
 
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Cta from '../components/ui/Cta.astro';
-import Longform from '../components/ui/Longform.astro';
-import PageHeader from '../components/ui/PageHeader.astro';
-import Panel from '../components/ui/Panel.astro';
-import Row from '../components/ui/Row.astro';
-import Section from '../components/ui/Section.astro';
-import Stat from '../components/ui/Stat.astro';
+const { socials, posts: postsConfig } = config;
 
-import { getPosts } from '../lib/writing';
-import { iso, monthYear, ordinal } from '../lib/format';
-import { list } from '../lib/collections';
-import { post as postPath } from '../lib/urls';
-import { pageSchema } from '../lib/schema';
+const locale = Astro.currentLocale ?? config.site.lang;
+const t = useTranslations(locale);
 
-const page = await getEntry('pages', 'index')!;
-const { Content } = await render(page);
+const posts = await getCollection("posts");
+const sortedPosts = getSortedPosts(posts);
+const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
+const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
+const homePath = getRelativeLocaleUrl(locale, "");
 
-const [status, now, ventures, posts] = await Promise.all([
-	list('status'),
-	list('now'),
-	list('ventures'),
-	getPosts(),
-]);
+// The hero copy lives in the content collection, never in this component.
+const hero = await getEntry("pages", "home");
 
-const latest = posts.slice(0, 3);
+if (!hero) {
+  throw new Error(
+    "Missing content entry: `home.md` or `home.mdx` in `src/content/pages/`"
+  );
+}
 
-const schema = pageSchema({ path: '/', title: page.data.head.title, description: page.data.description }, Astro.site!);
+const { Content: HeroContent } = await render(hero);
 ---
 
-<BaseLayout title={page.data.title} description={page.data.description} route="index" schema={schema}>
-	<PageHeader size="hero" prompt={page.data.head.prompt} title={page.data.head.title} measure="max-w-[24ch]">
-		<Longform measure="max-w-[74ch]" class="mt-2">
-			<Content />
-		</Longform>
-	</PageHeader>
+<Layout>
+  <Header />
+  <main
+    id="main-content"
+    data-layout="index"
+    data-home-path={homePath}
+    class="app-layout my-1"
+  >
+    <section id="hero" class="border-border border-b pt-8 pb-6">
+      <h1 class="my-4 inline-block text-4xl font-bold sm:my-8 sm:text-5xl">
+        {hero.data.title}
+      </h1>
+      <div class="app-prose max-w-none">
+        <HeroContent />
+      </div>
+      {/* The feed link belongs with the other subscribe-and-follow icons; beside
+          a three-line headline it renders as an orphan on its own row. */}
+      <div class="mt-4 flex max-sm:flex-col sm:items-center">
+        {socials.length > 0 && (
+          <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">
+            {t.home.socialLinks}:
+          </div>
+        )}
+        <div class="flex flex-wrap items-center gap-1">
+          {socials.length > 0 && <Socials />}
+          <a
+            target="_blank"
+            href={`${import.meta.env.BASE_URL.replace(/\/?$/, "/")}rss.xml`}
+            class="group p-2 hover:rotate-6 sm:p-1"
+            aria-label="RSS Feed"
+            title="RSS Feed"
+          >
+            <IconRss
+              class="stroke-accent inline-block size-6 scale-110 stroke-2 opacity-90 rtl:-rotate-90"
+            />
+            <span class="sr-only">RSS Feed</span>
+          </a>
+        </div>
+      </div>
+    </section>
 
-	<Panel cols="grid-cols-4 max-md:grid-cols-2" class="animate-fade-in stagger-2 mt-11">
-		{
-			status.map((cell) => (
-				<Stat
-					label={cell.data.label}
-					value={cell.data.value}
-					note={cell.data.note}
-					tone={cell.data.tone}
-					live={cell.data.live}
-				/>
-			))
-		}
-	</Panel>
+    {
+      featuredPosts.length > 0 && (
+        <section
+          id="featured"
+          class:list={[
+            "pt-12 pb-6",
+            { "border-border border-b": recentPosts.length > 0 },
+          ]}
+        >
+          <h2 class="text-2xl font-semibold tracking-wide">
+            {t.home.featured}
+          </h2>
+          <ul>
+            {featuredPosts.map(data => (
+              <Card variant="h3" {...data} />
+            ))}
+          </ul>
+        </section>
+      )
+    }
 
-	<Section
-		title="$ cat now.md"
-		meta={monthYear(new Date())}
-		animateRule
-		class="animate-fade-in stagger-3 mt-[76px]"
-	>
-		{
-			now.map((item) => (
-				<Row cols="grid-cols-[112px_minmax(0,1fr)] max-sm:grid-cols-1 max-sm:gap-[7px]">
-					<span slot="lead" class="text-meta tracking-label text-dim pt-[3px] uppercase">
-						{item.data.label}
-					</span>
-					<span class="text-item leading-body text-fg">{item.data.body}</span>
-				</Row>
-			))
-		}
-	</Section>
+    {
+      recentPosts.length > 0 && (
+        <section id="recent-posts" class="pt-12 pb-6">
+          <h2 class="text-2xl font-semibold tracking-wide">
+            {t.home.recentPosts}
+          </h2>
+          <ul>
+            {recentPosts.slice(0, postsConfig.perIndex).map(data => (
+              <Card variant="h3" {...data} />
+            ))}
+          </ul>
+        </section>
+      )
+    }
 
-	<Section
-		title="$ ls -la ./work"
-		action="all work →"
-		actionHref="/work"
-		class="animate-fade-in stagger-4 mt-[66px]"
-	>
-		{
-			ventures.map((venture, i) => (
-				<Row
-					href="/work"
-					pad="md"
-					cols="grid-cols-[34px_minmax(0,1fr)_150px] max-sm:grid-cols-1 max-sm:gap-[7px]"
-				>
-					<span slot="lead" class="text-meta text-dim">{ordinal(i)}</span>
-					<span class="flex flex-col gap-1.5">
-						<span class="text-entry tracking-snug text-fg font-medium">{venture.data.name}</span>
-						<span class="text-row leading-row text-soft">{venture.data.summary}</span>
-					</span>
-					<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
-						{venture.data.status}
-						<br />
-						{venture.data.period}
-					</span>
-				</Row>
-			))
-		}
-	</Section>
+    <div class="my-8 text-center">
+      <LinkButton href={getRelativeLocaleUrl(locale, "posts")}>
+        {t.home.allPosts}
+        <IconArrowRight class="inline-block rtl:-rotate-180" />
+      </LinkButton>
+    </div>
+  </main>
+  <Footer />
+</Layout>
 
-	<Section
-		title="$ ls ./writing | head -3"
-		action="archive →"
-		actionHref="/writing"
-		class="animate-fade-in stagger-5 mt-[66px]"
-	>
-		{
-			latest.map((post) => (
-				<Row
-					href={postPath(post.id)}
-					cols="grid-cols-[minmax(0,1fr)_170px] max-sm:grid-cols-1 max-sm:gap-[7px]"
-				>
-					<span class="text-body text-fg">{post.id}.md</span>
-					<span slot="trail" class="text-meta text-subtle text-right max-sm:text-left">
-						{iso(post.data.pubDate)} · {post.minutes} min
-					</span>
-				</Row>
-			))
-		}
-	</Section>
-
-	{
-		page.data.cta && (
-			<Cta {...page.data.cta} class="animate-fade-in stagger-6 mt-[76px]" />
-		)
-	}
-</BaseLayout>
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
+      ?.dataset;
+    const baseRoot = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+    if (indexLayout?.layout) {
+      sessionStorage.setItem("backUrl", indexLayout.homePath ?? baseRoot);
+    }
+  });
+</script>

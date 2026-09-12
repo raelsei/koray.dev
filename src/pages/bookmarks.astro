@@ -1,0 +1,36 @@
+---
+import { getEntry, render } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import Footer from "@/components/Footer.astro";
+import config from "@/config";
+
+const bookmarks = await getEntry("pages", "bookmarks");
+
+if (!bookmarks) {
+  throw new Error(
+    "Missing content entry: `bookmarks.md` or `bookmarks.mdx` in `src/content/pages/`"
+  );
+}
+
+const { Content } = await render(bookmarks);
+---
+
+<Layout
+  title={`${bookmarks.data.title} | ${config.site.title}`}
+  description={bookmarks.data.description}
+  ogImage={bookmarks.data.ogImage}
+  canonicalURL={bookmarks.data.canonicalURL}
+>
+  <Header />
+
+  <Breadcrumb />
+
+  <Main pageTitle={bookmarks.data.title} class="app-prose">
+    <Content />
+  </Main>
+
+  <Footer />
+</Layout>
