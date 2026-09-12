@@ -12,6 +12,8 @@ type Props = {
   description?: string;
   ogImage?: string;
   canonicalURL?: string;
+  /** Keeps a utility page (search, 404) out of the index while still following links. */
+  noindex?: boolean;
 };
 
 const { site } = config;
@@ -21,13 +23,23 @@ const {
   description = site.description,
   ogImage = resolveDefaultOgImagePath(config),
   canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
+  noindex = false,
 } = Astro.props;
 
 const socialImageURL = new URL(ogImage, Astro.site ?? Astro.url);
+
+// `getRelativeLocaleUrl` appends a trailing slash, which would point autodiscovery
+// at /rss.xml/ while the build emits the file at /rss.xml.
 const rssHref = getRelativeLocaleUrl(
   Astro.currentLocale ?? config.site.lang,
   "rss.xml"
-);
+).replace(/\/$/, "");
+
+// Open Graph wants language_TERRITORY, not the bare tag `lang` uses.
+const OG_LOCALES: Record<string, string> = { en: "en_US" };
+const ogLocale =
+  OG_LOCALES[Astro.currentLocale ?? site.lang] ??
+  (Astro.currentLocale ?? site.lang).replace("-", "_");
 ---
 
 <!doctype html>
@@ -40,7 +52,7 @@ const rssHref = getRelativeLocaleUrl(
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href={getAssetPath("favicon.svg")} />
-    <link rel="icon" href={getAssetPath("favicon.ico")} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
 
@@ -60,6 +72,7 @@ const rssHref = getRelativeLocaleUrl(
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.title} />
+    <meta property="og:locale" content={ogLocale} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
@@ -80,8 +93,9 @@ const rssHref = getRelativeLocaleUrl(
       href={new URL(rssHref, Astro.site)}
     />
 
-    <!-- Filled at runtime by theme.ts to match the current background colour -->
-    <meta name="theme-color" content="" />
+    {/* Seeded with the dark background so browser chrome is right on first paint
+        and stays right with JavaScript off; theme.ts rewrites it on toggle. */}
+    <meta name="theme-color" content="#08090a" />
 
     <!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) -->
     <slot name="head" />

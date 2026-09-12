@@ -24,8 +24,13 @@ export default defineConfig({
   integrations: [
     mdx(),
     sitemap({
-      filter: page =>
-        config.features?.showArchives !== false || !page.endsWith("/archives/"),
+      filter: page => {
+        // /search/ is noindex; listing it in the sitemap is a mixed signal.
+        if (page.endsWith("/search/")) return false;
+        return (
+          config.features?.showArchives !== false || !page.endsWith("/archives/")
+        );
+      },
     }),
   ],
   i18n: {
