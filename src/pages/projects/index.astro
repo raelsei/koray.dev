@@ -1,0 +1,136 @@
+---
+import { getCollection, getEntry, render } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import Footer from "@/components/Footer.astro";
+import { itemList, page as pageNode } from "@/utils/schema";
+import { groupProjects, hasWriteup, projectUrl } from "@/utils/projects";
+import config from "@/config";
+
+const intro = await getEntry("pages", "projects");
+
+if (!intro) {
+  throw new Error(
+    "Missing content entry: `projects.md` or `projects.mdx` in `src/content/pages/`"
+  );
+}
+
+const { Content } = await render(intro);
+
+const locale = Astro.currentLocale ?? config.site.lang;
+const groups = groupProjects(await getCollection("projects"));
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+
+// Every project the page renders, in the order it renders them, so the list a
+// crawler reads is the list a reader sees.
+const schema = [
+  pageNode(config, canonical, {
+    kind: "CollectionPage",
+    name: intro.data.title,
+    description: intro.data.description,
+  }),
+  itemList(
+    canonical,
+    groups.flatMap(group =>
+      group.items.map(project => ({
+        name: project.data.name,
+        url: new URL(projectUrl(project, locale)!, Astro.site).href,
+      }))
+    )
+  ),
+];
+---
+
+<Layout
+  title={`${intro.data.title} | ${config.site.title}`}
+  description={intro.data.description}
+  ogImage={intro.data.ogImage}
+  canonicalURL={intro.data.canonicalURL ?? canonical}
+  {schema}
+>
+  <Header />
+
+  <Breadcrumb />
+
+  <Main pageTitle={intro.data.title}>
+    <div class="app-prose max-w-none">
+      <Content />
+    </div>
+
+    {groups.map(group => (
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold">{group.label}</h2>
+        <ul>
+          {group.items.map(project => {
+            const { name, status, period, summary, lang, metrics, repo } =
+              project.data;
+            const href = projectUrl(project, locale)!;
+            const internal = hasWriteup(project);
+
+            return (
+              <li class="my-6">
+                <a
+                  href={href}
+                  rel={internal ? undefined : "noopener"}
+                  class:list={[
+                    "text-accent inline-block text-lg font-medium",
+                    "decoration-dashed underline-offset-4 hover:underline",
+                    "focus-visible:no-underline focus-visible:underline-offset-0",
+                  ]}
+                >
+                  <h3>{name}</h3>
+                </a>
+
+                {/* Status, dates and language are metadata, not prose: one
+                      muted line, in the same slot Datetime occupies on a post. */}
+                <div class="text-muted-foreground flex flex-wrap items-center gap-x-2 text-sm">
+                  {status && <span>{status}</span>}
+                  {status && period && <span aria-hidden="true">·</span>}
+                  {period && <span>{period}</span>}
+                  {(status || period) && lang && (
+                    <span aria-hidden="true">·</span>
+                  )}
+                  {lang && <span>{lang}</span>}
+                </div>
+
+                <p>{summary}</p>
+
+                {metrics && (
+                  <ul class="mt-2 flex flex-wrap gap-x-6 gap-y-1">
+                    {metrics.map(metric => (
+                      <li class="text-sm">
+                        <span class="text-accent font-medium">
+                          {metric.value}
+                        </span>{" "}
+                        <span class="text-muted-foreground">
+                          {metric.label}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {/* A write-up page is the link above, so the source needs its
+                      own way out. Without a write-up the name already is it. */}
+                {internal && repo && (
+                  <a
+                    href={repo}
+                    rel="noopener"
+                    class="mt-2 inline-block text-sm decoration-dashed underline-offset-4 hover:underline"
+                  >
+                    source
+                  </a>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    ))}
+  </Main>
+
+  <Footer />
+</Layout>

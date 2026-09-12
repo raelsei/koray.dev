@@ -30,6 +30,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   tags: "Tags",
   about: "About",
   bookmarks: "Bookmarks",
+  projects: "Projects",
   archives: "Archives",
   search: "Search",
 };
@@ -186,6 +187,40 @@ export function blogPosting(
     inLanguage: config.site.lang,
     author: { "@id": ids.person(base) },
     publisher: { "@id": ids.person(base) },
+    isPartOf: { "@id": ids.website(base) },
+  };
+}
+
+/**
+ * One thing I built. A repository is literally source code; anything else is a
+ * work with a creator, and both hang off the same Person node so the entity
+ * graph stays connected instead of introducing a second author.
+ */
+export function project(
+  config: ResolvedAstroPaperConfig,
+  canonical: string,
+  item: {
+    name: string;
+    description?: string;
+    url?: string;
+    repo?: string;
+    lang?: string;
+    tags?: string[];
+  }
+): Node {
+  const base = trimEnd(config.site.url);
+  return {
+    "@type": item.repo ? "SoftwareSourceCode" : "CreativeWork",
+    "@id": `${canonical}#project`,
+    mainEntityOfPage: { "@id": ids.page(canonical) },
+    name: item.name,
+    ...(item.description && { description: item.description }),
+    ...(item.url && { url: item.url }),
+    ...(item.repo && { codeRepository: item.repo }),
+    ...(item.lang && { programmingLanguage: item.lang }),
+    ...(item.tags?.length && { keywords: item.tags }),
+    inLanguage: config.site.lang,
+    creator: { "@id": ids.person(base) },
     isPartOf: { "@id": ids.website(base) },
   };
 }

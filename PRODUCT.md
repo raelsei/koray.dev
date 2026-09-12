@@ -49,13 +49,24 @@ that decision stops working. Every post keeps a "real limits" section.
 ## Operating Context
 
 **Routes.** `/` · `/posts` (paginated) · `/posts/<slug>` · `/tags` ·
-`/tags/<tag>` (paginated) · `/archives` · `/about` · `/bookmarks` · `/search` ·
-`404`, plus generated `/rss.xml`, `/robots.txt`, `/og.png`, per-post
-`/posts/<slug>/index.png`, `/sitemap-index.xml`, and the Pagefind index.
+`/tags/<tag>` (paginated) · `/archives` · `/projects` · `/projects/<slug>` ·
+`/about` · `/bookmarks` · `/search` · `404`, plus generated `/rss.xml`,
+`/robots.txt`, `/og.png`, per-post `/posts/<slug>/index.png`,
+`/sitemap-index.xml`, and the Pagefind index.
 
 **Authoring.** Editing content is editing files. `src/content/posts/` holds the
-writing and `src/content/pages/` the three standing pages (`home`, `about`,
-`bookmarks`). A malformed field fails the build rather than shipping blank.
+writing, `src/content/pages/` the four standing pages (`home`, `about`,
+`bookmarks`, `projects`), and `src/content/projects/` one file per thing built.
+A malformed field fails the build rather than shipping blank.
+
+**Projects.** One collection, split by `kind` — `venture`, `library`,
+`starter`, `tool` — because the division is authorship: a library I wrote is my
+project. `kind` decides only which group it lands in on the index, and an empty
+group is not rendered. A body is optional: an entry with one gets its own page,
+an entry without one stays a row linking to its repository, so no page ships
+carrying a single sentence. Deliberately absent: per-kind tag routes, which
+would be near-duplicate listings, and star counts, which decay silently between
+edits — the repository link is the evidence instead.
 
 **Writing routine.** Posts are post-mortems with the names filed off. Each
 passes four gates before publishing: factual check; privacy scrub (nothing
@@ -158,34 +169,38 @@ Confirmed real by the user — all of it is citable as fact:
   `a-missing-capability-beats-a-threshold`,
   `the-endpoint-that-succeeded-at-doing-nothing`,
   `the-label-was-not-the-identity`. The first and last are `featured: true`.
+- **Ventures (published, `/projects`):** koative — applied-AI studio,
+  bootstrapped, İstanbul, three engineers and one designer, funds its own
+  fintech products and takes one partner engagement a year. lumi — household
+  finance copilot in private beta: 40 households, 94% categorised, 180 ms p95
+  sync. bine — invoice reconciliation for small merchants in Türkiye, alpha.
+  Each carries a write-up, so each has its own page.
+- **Open source (published, `/projects`):** ledger-kit, sse-stream, tr-iban as
+  libraries; prompt-forge, rag-lab, dotfiles as tools. Rows linking to their
+  repositories, no write-ups yet. The star counts the previous site carried
+  (412 / 289 / 174 / 143 / 96 / 64) were **dropped on purpose**: hand-authored,
+  so they decay between edits, and a link to the repository is proof where a
+  stale number is a claim. Do not reintroduce them without a live source.
 - **Published elsewhere on the site:** the advisory offer and the house rules
   (`/about`), and two tool links (`/bookmarks`).
 - **Assets:** `public/favicon.svg` and `public/apple-touch-icon.png` (rasterised
   180×180 from the favicon) are the only binary assets; OG images are generated
   per post at build time.
 
-**Still true, but no longer published.** The redesign narrowed the site to the
-theme's own information architecture, so these facts left the site without
-ceasing to be facts. They are citable, and they are the material for `/work`
-and `/stack` if either is ever rebuilt — the previous implementation is
-recoverable from git history on `main`:
+**Still true, but not published.** Citable, and recoverable from git history on
+`main`, where the previous implementation also lives:
 
-- **Ventures:** koative — applied-AI studio, bootstrapped, İstanbul, three
-  engineers and one designer, funds its own fintech products and takes one
-  partner engagement a year. Lumi — household finance copilot in private beta:
-  40 households, 94% categorised, 180 ms p95 sync. Bine — invoice
-  reconciliation for small merchants in Türkiye, alpha.
-- **Open source:** prompt-forge, ledger-kit, sse-stream, rag-lab, tr-iban,
-  dotfiles, with star counts authored as a point-in-time snapshot
-  (412 / 289 / 174 / 143 / 96 / 64). Real but hand-authored, so they drift.
 - **Track record:** koative 2026—; lead product engineer on a payments platform
   2023–26; product engineer, marketplace and checkout 2021–23; freelance
   2019–21.
-- **Other:** dated notes, the annual-audit stack, three further library shelves
-  (repos, dotfiles, prompts), two dotfiles write-ups, three published prompts.
-
-Losing `/work` costs the site its venture evidence, which the Users section
-names as what advisory leads weigh. That trade was made knowingly.
+- **Other:** dated notes, the annual-audit stack, two dotfiles write-ups, three
+  published prompts. Prompts were considered for their own section and
+  **declined by the user** for now; the argument for them was long-tail search,
+  the argument against was that they are undated reference material and would
+  land in the RSS feed as if they were posts.
+- **One contradiction to settle:** the old `stack.yaml` listed `zsh + fzf`
+  while the dotfiles write-up said it had been ported off zsh to fish. The
+  write-up is the more specific source, so `/projects` says fish. Confirm.
 
 Absent, and future work must not invent them: **no testimonials, no named
 clients or employers, no case studies, no press, no pricing, no logo wall, no

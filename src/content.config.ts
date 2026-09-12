@@ -61,4 +61,43 @@ const bookmarks = defineCollection({
   }),
 });
 
-export const collections = { posts, pages, bookmarks };
+/**
+ * Things I built: ventures, libraries, tools, starters. One collection rather
+ * than one per kind, because the split is authorship — a library I wrote is my
+ * project — and `kind` only decides which group it lands in on the index.
+ *
+ * A body is optional. An entry with one gets its own page; an entry without one
+ * stays a row on the index that links straight to its repo, so nothing ships as
+ * a page carrying a single sentence.
+ */
+const projects = defineCollection({
+  loader: glob({
+    pattern: "**/[^_]*.{md,mdx}",
+    base: "./src/content/projects",
+  }),
+  schema: z.object({
+    name: z.string(),
+    kind: z.enum(["venture", "library", "tool", "starter"]),
+    /** Rank within the kind group; the index never sorts alphabetically. */
+    order: z.number(),
+    /**
+     * Lifecycle word rendered as-is: founder, private beta, alpha. Optional
+     * because a published library does not have one, and inventing a "stable"
+     * for it would be a claim rather than a fact.
+     */
+    status: z.string().optional(),
+    period: z.string().optional(),
+    /** One line, used on the index and as the page's meta description. */
+    summary: z.string(),
+    /** The live thing, if there is one to visit. */
+    url: z.url().optional(),
+    repo: z.url().optional(),
+    lang: z.string().optional(),
+    metrics: z
+      .array(z.object({ value: z.string(), label: z.string() }))
+      .optional(),
+    tags: z.array(z.string()).default([]),
+  }),
+});
+
+export const collections = { posts, pages, bookmarks, projects };

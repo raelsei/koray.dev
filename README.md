@@ -13,9 +13,12 @@ Keeping this boundary clear is what makes the next theme upgrade cheap.
 | `astro-paper.config.ts` — domain, author, timezone, socials, share links, feature flags | every component under `src/components/`      |
 | `src/styles/theme.css` — the seven colour tokens, light and dark                        | `src/styles/global.css`, `typography.css`    |
 | `src/content/posts/` — the writing                                                      | every route under `src/pages/`               |
-| `src/content/pages/` — `home`, `about`, `bookmarks`                                     | `src/utils/` except `schema.ts`, `src/i18n/` |
+| `src/content/pages/` — `home`, `about`, `bookmarks`, `projects`                         | `src/utils/` except `schema.ts`, `src/i18n/` |
 | `src/content/bookmarks.yaml` — the bookmark links, as data                              | `src/layouts/` structure                     |
-| `src/utils/schema.ts` — all JSON-LD                                                     | everything else                              |
+| `src/content/projects/` — one file per thing built                                      | everything else                              |
+| `src/utils/schema.ts` — all JSON-LD                                                     |                                              |
+| `src/utils/projects.ts` — project grouping and link resolution                          |                                              |
+| `src/pages/projects/` — the two project routes                                          |                                              |
 | `public/favicon.svg`, `public/apple-touch-icon.png`, `public/CNAME`                     |                                              |
 | `.github/workflows/deploy.yml` — the Pages deploy                                       |                                              |
 
@@ -27,13 +30,30 @@ makes a theme bump a merge rather than a rewrite.
 | File                                       | Edit                                                                                                                                                    |
 | :----------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `src/pages/index.astro`                    | Hero copy read from the content collection; feed icon moved into the social row                                                                         |
-| `src/components/Header.astro`, `src/i18n/` | The `Bookmarks` nav entry                                                                                                                               |
+| `src/components/Header.astro`, `src/i18n/` | The `Bookmarks` and `Projects` nav entries; the nav list wraps instead of clipping (see below)                                                          |
 | `astro.config.ts`                          | Dark code theme; `/search/` filtered out of the sitemap                                                                                                 |
 | `src/layouts/Layout.astro`                 | `schema` and `noindex` props; dead `favicon.ico` link removed; `og:locale`; static `theme-color`; `apple-touch-icon`; RSS href without a trailing slash |
 | `src/layouts/PostLayout.astro`             | Post JSON-LD routed through the shared graph instead of its own block                                                                                   |
 | `src/pages/search.astro`                   | Dev notice only when the index is genuinely missing, naming `bun run build`                                                                             |
-| `src/content.config.ts`                    | `seoTitle` on pages; the `bookmarks` collection                                                                                                         |
+| `src/content.config.ts`                    | `seoTitle` on pages; the `bookmarks` and `projects` collections                                                                                         |
 | Listing and page routes                    | Page-specific JSON-LD, and the meta description the theme rendered but never set                                                                        |
+
+#### Why the nav list wraps
+
+The theme's horizontal nav never fit its own container. Measured in the built
+page: the row's items need 473 px of content, and with the theme's `gap-x-5`
+the row wants 614 px where the layout allocates 598 px. The excess used to
+spill into the right margin, which looks fine on a wide screen — the clipping
+only becomes visible once the viewport is narrow enough to reach it, and then
+the search icon is cut in half and the theme toggle is off-screen entirely.
+That happened at 640 px with the theme's own four links, before this site added
+any.
+
+So the list carries two changes: `gap-x-3`, which brings the row to 558 px and
+inside the budget, and `flex-wrap`, so a future entry wraps to a second row
+rather than clipping a control. Verified from 375 px to 1920 px: one row from
+768 px up, two rows in the 640–767 px band, the hamburger below that, and no
+horizontal page scroll at any width.
 
 ## Commands
 
@@ -175,8 +195,10 @@ the build instead of shipping blank.
 
 ```
 src/content/
-├── posts/    the writing — one Markdown file per post
-└── pages/    home hero, about, bookmarks
+├── posts/      the writing — one Markdown file per post
+├── projects/   one file per thing built
+├── pages/      home hero, about, bookmarks, projects intro
+└── bookmarks.yaml
 ```
 
 ### Writing a post
@@ -198,6 +220,42 @@ featured: true
 
 A fenced block gains a filename caption when the fence carries a filename, and a
 copy button either way.
+
+### Adding a project
+
+Drop a Markdown file in `src/content/projects/`. Required frontmatter is `name`,
+`kind`, `order` and `summary`; `status`, `period`, `url`, `repo`, `lang`,
+`metrics` and `tags` are optional.
+
+```md
+---
+name: ledger-kit
+kind: library
+order: 1
+summary: Double-entry primitives that refuse to lose a cent.
+repo: https://github.com/raelsei/ledger-kit
+lang: go
+---
+```
+
+`kind` is one of `venture`, `library`, `starter`, `tool`. It only decides which
+group the entry lands in on `/projects/`, in the order fixed by `KIND_GROUPS` in
+[`src/utils/projects.ts`](src/utils/projects.ts); a group with no entries is not
+rendered, so a kind can be named before anything fills it. `order` ranks within
+the group — the index never sorts alphabetically.
+
+**The body decides whether there is a page.** Write something under the
+frontmatter and the entry gets `/projects/<slug>/`, with the index linking
+there. Leave the body empty and the entry stays a row linking to `url` or
+`repo`. That is deliberate: it means no page ships carrying a single sentence,
+and the page cannot disagree with whether there is anything on it.
+
+Two things are absent on purpose. There are **no per-kind tag routes** —
+filtered listings with no prose of their own are near-duplicates of the index,
+and at this count a filter is worse UX than one grouped page. And there are **no
+star counts**: hand-authored numbers decay silently between edits, so the
+repository link carries the proof instead. Both are worth revisiting past
+roughly 25 projects, not before.
 
 ## Structured data
 
