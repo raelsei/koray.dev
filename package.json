@@ -8,6 +8,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build && pagefind --site dist && cp -r dist/pagefind public/",
+    "build:bun": "astro check && bunx --bun astro build && pagefind --site dist && cp -r dist/pagefind public/",
+    "verify:runtime": "bun run build && find dist -name '*.png' | sort | xargs shasum -a 256 > /tmp/og-node.txt && bun run build:bun && find dist -name '*.png' | sort | xargs shasum -a 256 > /tmp/og-bun.txt && diff /tmp/og-node.txt /tmp/og-bun.txt && echo 'OG images identical under both runtimes'",
     "preview": "astro preview",
     "sync": "astro sync",
     "astro": "astro",

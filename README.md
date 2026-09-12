@@ -36,15 +36,17 @@ makes a theme bump a merge rather than a rewrite.
 
 ## Commands
 
-| Command            | Action                                                   |
-| :----------------- | :------------------------------------------------------- |
-| `bun install`      | Install dependencies                                     |
-| `bun dev`          | Dev server on `localhost:4321`                           |
-| `bun run build`    | Type-check, build to `./dist/`, then index with Pagefind |
-| `bun preview`      | Serve the build locally                                  |
-| `bunx astro check` | Type-check `.astro`, `.ts`, and content schemas          |
-| `bun run format`   | Prettier                                                 |
-| `bun run lint`     | ESLint                                                   |
+| Command                  | Action                                                      |
+| :----------------------- | :---------------------------------------------------------- |
+| `bun install`            | Install dependencies                                        |
+| `bun dev`                | Dev server on `localhost:4321`                              |
+| `bun run build`          | Type-check, build to `./dist/`, then index with Pagefind    |
+| `bun run build:bun`      | Same, but `astro build` runs on the Bun runtime — see below |
+| `bun run verify:runtime` | Builds both ways and diffs the OG images byte-for-byte      |
+| `bun preview`            | Serve the build locally                                     |
+| `bunx astro check`       | Type-check `.astro`, `.ts`, and content schemas             |
+| `bun run format`         | Prettier                                                    |
+| `bun run lint`           | ESLint                                                      |
 
 Per `AGENTS.md`, start the dev server as `astro dev --background` and manage it
 with `astro dev stop|status|logs`.
@@ -59,16 +61,57 @@ with `astro dev stop|status|logs`.
 Cloudflare Pages, connected to this repository. `koray.dev` is already a zone in
 the same Cloudflare account, so the custom domain wires itself up.
 
-| Setting                | Value           |
-| :--------------------- | :-------------- |
-| Framework preset       | Astro           |
-| Build command          | `bun run build` |
-| Build output directory | `dist`          |
-| Production branch      | `main`          |
+| Setting                | Value                          |
+| :--------------------- | :----------------------------- |
+| Framework preset       | Astro                          |
+| Build command          | `bun install && bun run build` |
+| Build output directory | `dist`                         |
+| Production branch      | `main`                         |
+| Build variable         | `BUN_VERSION` = `1.4.2`        |
+| Build variable         | `NODE_VERSION` = `22.12.0`     |
 
-`bun run build` must be the build command, not `astro build`: search is a
-Pagefind index generated from `dist` after the build, and `astro build` alone
-ships a site whose `/search` finds nothing.
+Three things about that build command are load-bearing:
+
+- **`bun install &&` is not redundant.** Pages publishes no lockfile-detection
+  rule for Bun — the Bun row of its build-image table has an empty File column
+  — and community reports say its automatic install recognises only the legacy
+  binary `bun.lockb`, not the text `bun.lock` that Bun ≥ 1.2 writes and that
+  this repo has. If that is right, an auto-install build fails with
+  `astro: command not found`. Running the install explicitly is idempotent and
+  correct either way.
+- **`bun run build`, not `astro build`.** Search is a Pagefind index generated
+  from `dist` _after_ the build; `astro build` alone ships a site whose
+  `/search` finds nothing.
+- **Pin `BUN_VERSION`.** Pages defaults to Bun 1.2.15 and states that tools
+  which do not follow semver — Bun by name — may be updated with three months'
+  notice. `package.json` `engines` cannot pin it: Pages documents that it does
+  not read `engines`, and Bun does not enforce it either
+  ([oven-sh/bun#5846](https://github.com/oven-sh/bun/issues/5846)).
+
+### Why Node builds this, not Bun
+
+Bun is the package manager and script runner. It is **not** the build runtime:
+`astro` and `pagefind` ship `#!/usr/bin/env node` shebangs, so `bun run build`
+hands the actual work to Node. That is deliberate, and it is what
+[Astro's Bun recipe](https://docs.astro.build/en/recipes/bun/) documents — the
+`--bun` flag it recommended in 2024 has since been removed from those docs.
+
+Locally the Bun runtime looks fine: `bun run verify:runtime` produces
+**byte-identical** OG images and builds about 12% faster. That result is from
+macOS arm64 and does not transfer to the deploy target.
+
+> **The blocker.** Pages builds on Ubuntu x86_64.
+> [oven-sh/bun#20372](https://github.com/oven-sh/bun/issues/20372) — a `sharp`
+> segfault under Bun, labelled `napi` / `crash` / `linux` / `runtime` — is open
+> and unassigned, and its reporter notes it works on macOS arm64 and crashes on
+> Linux. `sharp` is irreplaceable here: it converts satori's SVG into the OG
+> PNGs, and Bun's own `Bun.Image` cannot decode SVG at all.
+
+The trade is asymmetric — half a second on a build that runs once per deploy,
+against a segfault class on the deploy platform with no fallback. So `build`
+stays on Node. To revisit it: pin `BUN_VERSION` to a 1.4.x, confirm #20372 is
+closed, run `bun run verify:runtime` on a Linux x86_64 runner, and only then
+switch the Pages build command to `bun install && bun --bun run build`.
 
 ## Colour
 
