@@ -16,7 +16,8 @@ Keeping this boundary clear is what makes the next theme upgrade cheap.
 | `src/content/pages/` — `home`, `about`, `bookmarks`                                     | `src/utils/` except `schema.ts`, `src/i18n/` |
 | `src/content/bookmarks.yaml` — the bookmark links, as data                              | `src/layouts/` structure                     |
 | `src/utils/schema.ts` — all JSON-LD                                                     | everything else                              |
-| `public/favicon.svg`, `public/apple-touch-icon.png`                                     |                                              |
+| `public/favicon.svg`, `public/apple-touch-icon.png`, `public/CNAME`                     |                                              |
+| `.github/workflows/deploy.yml` — the Pages deploy                                       |                                              |
 
 ### Local edits against upstream
 
@@ -58,35 +59,49 @@ with `astro dev stop|status|logs`.
 
 ## Deploying
 
-Cloudflare Pages, connected to this repository. `koray.dev` is already a zone in
-the same Cloudflare account, so the custom domain wires itself up.
+GitHub Pages, built and published by
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) on every push to
+`main`. Nothing is committed to a branch; the workflow uploads `dist/` as a
+Pages artifact.
 
-| Setting                | Value                          |
-| :--------------------- | :----------------------------- |
-| Framework preset       | Astro                          |
-| Build command          | `bun install && bun run build` |
-| Build output directory | `dist`                         |
-| Production branch      | `main`                         |
-| Build variable         | `BUN_VERSION` = `1.4.2`        |
-| Build variable         | `NODE_VERSION` = `22.12.0`     |
+**One setting is not in this repo:** Settings → Pages → **Source** must be
+**GitHub Actions**. Without it the workflow runs green and publishes nothing.
 
-Three things about that build command are load-bearing:
+The workflow is the official [`withastro/action`](https://github.com/withastro/action),
+and three of its behaviours are what this project relies on:
 
-- **`bun install &&` is not redundant.** Pages publishes no lockfile-detection
-  rule for Bun — the Bun row of its build-image table has an empty File column
-  — and community reports say its automatic install recognises only the legacy
-  binary `bun.lockb`, not the text `bun.lock` that Bun ≥ 1.2 writes and that
-  this repo has. If that is right, an auto-install build fails with
-  `astro: command not found`. Running the install explicitly is idempotent and
-  correct either way.
-- **`bun run build`, not `astro build`.** Search is a Pagefind index generated
-  from `dist` _after_ the build; `astro build` alone ships a site whose
-  `/search` finds nothing.
-- **Pin `BUN_VERSION`.** Pages defaults to Bun 1.2.15 and states that tools
-  which do not follow semver — Bun by name — may be updated with three months'
-  notice. `package.json` `engines` cannot pin it: Pages documents that it does
-  not read `engines`, and Bun does not enforce it either
-  ([oven-sh/bun#5846](https://github.com/oven-sh/bun/issues/5846)).
+- It finds `bun.lock` — the text lockfile Bun ≥ 1.2 writes — installs with Bun,
+  **and separately installs Node** to run the build. That is exactly the split
+  this project wants, with no configuration.
+- It runs the package `build` script, so `astro check` and the Pagefind index
+  both happen. Do not override `build-cmd` with a bare `astro build`: search is
+  an index generated from `dist` _after_ the build, and `astro build` alone
+  ships a site whose `/search` finds nothing.
+- It publishes through `upload-pages-artifact` / `deploy-pages`, which serves
+  the artifact as-is. **Jekyll never runs**, so `_astro/` is safe and
+  `public/.nojekyll` is unnecessary. That file is folklore carried over from the
+  old deploy-from-a-branch flow; do not add it back.
+
+The branch-based limitation that made GitHub Pages a bad fit before — it only
+served `/` or `/docs` from a branch, so you had to commit the build — does not
+apply to the Actions flow.
+
+### Custom domain
+
+[`public/CNAME`](public/CNAME) contains `koray.dev`, which is what binds the
+domain; `site` in `astro-paper.config.ts` matches it and **`base` is
+deliberately unset**.
+
+DNS must point the apex at GitHub Pages' `A`/`AAAA` addresses. If the zone
+stays on Cloudflare, keep those records **DNS-only (grey cloud)**: a proxied
+record blocks the HTTP validation GitHub uses to issue the certificate, and the
+site answers with a TLS error rather than a redirect, which reads like a DNS
+problem and is not one.
+
+> Dropping the custom domain is not a one-line change. The site would move to
+> `https://raelsei.github.io/koray.dev/`, which makes `base: "/koray.dev"`
+> mandatory and rewrites every internal URL. `site` and `base` must be changed
+> together with the `CNAME`, or every asset 404s.
 
 ### Why Node builds this, not Bun
 
@@ -98,9 +113,9 @@ hands the actual work to Node. That is deliberate, and it is what
 
 Locally the Bun runtime looks fine: `bun run verify:runtime` produces
 **byte-identical** OG images and builds about 12% faster. That result is from
-macOS arm64 and does not transfer to the deploy target.
+macOS arm64 and does not transfer to CI.
 
-> **The blocker.** Pages builds on Ubuntu x86_64.
+> **The blocker.** GitHub's runners are Ubuntu x86_64.
 > [oven-sh/bun#20372](https://github.com/oven-sh/bun/issues/20372) — a `sharp`
 > segfault under Bun, labelled `napi` / `crash` / `linux` / `runtime` — is open
 > and unassigned, and its reporter notes it works on macOS arm64 and crashes on
@@ -108,10 +123,10 @@ macOS arm64 and does not transfer to the deploy target.
 > PNGs, and Bun's own `Bun.Image` cannot decode SVG at all.
 
 The trade is asymmetric — half a second on a build that runs once per deploy,
-against a segfault class on the deploy platform with no fallback. So `build`
-stays on Node. To revisit it: pin `BUN_VERSION` to a 1.4.x, confirm #20372 is
-closed, run `bun run verify:runtime` on a Linux x86_64 runner, and only then
-switch the Pages build command to `bun install && bun --bun run build`.
+against a segfault class on the build platform with no fallback. So `build`
+stays on Node. To revisit it: confirm #20372 is closed, run
+`bun run verify:runtime` on an `ubuntu-latest` runner, and only then set
+`build-cmd: bun --bun run build` on the action.
 
 ## Colour
 
@@ -194,8 +209,10 @@ rather than as a crumb of its own.
 ## Search Console
 
 `astro.config.ts` declares `PUBLIC_GOOGLE_SITE_VERIFICATION` as an optional
-public env var. Set it in the Cloudflare Pages project and the verification
-meta tag appears on every page; leave it unset and no tag is emitted.
+public env var. It is read at build time, so it has to be set where the build
+runs: add it to the `env:` block of the `withastro/action` step in
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), sourced from a
+repository variable or secret. Leave it unset and no tag is emitted.
 
 ## Generated
 

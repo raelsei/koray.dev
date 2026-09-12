@@ -1,4 +1,4 @@
-# build output — Cloudflare Pages builds this, it is never committed
+# build output — CI builds and uploads this, it is never committed
 dist/
 
 # generated types and font cache

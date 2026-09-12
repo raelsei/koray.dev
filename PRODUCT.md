@@ -68,8 +68,9 @@ split if it carries two.
 **Development.** `bun dev` serves `localhost:4321`; per `AGENTS.md`, start it as
 `astro dev --background` and manage it with `astro dev stop|status|logs`.
 `bunx astro check` type-checks components, TypeScript, and content schemas.
-Deployment is Cloudflare Pages from `main` (`bun run build` → `dist`), with
-preview URLs on other branches; the `koray.dev` zone is in the same account.
+Deployment is GitHub Pages, published by `.github/workflows/deploy.yml` on
+every push to `main` (`bun run build` → `dist`, uploaded as a Pages artifact).
+The custom domain is bound by `public/CNAME`; `base` stays unset because of it.
 
 ## Capabilities and Constraints
 
@@ -154,8 +155,9 @@ Confirmed real by the user — all of it is citable as fact:
   `the-label-was-not-the-identity`. The first and last are `featured: true`.
 - **Published elsewhere on the site:** the advisory offer and the house rules
   (`/about`), and two tool links (`/bookmarks`).
-- **Assets:** `public/favicon.svg` is the only binary asset; OG images are
-  generated per post at build time.
+- **Assets:** `public/favicon.svg` and `public/apple-touch-icon.png` (rasterised
+  180×180 from the favicon) are the only binary assets; OG images are generated
+  per post at build time.
 
 **Still true, but no longer published.** The redesign narrowed the site to the
 theme's own information architecture, so these facts left the site without
