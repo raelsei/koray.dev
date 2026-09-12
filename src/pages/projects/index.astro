@@ -7,6 +7,7 @@ import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
 import { itemList, page as pageNode } from "@/utils/schema";
 import { groupProjects, hasWriteup, projectUrl } from "@/utils/projects";
+import { toTransitionName } from "@/utils/toTransitionName";
 import config from "@/config";
 
 const intro = await getEntry("pages", "projects");
@@ -81,7 +82,19 @@ const schema = [
                     "focus-visible:no-underline focus-visible:underline-offset-0",
                   ]}
                 >
-                  <h3>{name}</h3>
+                  {/* Named only when there is a page to morph into. An
+                      external row has no second half, and a name present on
+                      one side animates as an exit — which reads as a glitch
+                      rather than a transition. */}
+                  <h3
+                    style={
+                      internal
+                        ? { viewTransitionName: toTransitionName(project.id) }
+                        : undefined
+                    }
+                  >
+                    {name}
+                  </h3>
                 </a>
 
                 {/* Status, dates and language are metadata, not prose: one

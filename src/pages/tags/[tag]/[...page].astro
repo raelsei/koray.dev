@@ -67,9 +67,13 @@ const schema = [
 
   <Breadcrumb />
 
+  {/* `Tag.astro` already names each chip after the tag slug, but nothing here
+      carried the matching name, so that directive animated an exit and read as
+      a flicker. Naming the h1 the same makes the chip morph into it. */}
   <Main
     pageTitle={`${t.pages.tagTitle}: ${tagName}`}
     pageDesc={`${t.pages.tagDesc} "${tagName}".`}
+    titleTransitionName={Astro.params.tag}
   >
     <ul>
       {page.data.map(data => (

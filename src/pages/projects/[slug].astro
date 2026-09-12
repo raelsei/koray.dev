@@ -8,6 +8,7 @@ import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
 import { page as pageNode, project as projectNode } from "@/utils/schema";
 import { hasWriteup, type Project } from "@/utils/projects";
+import { toTransitionName } from "@/utils/toTransitionName";
 import config from "@/config";
 
 // Only entries with something written in them. An entry that is just
@@ -58,7 +59,7 @@ const links = [
 
   <Breadcrumb />
 
-  <Main pageTitle={name}>
+  <Main pageTitle={name} titleTransitionName={toTransitionName(project.id)}>
     <div class="text-muted-foreground flex flex-wrap items-center gap-x-2 text-sm">
       {status && <span>{status}</span>}
       {status && period && <span aria-hidden="true">·</span>}
