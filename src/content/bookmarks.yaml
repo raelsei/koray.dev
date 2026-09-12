@@ -1,0 +1,12 @@
+# Tools that were reopened. Nothing is listed here speculatively — if it is on
+# this page it earned its place by being opened a second time.
+- id: tools
+  group: Tools
+  order: 1
+  links:
+    - name: Shots
+      url: https://shots.so/
+      note: Mockups and animated device frames, in a click.
+    - name: Better-T-Stack
+      url: https://www.better-t-stack.dev/
+      note: Scaffolds an end-to-end type-safe TypeScript project.

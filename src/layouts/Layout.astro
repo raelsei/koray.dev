@@ -4,6 +4,7 @@ import { ClientRouter } from "astro:transitions";
 import { getRelativeLocaleUrl } from "astro:i18n";
 import { resolveDefaultOgImagePath } from "@/utils/resolveDefaultOgImagePath";
 import { getAssetPath } from "@/utils/withBase";
+import { graph } from "@/utils/schema";
 import config from "@/config";
 import "@/styles/global.css";
 
@@ -12,6 +13,11 @@ type Props = {
   description?: string;
   ogImage?: string;
   canonicalURL?: string;
+  /**
+   * Page-specific JSON-LD nodes. The Person and WebSite are added here, so a
+   * route only declares what is unique to itself.
+   */
+  schema?: Record<string, unknown>[];
   /** Keeps a utility page (search, 404) out of the index while still following links. */
   noindex?: boolean;
 };
@@ -23,6 +29,7 @@ const {
   description = site.description,
   ogImage = resolveDefaultOgImagePath(config),
   canonicalURL = new URL(Astro.url.pathname, Astro.site).href,
+  schema = [],
   noindex = false,
 } = Astro.props;
 
@@ -52,6 +59,13 @@ const ogLocale =
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href={getAssetPath("favicon.svg")} />
+    {/* iOS ignores the SVG icon; without this, a home-screen bookmark gets a
+        screenshot of the page instead of a mark. */}
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href={getAssetPath("apple-touch-icon.png")}
+    />
     {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
@@ -97,17 +111,19 @@ const ogLocale =
         and stays right with JavaScript off; theme.ts rewrites it on toggle. */}
     <meta name="theme-color" content="#08090a" />
 
-    <!-- Extra head content injected by child layouts (e.g. JSON-LD, article meta) -->
+    {/* One graph per document: the sitewide Person and WebSite, whatever the
+        route declared, and a breadcrumb derived from the canonical path. */}
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={JSON.stringify(graph(config, canonicalURL, schema))}
+    ></script>
+    <!-- Extra head content injected by child layouts (e.g. article meta) -->
     <slot name="head" />
 
-    {
-      site.googleVerification && (
-        <meta
-          name="google-site-verification"
-          content={site.googleVerification}
-        />
-      )
-    }
+    {site.googleVerification && (
+      <meta name="google-site-verification" content={site.googleVerification} />
+    )}
 
     <!--
       Inline FOUC-prevention script: sets data-theme on <html> before
@@ -127,12 +143,9 @@ const ogLocale =
         window.__theme = { value: theme };
       })();
     </script>
-
     <ClientRouter />
   </head>
-  <body
-    class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col"
-  >
+  <body class="bg-background font-app text-foreground selection:bg-accent/75 selection:text-accent-foreground flex min-h-svh flex-col">
     <slot />
     <script>
       import "@/scripts/theme";

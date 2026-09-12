@@ -22,9 +22,7 @@ const { title, description, ...props } = data;
       "focus-visible:no-underline focus-visible:underline-offset-0",
     ]}
   >
-    <Heading transition:name={toTransitionName(id)}>
-      {title}
-    </Heading>
+    <Heading transition:name={toTransitionName(id)}>{title}</Heading>
   </a>
   <Datetime {...props} />
   <p>{description}</p>

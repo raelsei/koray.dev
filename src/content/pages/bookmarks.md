@@ -4,10 +4,5 @@ description: "Tools worth opening — the ones I reach for while making somethin
 ---
 
 Tools I open when I am making something, rather than reading about it.
-Everything here earned its place by being reopened.
-
-## Tools
-
-- [Shots](https://shots.so/) — mockups and animated device frames, in a click.
-- [Better-T-Stack](https://www.better-t-stack.dev/) — scaffolds an end-to-end
-  type-safe TypeScript project.
+Everything here earned its place by being reopened, so the list is short on
+purpose and grows slowly.

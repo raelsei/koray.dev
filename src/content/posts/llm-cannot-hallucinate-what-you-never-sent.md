@@ -36,23 +36,25 @@ This is the rule.
 ```typescript file="assemble.ts" accent
 const lines = [
   `baseline: ${renderBaseline(input)}`,
-  signals.length ? `signals: ${rank(signals).slice(0, 3).map(render).join('; ')}` : null,
+  signals.length
+    ? `signals: ${rank(signals).slice(0, 3).map(render).join("; ")}`
+    : null,
   phase ? `phase: ${renderPhase(phase)}` : null,
 ];
 
-const facts = lines.filter((l): l is string => l !== null).join('\n');
+const facts = lines.filter((l): l is string => l !== null).join("\n");
 ```
 
 There is no `signals: none`. No `phase: unknown`. No null placeholder, no empty
-string, no `N/A`. A missing fact produces a missing *line*.
+string, no `N/A`. A missing fact produces a missing _line_.
 
 A blank field is an invitation. The model reads a labelled slot with nothing in
 it and fills it, because that is what the shape of the text asks for. An absent
 field asks for nothing.
 
-Pair it with a prose rule that says what to do with the gap: *when a signal is
+Pair it with a prose rule that says what to do with the gap: _when a signal is
 given, that signal is the headline; if none is given, stay at the coarse level
-and invent nothing.* The system then degrades to vaguer-but-true instead of
+and invent nothing._ The system then degrades to vaguer-but-true instead of
 specific-and-false.
 
 > The model's factual ceiling is what you physically put in the string. The

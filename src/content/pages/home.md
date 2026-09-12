@@ -1,5 +1,6 @@
 ---
 title: "I build financial products with small teams and large models."
+seoTitle: "koray.dev — fintech, applied AI, and small teams"
 description: "Koray Güler — founder and product engineer. Fintech, applied AI, and small teams. Notes on money, models and shipping alone."
 ---
 

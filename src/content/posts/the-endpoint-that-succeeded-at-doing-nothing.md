@@ -13,9 +13,12 @@ everything else. Standard move: a tiny endpoint the client pings, and don't make
 the user wait for it.
 
 ```typescript file="beacon.ts"
-export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: Request,
+  ctx: { params: Promise<{ id: string }> }
+) {
   const { id } = await ctx.params;
-  void bumpViews(id).catch(() => {});      // don't block the response
+  void bumpViews(id).catch(() => {}); // don't block the response
   return new Response(null, { status: 204 });
 }
 ```
@@ -31,7 +34,7 @@ way to see it is to go and read the row.
 
 My first explanation was a compatibility flag about carrying promise resolution
 across request contexts. That flag is real, it was enabled, and it is not what
-happened — it governs continuations scheduled from a *different* request.
+happened — it governs continuations scheduled from a _different_ request.
 
 The actual rule is duller and much more important: this runtime cancels any
 promise still pending when the invocation ends, unless it was handed to the
@@ -46,7 +49,10 @@ commit. I never established where. From the outside the only observable was the
 ## await the thing everyone tells you not to await
 
 ```typescript file="beacon.ts" accent
-export async function POST(req: Request, ctx: { params: Promise<{ id: string }> }) {
+export async function POST(
+  req: Request,
+  ctx: { params: Promise<{ id: string }> }
+) {
   const { id } = await ctx.params;
   try {
     await bumpViews(id);
@@ -66,7 +72,7 @@ anything.
 > normal server that is the process, and it never asks. Here it is the platform,
 > and it wants to be asked explicitly.
 
-Being honest about this fix: awaiting is the *second* best answer. The platform's
+Being honest about this fix: awaiting is the _second_ best answer. The platform's
 background-work API extends execution for a bounded window after the response is
 sent, and analytics writes are the textbook use for it. I awaited because the
 framework's route handler does not hand me the platform context, so that API is

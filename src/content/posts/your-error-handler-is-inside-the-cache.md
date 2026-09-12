@@ -10,13 +10,13 @@ tags: [caching, correctness]
 The page loader did the defensive, obviously-correct thing:
 
 ```typescript file="page-data.ts"
-'use cache';
+"use cache";
 
 export async function getPage(slug: string) {
   try {
-    return await cms.fetchOne('pages', slug);
+    return await cms.fetchOne("pages", slug);
   } catch {
-    return undefined;               // degrade gracefully
+    return undefined; // degrade gracefully
   }
 }
 ```
@@ -36,18 +36,18 @@ our own opinion of it.
 ## the fix is a deletion
 
 ```typescript file="page-data.ts" accent
-'use cache';
+"use cache";
 
 // Deliberately uncaught. This cache stores what a function returns, and an
 // absent page and an unreachable backend must not return the same thing.
 // Catching here converts a half-minute outage into a full-lifetime one.
 export async function getPage(slug: string) {
-  return cms.fetchOne('pages', slug);
+  return cms.fetchOne("pages", slug);
 }
 ```
 
 Let it throw. Nothing is stored, so the next request retries and the page heals
-itself. An empty result from a query that *succeeded* is still perfectly
+itself. An empty result from a query that _succeeded_ is still perfectly
 cacheable.
 
 The comment is load-bearing. The next person to read this file will want to put
@@ -94,7 +94,7 @@ gone — which crawlers remember better than we did. A 5xx tells them to come ba
 The larger caveat is that the fix rests on a guarantee I did not write and cannot
 find documented: that this cache layer stores returned values and not rejected
 ones. I verified it; it is not a promise. It also does not generalise — one layer
-down, a fetch that resolves to a 500 is a *returned* response and gets stored
+down, a fetch that resolves to a 500 is a _returned_ response and gets stored
 like any other value.
 
 Which is the same shape as the comment two sections up. If that behaviour is ever

@@ -21,13 +21,17 @@ everybody agrees a key should never live.
 // The wrapping key is created non-extractable and stored as a live key handle,
 // never as bytes. Storage inspection yields an opaque object and ciphertext.
 const wrapper = await crypto.subtle.generateKey(
-  { name: 'AES-GCM', length: 256 },
-  false,                                   // ← the entire security delta
-  ['encrypt', 'decrypt'],
+  { name: "AES-GCM", length: 256 },
+  false, // ← the entire security delta
+  ["encrypt", "decrypt"]
 );
 
 const iv = crypto.getRandomValues(new Uint8Array(12));
-const sealed = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, wrapper, secret);
+const sealed = await crypto.subtle.encrypt(
+  { name: "AES-GCM", iv },
+  wrapper,
+  secret
+);
 secret.fill(0);
 
 await store.put({ sealed, iv, wrapper, expiresAt });
@@ -36,7 +40,7 @@ await store.put({ sealed, iv, wrapper, expiresAt });
 The plaintext is zeroed after sealing and again after every unseal. Loading
 checks expiry first and an expired record deletes itself rather than handing back
 a key that would fail later as an opaque signature error. Clearing removes the
-ciphertext *and* the wrapper. Signing out treats that deletion as a
+ciphertext _and_ the wrapper. Signing out treats that deletion as a
 precondition — if it throws, the sign-out aborts loudly, because the alternative
 is leaving a signing-capable tab on a shared machine while the UI says otherwise.
 
@@ -45,7 +49,7 @@ is leaving a signing-capable tab on a shared machine while the UI says otherwise
 Three weaker versions fail in ways worth naming. A raw key in storage is
 readable by any script and exfiltrable forever. A key encrypted under a
 passphrase-derived or byte-stored key sits next to its own unlock material, so
-the encryption is decoration. A key encrypted under an *extractable* wrapper is
+the encryption is decoration. A key encrypted under an _extractable_ wrapper is
 exported once and held offline.
 
 Non-extractability changes what an attacker walks away with. It does not change
@@ -86,7 +90,7 @@ ceiling would be self-dealing by construction.
 ## the expiry encoding is a joke that works
 
 There is no expiry field in the delegation. The convention is that the timestamp
-is appended to the delegation's human-readable *display name*, and parsed back
+is appended to the delegation's human-readable _display name_, and parsed back
 out of it upstream.
 
 I want to be rude about this and cannot entirely, because it has a real

@@ -5,6 +5,7 @@ import Header from "@/components/Header.astro";
 import Breadcrumb from "@/components/Breadcrumb.astro";
 import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
+import { page as pageNode } from "@/utils/schema";
 import config from "@/config";
 
 const about = await getEntry("pages", "about");
@@ -16,13 +17,27 @@ if (!about) {
 }
 
 const { Content } = await render(about);
+
+const canonical =
+  about.data.canonicalURL ?? new URL(Astro.url.pathname, Astro.site).href;
+
+// ProfilePage, with the sitewide Person as its main entity: this is the page
+// that tells a crawler who the site is about.
+const schema = [
+  pageNode(config, canonical, {
+    kind: "ProfilePage",
+    name: about.data.title,
+    description: about.data.description,
+  }),
+];
 ---
 
 <Layout
   title={`${about.data.title} | ${config.site.title}`}
   description={about.data.description}
   ogImage={about.data.ogImage}
-  canonicalURL={about.data.canonicalURL}
+  canonicalURL={canonical}
+  {schema}
 >
   <Header />
 

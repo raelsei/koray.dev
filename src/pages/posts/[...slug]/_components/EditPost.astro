@@ -19,19 +19,17 @@ const showEditPost = editPost.enabled && !hideEditPost && href.trim() !== "";
 const t = useTranslations(Astro.currentLocale);
 ---
 
-{
-  showEditPost && (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      class:list={[
-        "hover:text-accent text-muted-foreground flex justify-baseline gap-1.5",
-        className,
-      ]}
-    >
-      <IconEdit class="inline-block" />
-      <span>{t.post.editPage}</span>
-    </a>
-  )
-}
+{showEditPost && (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    class:list={[
+      "hover:text-accent text-muted-foreground flex justify-baseline gap-1.5",
+      className,
+    ]}
+  >
+    <IconEdit class="inline-block" />
+    <span>{t.post.editPage}</span>
+  </a>
+)}

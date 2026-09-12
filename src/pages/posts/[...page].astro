@@ -9,6 +9,8 @@ import Card from "@/components/Card.astro";
 import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
 import { getSortedPosts } from "@/utils/getSortedPosts";
+import { getPostUrl } from "@/utils/getPostPaths";
+import { itemList, page as pageNode } from "@/utils/schema";
 import { useTranslations } from "@/i18n";
 import config from "@/config";
 
@@ -21,11 +23,29 @@ const { page } = Astro.props;
 
 const locale = Astro.currentLocale ?? config.site.lang;
 const t = useTranslations(locale);
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+
+const schema = [
+  pageNode(config, canonical, {
+    kind: "CollectionPage",
+    name: t.pages.postsTitle,
+    description: t.pages.postsDesc,
+  }),
+  itemList(
+    canonical,
+    page.data.map(post => ({
+      name: post.data.title,
+      url: new URL(getPostUrl(post.id, post.filePath, locale), Astro.site).href,
+    }))
+  ),
+];
 ---
 
 <Layout
   title={`${t.pages.postsTitle}${page.currentPage > 1 ? ` (${t.pagination.page} ${page.currentPage})` : ""} | ${config.site.title}`}
   description={t.pages.postsDesc}
+  canonicalURL={canonical}
+  {schema}
 >
   <Header />
 
@@ -33,7 +53,9 @@ const t = useTranslations(locale);
 
   <Main pageTitle={t.pages.postsTitle} pageDesc={t.pages.postsDesc}>
     <ul>
-      {page.data.map(data => <Card {...data} />)}
+      {page.data.map(data => (
+        <Card {...data} />
+      ))}
     </ul>
   </Main>
 

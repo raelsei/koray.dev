@@ -30,7 +30,7 @@ Call the real assembly function and hash its output — the actual string that w
 be sent, not a subset and not a normalised copy.
 
 This inverts the maintenance burden. Before, adding a field to the prompt meant
-remembering to add it to the key. Now adding a field to the prompt *is* adding it
+remembering to add it to the key. Now adding a field to the prompt _is_ adding it
 to the key.
 
 One deliberate exception: the input text is trimmed before hashing, so a resubmit
@@ -53,7 +53,7 @@ something anyone can construct in milliseconds. And the consequence of a
 collision on this cache is serving one user the text generated for another.
 
 Two corrections, both cheap. Use a truncated cryptographic digest, so a collision
-cannot be *aimed*. And namespace the key by user and day, so even an accidental
+cannot be _aimed_. And namespace the key by user and day, so even an accidental
 one cannot cross a tenant boundary. The second is what the earlier version was
 missing entirely: it had no user component at all, which made the sizing argument
 doubly irrelevant — it was reasoning about the birthday bound of a namespace it

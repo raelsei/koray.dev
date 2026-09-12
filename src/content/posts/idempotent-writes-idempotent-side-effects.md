@@ -12,7 +12,7 @@ batch can arrive more than once — a retry, a relaunch with queued work, a seco
 device echoing back its own write. So the write is an upsert keyed on a
 client-minted id, and replaying it is a no-op. That part took an afternoon.
 
-The part that took longer: the write also *causes* things. A streak advances,
+The part that took longer: the write also _causes_ things. A streak advances,
 points are awarded, achievements unlock, and the interface fires a celebration.
 None of those are naturally idempotent, and the layer underneath them is designed
 to be replayed and to report success every time.
@@ -99,7 +99,7 @@ That guard is client-side: an in-flight flag that coalesces pushes at the source
 with a comment saying it exists for the animation and not for correctness.
 
 The complementary problem is stranger. Two consecutive pushes producing an
-*identical* aggregate should still celebrate twice, and value equality swallows
+_identical_ aggregate should still celebrate twice, and value equality swallows
 the second. So the emitted value carries a fresh id per emission purely to trip
 the change observer — a deliberate inequality, for a UI watching for change
 rather than reading state.
@@ -115,7 +115,7 @@ tolerates this and `do update` does not, which is why the awards insert never hi
 it and the entries insert did.
 
 The award diff has a smaller hole. Under read-committed, `do nothing` may skip a
-row conflicting with an *uncommitted* concurrent insert without waiting for it.
+row conflicting with an _uncommitted_ concurrent insert without waiting for it.
 If that transaction rolls back, the award is neither returned nor recorded. The
 next write re-derives it, so it self-heals — but it means the returned set is
 "what this call recorded", not quite "what became true".

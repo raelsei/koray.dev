@@ -23,7 +23,7 @@ what number the signed request must contain.
 // core range. Group zero is the venue's own list and must never be offset.
 export const wireAddress = (groupIndex: number, localIndex: number) => {
   if (groupIndex === 0) return localIndex;
-  if (groupIndex < 0) throw new RangeError('unknown listing group');
+  if (groupIndex < 0) throw new RangeError("unknown listing group");
   return ADDRESS_BASE + groupIndex * GROUP_SPAN + localIndex;
 };
 ```
@@ -66,7 +66,7 @@ looks exactly like a panel showing a true zero.
 
 A trailing-zero strip in the serialiser ate the zeros of whole-number sizes.
 Different function, different week, same underlying move: a value was treated
-according to how it *reads* rather than what it *is*.
+according to how it _reads_ rather than what it _is_.
 
 Three bugs, all on the money path, all from the same root, all invisible to the
 compiler because every identity in the system is spelled `string` or `number`.

@@ -28,7 +28,8 @@ export default defineConfig({
         // /search/ is noindex; listing it in the sitemap is a mixed signal.
         if (page.endsWith("/search/")) return false;
         return (
-          config.features?.showArchives !== false || !page.endsWith("/archives/")
+          config.features?.showArchives !== false ||
+          !page.endsWith("/archives/")
         );
       },
     }),

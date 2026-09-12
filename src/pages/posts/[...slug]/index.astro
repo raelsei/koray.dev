@@ -98,11 +98,13 @@ const ogImage = ogImageUrl
 
 <PostLayout
   title={`${title} | ${config.site.title}`}
+  headline={title}
   description={description}
   ogImage={ogImage}
   canonicalURL={canonicalURL}
   pubDatetime={pubDatetime}
   modDatetime={modDatetime}
+  {tags}
 >
   <Header />
 
@@ -152,7 +154,9 @@ const ogImage = ogImageUrl
     <BackToTopButton />
 
     <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />)}
+      {tags.map(tag => (
+        <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />
+      ))}
     </ul>
 
     <ShareLinks />

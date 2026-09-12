@@ -10,6 +10,7 @@ import Socials from "@/components/Socials.astro";
 import Card from "@/components/Card.astro";
 import LinkButton from "@/components/LinkButton.astro";
 import { getSortedPosts } from "@/utils/getSortedPosts";
+import { page as pageNode } from "@/utils/schema";
 import { useTranslations } from "@/i18n";
 import config from "@/config";
 
@@ -34,9 +35,28 @@ if (!hero) {
 }
 
 const { Content: HeroContent } = await render(hero);
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+
+// The sentence in the heading is the page's thesis, not a usable <title>; the
+// document title comes from `seoTitle` so tabs and search results stay legible.
+const documentTitle = hero.data.seoTitle ?? config.site.title;
+
+const schema = [
+  pageNode(config, canonical, {
+    kind: "WebPage",
+    name: documentTitle,
+    description: hero.data.description,
+  }),
+];
 ---
 
-<Layout>
+<Layout
+  title={documentTitle}
+  description={hero.data.description}
+  canonicalURL={canonical}
+  {schema}
+>
   <Header />
   <main
     id="main-content"
@@ -68,50 +88,42 @@ const { Content: HeroContent } = await render(hero);
             aria-label="RSS Feed"
             title="RSS Feed"
           >
-            <IconRss
-              class="stroke-accent inline-block size-6 scale-110 stroke-2 opacity-90 rtl:-rotate-90"
-            />
+            <IconRss class="stroke-accent inline-block size-6 scale-110 stroke-2 opacity-90 rtl:-rotate-90" />
             <span class="sr-only">RSS Feed</span>
           </a>
         </div>
       </div>
     </section>
 
-    {
-      featuredPosts.length > 0 && (
-        <section
-          id="featured"
-          class:list={[
-            "pt-12 pb-6",
-            { "border-border border-b": recentPosts.length > 0 },
-          ]}
-        >
-          <h2 class="text-2xl font-semibold tracking-wide">
-            {t.home.featured}
-          </h2>
-          <ul>
-            {featuredPosts.map(data => (
-              <Card variant="h3" {...data} />
-            ))}
-          </ul>
-        </section>
-      )
-    }
+    {featuredPosts.length > 0 && (
+      <section
+        id="featured"
+        class:list={[
+          "pt-12 pb-6",
+          { "border-border border-b": recentPosts.length > 0 },
+        ]}
+      >
+        <h2 class="text-2xl font-semibold tracking-wide">{t.home.featured}</h2>
+        <ul>
+          {featuredPosts.map(data => (
+            <Card variant="h3" {...data} />
+          ))}
+        </ul>
+      </section>
+    )}
 
-    {
-      recentPosts.length > 0 && (
-        <section id="recent-posts" class="pt-12 pb-6">
-          <h2 class="text-2xl font-semibold tracking-wide">
-            {t.home.recentPosts}
-          </h2>
-          <ul>
-            {recentPosts.slice(0, postsConfig.perIndex).map(data => (
-              <Card variant="h3" {...data} />
-            ))}
-          </ul>
-        </section>
-      )
-    }
+    {recentPosts.length > 0 && (
+      <section id="recent-posts" class="pt-12 pb-6">
+        <h2 class="text-2xl font-semibold tracking-wide">
+          {t.home.recentPosts}
+        </h2>
+        <ul>
+          {recentPosts.slice(0, postsConfig.perIndex).map(data => (
+            <Card variant="h3" {...data} />
+          ))}
+        </ul>
+      </section>
+    )}
 
     <div class="my-8 text-center">
       <LinkButton href={getRelativeLocaleUrl(locale, "posts")}>

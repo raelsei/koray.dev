@@ -20,7 +20,7 @@ correlated with attention by construction.
 
 First fix was a per-process throttle. It was wrong twice.
 
-It was per-*instance*, so it bounded nothing horizontally — two containers meant
+It was per-_instance_, so it bounded nothing horizontally — two containers meant
 two budgets, and the number it enforced was a number nobody had chosen. And it
 sat in front of the scheduled retry as well, which was the mechanism supposed to
 refill the cache once quota recovered. The throttle's job was to protect the

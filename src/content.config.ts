@@ -1,6 +1,6 @@
 import { defineCollection } from "astro:content";
 import { z } from "astro/zod";
-import { glob } from "astro/loaders";
+import { file, glob } from "astro/loaders";
 import config from "@/config";
 
 export const BLOG_PATH = "src/content/posts";
@@ -28,10 +28,37 @@ const pages = defineCollection({
   loader: glob({ pattern: "**/[^_]*.{md,mdx}", base: "./src/content/pages" }),
   schema: z.object({
     title: z.string(),
+    /**
+     * Document title when the visible heading is the wrong length for a tab or
+     * a search result. The home page's heading is a full sentence.
+     */
+    seoTitle: z.string().optional(),
     description: z.string().optional(),
     ogImage: z.string().optional(),
     canonicalURL: z.string().optional(),
   }),
 });
 
-export const collections = { posts, pages };
+/**
+ * Bookmarks are data, not prose: the page renders them and also emits them as
+ * an `ItemList`, and prose cannot be read twice like that.
+ */
+const bookmarks = defineCollection({
+  loader: file("src/content/bookmarks.yaml"),
+  schema: z.object({
+    id: z.string(),
+    group: z.string(),
+    order: z.number(),
+    links: z
+      .array(
+        z.object({
+          name: z.string(),
+          url: z.url(),
+          note: z.string(),
+        })
+      )
+      .min(1),
+  }),
+});
+
+export const collections = { posts, pages, bookmarks };

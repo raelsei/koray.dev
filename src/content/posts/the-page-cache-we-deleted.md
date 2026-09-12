@@ -29,7 +29,7 @@ them in a row.
 ## what we were actually paying for
 
 Object storage bills writes at roughly twelve times reads. So the question is not
-"does the cache hit" but *how many writes does one useful read cost*.
+"does the cache hit" but _how many writes does one useful read cost_.
 
 Rendered HTML is the bad shape. Pages are numerous, individually low-value, and
 revalidate on a timer — so the store is charged a write per page per window
@@ -82,7 +82,7 @@ hurts.
 ## when this stops working
 
 The single-flight map is module scope, which on this runtime means per isolate.
-It collapses concurrent misses *inside* one isolate; it does nothing across the
+It collapses concurrent misses _inside_ one isolate; it does nothing across the
 fleet. A globally cold key still costs one write per location that gets asked —
 the same fan-out the page cache died of, reduced by a couple of orders of
 magnitude rather than removed. If that ever stops being enough, the honest next

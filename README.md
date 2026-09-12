@@ -8,31 +8,43 @@ content and identity on top.
 
 Keeping this boundary clear is what makes the next theme upgrade cheap.
 
-| Ours | The theme's |
-| :--- | :--- |
-| `astro-paper.config.ts` — domain, author, timezone, socials, share links, feature flags | every component under `src/components/` |
-| `src/styles/theme.css` — the seven colour tokens, light and dark | `src/styles/global.css`, `typography.css` |
-| `src/content/posts/` — the writing | every route under `src/pages/` |
-| `src/content/pages/` — `home`, `about`, `bookmarks` | `src/utils/`, `src/i18n/`, `src/layouts/` |
-| `public/favicon.svg` | everything else |
+| Ours                                                                                    | The theme's                                  |
+| :-------------------------------------------------------------------------------------- | :------------------------------------------- |
+| `astro-paper.config.ts` — domain, author, timezone, socials, share links, feature flags | every component under `src/components/`      |
+| `src/styles/theme.css` — the seven colour tokens, light and dark                        | `src/styles/global.css`, `typography.css`    |
+| `src/content/posts/` — the writing                                                      | every route under `src/pages/`               |
+| `src/content/pages/` — `home`, `about`, `bookmarks`                                     | `src/utils/` except `schema.ts`, `src/i18n/` |
+| `src/content/bookmarks.yaml` — the bookmark links, as data                              | `src/layouts/` structure                     |
+| `src/utils/schema.ts` — all JSON-LD                                                     | everything else                              |
+| `public/favicon.svg`, `public/apple-touch-icon.png`                                     |                                              |
 
-Three files carry a local edit against upstream, each marked with a comment
-explaining why: `src/pages/index.astro` (hero copy read from the content
-collection, feed icon moved into the social row), `src/components/Header.astro`
-plus `src/i18n/` (the `Bookmarks` nav entry), and `astro.config.ts` (dark code
-theme). Everything else is upstream, so a theme bump is a merge, not a rewrite.
+### Local edits against upstream
+
+Each is marked with a comment explaining why. Keeping this list short is what
+makes a theme bump a merge rather than a rewrite.
+
+| File                                       | Edit                                                                                                                                                    |
+| :----------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/pages/index.astro`                    | Hero copy read from the content collection; feed icon moved into the social row                                                                         |
+| `src/components/Header.astro`, `src/i18n/` | The `Bookmarks` nav entry                                                                                                                               |
+| `astro.config.ts`                          | Dark code theme; `/search/` filtered out of the sitemap                                                                                                 |
+| `src/layouts/Layout.astro`                 | `schema` and `noindex` props; dead `favicon.ico` link removed; `og:locale`; static `theme-color`; `apple-touch-icon`; RSS href without a trailing slash |
+| `src/layouts/PostLayout.astro`             | Post JSON-LD routed through the shared graph instead of its own block                                                                                   |
+| `src/pages/search.astro`                   | Dev notice only when the index is genuinely missing, naming `bun run build`                                                                             |
+| `src/content.config.ts`                    | `seoTitle` on pages; the `bookmarks` collection                                                                                                         |
+| Listing and page routes                    | Page-specific JSON-LD, and the meta description the theme rendered but never set                                                                        |
 
 ## Commands
 
-| Command | Action |
-| :--- | :--- |
-| `bun install` | Install dependencies |
-| `bun dev` | Dev server on `localhost:4321` |
-| `bun run build` | Type-check, build to `./dist/`, then index with Pagefind |
-| `bun preview` | Serve the build locally |
-| `bunx astro check` | Type-check `.astro`, `.ts`, and content schemas |
-| `bun run format` | Prettier |
-| `bun run lint` | ESLint |
+| Command            | Action                                                   |
+| :----------------- | :------------------------------------------------------- |
+| `bun install`      | Install dependencies                                     |
+| `bun dev`          | Dev server on `localhost:4321`                           |
+| `bun run build`    | Type-check, build to `./dist/`, then index with Pagefind |
+| `bun preview`      | Serve the build locally                                  |
+| `bunx astro check` | Type-check `.astro`, `.ts`, and content schemas          |
+| `bun run format`   | Prettier                                                 |
+| `bun run lint`     | ESLint                                                   |
 
 Per `AGENTS.md`, start the dev server as `astro dev --background` and manage it
 with `astro dev stop|status|logs`.
@@ -47,12 +59,12 @@ with `astro dev stop|status|logs`.
 Cloudflare Pages, connected to this repository. `koray.dev` is already a zone in
 the same Cloudflare account, so the custom domain wires itself up.
 
-| Setting | Value |
-| :--- | :--- |
-| Framework preset | Astro |
-| Build command | `bun run build` |
-| Build output directory | `dist` |
-| Production branch | `main` |
+| Setting                | Value           |
+| :--------------------- | :-------------- |
+| Framework preset       | Astro           |
+| Build command          | `bun run build` |
+| Build output directory | `dist`          |
+| Production branch      | `main`          |
 
 `bun run build` must be the build command, not `astro build`: search is a
 Pagefind index generated from `dist` after the build, and `astro build` alone
@@ -110,16 +122,48 @@ featured: true
 A fenced block gains a filename caption when the fence carries a filename, and a
 copy button either way.
 
+## Structured data
+
+Every page emits exactly one `application/ld+json` block containing a single
+`@graph`. Entities are declared once with a stable `@id` and referenced by
+`@id` thereafter, so the `Person` and `WebSite` are never duplicated inside a
+document and a crawler reading two pages sees the same two entities. All of it
+is built in [`src/utils/schema.ts`](src/utils/schema.ts); a route passes only
+what is unique to itself through `Layout`'s `schema` prop.
+
+| Route                   | Nodes                                                          |
+| :---------------------- | :------------------------------------------------------------- |
+| all                     | `Person` · `WebSite` · `BreadcrumbList` (except the home page) |
+| `/`                     | `WebPage`                                                      |
+| `/about`                | `ProfilePage`, with the `Person` as its `mainEntity`           |
+| `/posts`, `/tags/<tag>` | `CollectionPage` · `ItemList` of the posts on that page        |
+| `/tags`, `/archives`    | `CollectionPage`                                               |
+| `/bookmarks`            | `CollectionPage` · `ItemList` of the links                     |
+| `/posts/<slug>`         | `WebPage` · `BlogPosting`, authored by the `Person`            |
+
+Breadcrumbs are derived from the canonical path, so they cannot drift from the
+visible `Breadcrumb` component, and a numeric segment renders as `Page 2`
+rather than as a crumb of its own.
+
+> A dangling `@id` — a reference to a node the document never declares — is the
+> failure mode worth testing for. Nothing validates it at build time.
+
+## Search Console
+
+`astro.config.ts` declares `PUBLIC_GOOGLE_SITE_VERIFICATION` as an optional
+public env var. Set it in the Cloudflare Pages project and the verification
+meta tag appears on every page; leave it unset and no tag is emitted.
+
 ## Generated
 
-| Path | Built by |
-| :--- | :--- |
-| `/sitemap-index.xml` | `@astrojs/sitemap` |
-| `/rss.xml` | `src/pages/rss.xml.ts` |
-| `/robots.txt` | `src/pages/robots.txt.ts` |
-| `/og.png` | `src/pages/og.png.ts` — Satori, drawn with the site font |
-| `/posts/<slug>/index.png` | per-post OG image, same generator |
-| `/pagefind/*` | Pagefind, from `dist` after the build |
+| Path                      | Built by                                                 |
+| :------------------------ | :------------------------------------------------------- |
+| `/sitemap-index.xml`      | `@astrojs/sitemap`                                       |
+| `/rss.xml`                | `src/pages/rss.xml.ts`                                   |
+| `/robots.txt`             | `src/pages/robots.txt.ts`                                |
+| `/og.png`                 | `src/pages/og.png.ts` — Satori, drawn with the site font |
+| `/posts/<slug>/index.png` | per-post OG image, same generator                        |
+| `/pagefind/*`             | Pagefind, from `dist` after the build                    |
 
 There is no static OG image checked in: `features.dynamicOgImage` generates one
 per post and a site default, so a social card can never fall out of date with

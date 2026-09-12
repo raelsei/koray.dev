@@ -41,7 +41,7 @@ then cut the string.
 const encodeAmount = (value: number, scale: number) => {
   const s = value.toFixed(scale + 1);
   const cut = s.slice(0, -1);
-  return cut.endsWith('.') ? cut.slice(0, -1) : cut;
+  return cut.endsWith(".") ? cut.slice(0, -1) : cut;
 };
 ```
 
@@ -63,7 +63,7 @@ the guard position. The tolerance is genuinely useful, because it is what
 absorbs the representation error and turns `0.58` back into `0.58`. It is also
 not free: any value sitting within that tolerance of a boundary crosses it.
 
-> The first version lands one step low. The second occasionally lands *high*.
+> The first version lands one step low. The second occasionally lands _high_.
 > Only one of those two spends money the account does not have.
 
 Low is a residue and an awkward support thread. High is a request for more than
@@ -85,12 +85,12 @@ const encodeAmount = (value: number, scale: number) => {
 
   // Only sub-1e-6 values still render exponentially, and toFixed is plain there.
   let s = String(value);
-  if (s.includes('e')) s = value.toFixed(Math.max(scale + 1, 20));
+  if (s.includes("e")) s = value.toFixed(Math.max(scale + 1, 20));
 
-  const dot = s.indexOf('.');
+  const dot = s.indexOf(".");
   if (dot === -1) return s;
   const cut = scale === 0 ? s.slice(0, dot) : s.slice(0, dot + 1 + scale);
-  return cut.includes('.') ? cut.replace(/0+$/, '').replace(/\.$/, '') : cut;
+  return cut.includes(".") ? cut.replace(/0+$/, "").replace(/\.$/, "") : cut;
 };
 ```
 
@@ -111,14 +111,16 @@ different number.
 
 ```typescript file="serialize.ts"
 const encodeRate = (value: number) =>
-  Number.isInteger(value) ? String(value) : trimZeros(value.toPrecision(SIG_FIGS));
+  Number.isInteger(value)
+    ? String(value)
+    : trimZeros(value.toPrecision(SIG_FIGS));
 ```
 
 An early return, above the rounding. Two caveats I would not have written the
 first time: `toPrecision` goes exponential once the integer part outgrows the
 budget, so this is only safe because values on this path are bounded well below
 that — and the trailing-zero strip is the third bug in this family. On the
-*amount* path, not this one, stripping zeros without first checking for a decimal
+_amount_ path, not this one, stripping zeros without first checking for a decimal
 point turned `4500` into `45`. A hundredfold error, introduced by a tidy-up,
 caught in review because the diff was small enough to read.
 
