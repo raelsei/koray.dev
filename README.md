@@ -27,16 +27,17 @@ Keeping this boundary clear is what makes the next theme upgrade cheap.
 Each is marked with a comment explaining why. Keeping this list short is what
 makes a theme bump a merge rather than a rewrite.
 
-| File                                       | Edit                                                                                                                                                                             |
-| :----------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/pages/index.astro`                    | Hero copy read from the content collection; feed icon moved into the social row                                                                                                  |
-| `src/components/Header.astro`, `src/i18n/` | Nav is `Posts · Projects · Bookmarks · About`: `Projects` and `Bookmarks` added, `Tags` dropped from the bar, `About` moved last; the list wraps instead of clipping (see below) |
-| `astro.config.ts`                          | Dark code theme; `/search/` filtered out of the sitemap                                                                                                                          |
-| `src/layouts/Layout.astro`                 | `schema` and `noindex` props; dead `favicon.ico` link removed; `og:locale`; static `theme-color`; `apple-touch-icon`; RSS href without a trailing slash                          |
-| `src/layouts/PostLayout.astro`             | Post JSON-LD routed through the shared graph instead of its own block                                                                                                            |
-| `src/pages/search.astro`                   | Dev notice only when the index is genuinely missing, naming `bun run build`                                                                                                      |
-| `src/content.config.ts`                    | `seoTitle` on pages; the `bookmarks` and `projects` collections                                                                                                                  |
-| Listing and page routes                    | Page-specific JSON-LD, and the meta description the theme rendered but never set                                                                                                 |
+| File                                                        | Edit                                                                                                                                                                             |
+| :---------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/pages/index.astro`                                     | Hero copy read from the content collection; feed icon moved into the social row                                                                                                  |
+| `src/components/Header.astro`, `src/i18n/`                  | Nav is `Posts · Projects · Bookmarks · About`: `Projects` and `Bookmarks` added, `Tags` dropped from the bar, `About` moved last; the list wraps instead of clipping (see below) |
+| `astro.config.ts`                                           | Dark code theme; `/search/` filtered out of the sitemap                                                                                                                          |
+| `src/layouts/Layout.astro`                                  | `schema` and `noindex` props; dead `favicon.ico` link removed; `og:locale`; static `theme-color`; `apple-touch-icon`; RSS href without a trailing slash                          |
+| `src/layouts/PostLayout.astro`                              | Post JSON-LD routed through the shared graph instead of its own block                                                                                                            |
+| `src/pages/search.astro`                                    | Dev notice only when the index is genuinely missing, naming `bun run build`                                                                                                      |
+| `src/content.config.ts`                                     | `seoTitle` on pages; the `bookmarks` and `projects` collections                                                                                                                  |
+| `src/components/Main.astro`, `Datetime.astro`, `Card.astro` | Optional `titleTransitionName` / `transitionName`, and the card date named, so a listing-to-detail View Transition morphs both halves (see below)                                |
+| Listing and page routes                                     | Page-specific JSON-LD; the meta description the theme rendered but never set; paired View Transition names on the tag and project pages                                          |
 
 #### Why the nav list wraps
 
@@ -60,6 +61,46 @@ width.
 
 A nav entry costs roughly 60 px of the 598 px budget. Past it nothing breaks;
 the row just wraps at a wider viewport than before.
+
+#### View transitions
+
+`ClientRouter` in `Layout.astro` makes navigation a client-side swap, and
+`view-transition-name` morphs a listing element into its detail counterpart.
+The rule that matters: **the same CSS ident must exist on the page being left
+and the page being entered.** Two failure modes, both silent:
+
+- A name on only one side animates as an exit, which reads as a flicker rather
+  than a transition. `Tag.astro` shipped in exactly this state — every chip was
+  named and nothing on `/tags/<tag>/` matched.
+- The same name twice on one page disables the animation for that name
+  entirely.
+
+Names come from [`toTransitionName`](src/utils/toTransitionName.ts), which
+sanitises to a valid CSS `<custom-ident>`: dots stripped (`Math.floor` would
+otherwise be invalid), no leading digit, non-ASCII hex-encoded. An invalid name
+fails the same silent way.
+
+The pairs currently in place:
+
+| Listing              | Detail                     | Name                      |
+| :------------------- | :------------------------- | :------------------------ |
+| `Card.astro` title   | post `<h1>`                | `<post-id>`               |
+| `Card.astro` date    | post `Datetime`            | `<post-id>-date`          |
+| `Tag.astro` chip     | `/tags/<tag>/` `<h1>`      | `<tag>`                   |
+| `/projects/` heading | `/projects/<slug>/` `<h1>` | `<project-id>`            |
+| `/projects/` metric  | `/projects/<slug>/` metric | `<project-id>-metric-<i>` |
+
+A project row without a write-up links to its repository, so its heading is
+deliberately left unnamed — there is no second half to morph into.
+
+Reduced motion needs no work: Astro ships `@media (prefers-reduced-motion)`
+rules that set `animation: none` on the view-transition pseudo-elements. Do not
+hand-roll a second set.
+
+Note for testing: headless Chromium exposes `document.startViewTransition` but
+runs no transition, so the animation cannot be captured there. Verify the
+pairing by diffing the idents per page in `dist`; the frames need a real
+browser.
 
 ## Commands
 

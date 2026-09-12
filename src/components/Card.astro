@@ -24,6 +24,6 @@ const { title, description, ...props } = data;
   >
     <Heading transition:name={toTransitionName(id)}>{title}</Heading>
   </a>
-  <Datetime {...props} />
+  <Datetime {...props} transitionName={`${toTransitionName(id)}-date`} />
   <p>{description}</p>
 </li>

@@ -68,10 +68,16 @@ const links = [
       {lang && <span>{lang}</span>}
     </div>
 
+    {/* Paired with the same metric on the index, so the numbers travel to
+        their new place instead of fading out and back in. */}
     {metrics && (
       <ul class="mt-6 flex flex-wrap gap-x-8 gap-y-2">
-        {metrics.map(metric => (
-          <li>
+        {metrics.map((metric, i) => (
+          <li
+            style={{
+              viewTransitionName: `${toTransitionName(project.id)}-metric-${i}`,
+            }}
+          >
             <span class="text-accent text-lg font-medium">{metric.value}</span>{" "}
             <span class="text-muted-foreground text-sm">{metric.label}</span>
           </li>

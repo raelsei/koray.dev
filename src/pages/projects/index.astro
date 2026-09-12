@@ -113,8 +113,17 @@ const schema = [
 
                 {metrics && (
                   <ul class="mt-2 flex flex-wrap gap-x-6 gap-y-1">
-                    {metrics.map(metric => (
-                      <li class="text-sm">
+                    {metrics.map((metric, i) => (
+                      <li
+                        class="text-sm"
+                        style={
+                          internal
+                            ? {
+                                viewTransitionName: `${toTransitionName(project.id)}-metric-${i}`,
+                              }
+                            : undefined
+                        }
+                      >
                         <span class="text-accent font-medium">
                           {metric.value}
                         </span>{" "}
