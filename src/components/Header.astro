@@ -66,19 +66,20 @@ const isActive = (path: string) => {
         <IconX id="close-icon" class="hidden" />
         <IconMenuDeep id="menu-icon" />
       </button>
-      {/* Local edit: two changes, both because the horizontal nav never fit its
-          own container. Measured: eight items need 473px of content, and with
-          the theme's `gap-x-5` the row wants 614px where the layout allocates
-          598px. It used to overflow into the right margin, which looked fine
-          until the viewport got narrow enough that the clipping showed — the
-          search icon cut in half and the theme toggle off-screen.
+      {/* Local edit: `flex-wrap` and a row gap. The theme's horizontal nav can
+          overflow its own container rather than wrap, and when it does it clips
+          from the right — the search icon cut in half, the theme toggle
+          off-screen. Measured in the built page: seven items need 420px of
+          content, so the row wants 540px, against a 598px budget at desktop
+          widths but only 470px at 640px. So it fits wide and does not fit at
+          the `sm` breakpoint, which is where the clipping used to show.
 
-          `gap-x-3` brings the row to 558px, inside the budget; `flex-wrap` is
-          the safety net, so any future item wraps to a second row instead of
-          clipping a control. */}
+          Wrapping degrades to a second row instead of hiding a control, and
+          keeps the theme's own `gap-x-5` spacing. Adding a nav item costs
+          roughly 60px of this budget; past it the row simply wraps sooner. */}
       <ul
         id="menu-items"
-        class="[&>li>a]:hover:text-accent mt-4 hidden w-44 grid-cols-2 place-content-center gap-2 sm:mt-0 sm:flex sm:w-auto sm:flex-wrap sm:justify-end sm:gap-x-3 sm:gap-y-1 sm:[&>li]:h-8 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium sm:[&>li>a]:px-2 sm:[&>li>a]:py-1"
+        class="[&>li>a]:hover:text-accent mt-4 hidden w-44 grid-cols-2 place-content-center gap-2 sm:mt-0 sm:flex sm:w-auto sm:flex-wrap sm:justify-end sm:gap-x-5 sm:gap-y-1 sm:[&>li]:h-8 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium sm:[&>li>a]:px-2 sm:[&>li>a]:py-1"
       >
         <li class="col-span-2">
           <a
@@ -86,22 +87,6 @@ const isActive = (path: string) => {
             class:list={{ "active-nav": isActive("/posts") }}
           >
             {t.nav.posts}
-          </a>
-        </li>
-        <li class="col-span-2">
-          <a
-            href={getRelativeLocaleUrl(locale, "tags")}
-            class:list={{ "active-nav": isActive("/tags") }}
-          >
-            {t.nav.tags}
-          </a>
-        </li>
-        <li class="col-span-2">
-          <a
-            href={getRelativeLocaleUrl(locale, "about")}
-            class:list={{ "active-nav": isActive("/about") }}
-          >
-            {t.nav.about}
           </a>
         </li>
         <li class="col-span-2">
@@ -118,6 +103,14 @@ const isActive = (path: string) => {
             class:list={{ "active-nav": isActive("/bookmarks") }}
           >
             {t.nav.bookmarks}
+          </a>
+        </li>
+        <li class="col-span-2">
+          <a
+            href={getRelativeLocaleUrl(locale, "about")}
+            class:list={{ "active-nav": isActive("/about") }}
+          >
+            {t.nav.about}
           </a>
         </li>
         {features.showArchives && (

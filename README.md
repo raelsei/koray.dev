@@ -27,33 +27,39 @@ Keeping this boundary clear is what makes the next theme upgrade cheap.
 Each is marked with a comment explaining why. Keeping this list short is what
 makes a theme bump a merge rather than a rewrite.
 
-| File                                       | Edit                                                                                                                                                    |
-| :----------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/pages/index.astro`                    | Hero copy read from the content collection; feed icon moved into the social row                                                                         |
-| `src/components/Header.astro`, `src/i18n/` | The `Bookmarks` and `Projects` nav entries; the nav list wraps instead of clipping (see below)                                                          |
-| `astro.config.ts`                          | Dark code theme; `/search/` filtered out of the sitemap                                                                                                 |
-| `src/layouts/Layout.astro`                 | `schema` and `noindex` props; dead `favicon.ico` link removed; `og:locale`; static `theme-color`; `apple-touch-icon`; RSS href without a trailing slash |
-| `src/layouts/PostLayout.astro`             | Post JSON-LD routed through the shared graph instead of its own block                                                                                   |
-| `src/pages/search.astro`                   | Dev notice only when the index is genuinely missing, naming `bun run build`                                                                             |
-| `src/content.config.ts`                    | `seoTitle` on pages; the `bookmarks` and `projects` collections                                                                                         |
-| Listing and page routes                    | Page-specific JSON-LD, and the meta description the theme rendered but never set                                                                        |
+| File                                       | Edit                                                                                                                                                                             |
+| :----------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/pages/index.astro`                    | Hero copy read from the content collection; feed icon moved into the social row                                                                                                  |
+| `src/components/Header.astro`, `src/i18n/` | Nav is `Posts · Projects · Bookmarks · About`: `Projects` and `Bookmarks` added, `Tags` dropped from the bar, `About` moved last; the list wraps instead of clipping (see below) |
+| `astro.config.ts`                          | Dark code theme; `/search/` filtered out of the sitemap                                                                                                                          |
+| `src/layouts/Layout.astro`                 | `schema` and `noindex` props; dead `favicon.ico` link removed; `og:locale`; static `theme-color`; `apple-touch-icon`; RSS href without a trailing slash                          |
+| `src/layouts/PostLayout.astro`             | Post JSON-LD routed through the shared graph instead of its own block                                                                                                            |
+| `src/pages/search.astro`                   | Dev notice only when the index is genuinely missing, naming `bun run build`                                                                                                      |
+| `src/content.config.ts`                    | `seoTitle` on pages; the `bookmarks` and `projects` collections                                                                                                                  |
+| Listing and page routes                    | Page-specific JSON-LD, and the meta description the theme rendered but never set                                                                                                 |
 
 #### Why the nav list wraps
 
-The theme's horizontal nav never fit its own container. Measured in the built
-page: the row's items need 473 px of content, and with the theme's `gap-x-5`
-the row wants 614 px where the layout allocates 598 px. The excess used to
-spill into the right margin, which looks fine on a wide screen — the clipping
-only becomes visible once the viewport is narrow enough to reach it, and then
-the search icon is cut in half and the theme toggle is off-screen entirely.
-That happened at 640 px with the theme's own four links, before this site added
-any.
+The theme's horizontal nav overflows its own container rather than wrapping,
+and when it overflows it clips from the right: the search icon cut in half, the
+theme toggle off-screen entirely. That was already true at 640 px with the
+theme's own four links, before this site changed anything — the excess spilled
+into the right margin, which looks fine on a wide screen, so the defect only
+shows once the viewport is narrow enough to reach it.
 
-So the list carries two changes: `gap-x-3`, which brings the row to 558 px and
-inside the budget, and `flex-wrap`, so a future entry wraps to a second row
-rather than clipping a control. Verified from 375 px to 1920 px: one row from
-768 px up, two rows in the 640–767 px band, the hamburger below that, and no
-horizontal page scroll at any width.
+Measured in the built page, at the current four text links and three icons: the
+items need 420 px of content, so the row wants 539 px. Desktop widths allocate
+598 px, and 640 px allocates 470 px — it fits wide and cannot fit at the `sm`
+breakpoint, which is exactly where the clipping appeared.
+
+So the only change is `flex-wrap` plus a row gap, which degrades to a second
+row instead of hiding a control and keeps the theme's own `gap-x-5` spacing.
+Verified from 375 px to 1920 px: one row from 768 px up, two rows in the
+640–767 px band, the hamburger below that, and no horizontal page scroll at any
+width.
+
+A nav entry costs roughly 60 px of the 598 px budget. Past it nothing breaks;
+the row just wraps at a wider viewport than before.
 
 ## Commands
 

@@ -229,10 +229,13 @@ One centred column: `app-layout` is `max-w-3xl` (48rem / 768px) with `mx-auto`
 and a 1rem inline gutter, and every page uses it — header, main, footer alike.
 There is no sidebar, no two-column body, and no card grid.
 
-The header is a single row: wordmark left; then Posts, Tags, About, Bookmarks as
+The header is one row: wordmark left; then Posts, Projects, Bookmarks, About as
 text links, followed by the archives, search and theme controls as icon buttons.
-Below 640px the icon row collapses behind a hamburger and the menu becomes a
-two-column grid. Sections on the home page are separated by a single
+The row wants 539px against a 598px budget, so it wraps to a second row between
+640px and 767px rather than clipping a control; below 640px it collapses behind
+a hamburger and the menu becomes a two-column grid. Tags is reachable from the
+tag chips on a post and from the breadcrumb, not from the bar. Sections on the
+home page are separated by a single
 `border-border` bottom rule — hero, then Featured, then Recent Posts — with an
 `All Posts` link closing the page.
 
