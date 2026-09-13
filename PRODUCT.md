@@ -8,12 +8,13 @@ web
 
 ## Users
 
-**Primary: advisory leads.** Fintech teams putting an LLM somewhere near real
-money, and founders who need a first engineer's judgement for a short
-engagement. They arrive skeptical, usually from a post or a referral, and they
-are deciding whether this person's judgement is worth an email. Success is a
-qualified message to `id@koray.dev`. Capacity is finite and stated on the
-site — two advisory slots, plus one partner engagement a year through koative.
+**Primary: client-project leads.** Teams and founders who need an iOS or
+Android app, a web platform, or the product design between them, and who care
+that the result stays calm. They arrive from a post, a referral, or
+koative.com, and they are deciding whether this person's judgement is worth an
+email. Success is a qualified message to `id@koray.dev`. Capacity is finite and
+stated on the site — koative takes a few client projects a year, because its
+own products come first.
 
 **Secondary, in service of the primary:** engineers who land on a single post
 from search or social. They are not the conversion target, but their trust is
@@ -22,24 +23,25 @@ persuades nobody.
 
 ## Product Purpose
 
-The personal site of Koray Güler — founder and product engineer, İstanbul.
-Six years inside payments teams (reconciliation, ledgers, KYC flows), now
-running koative, an applied-AI studio building fintech products in-house.
+The personal site of Koray Güler — product engineer, İstanbul, and founder of
+[koative](https://koative.com) (est. 2026), an independent software studio that
+ships its own products before anyone else's. The studio's first product is
+Lumi, a daily-ritual iOS app.
 
-The site exists to convert demonstrated judgement into advisory work. It does
-that by publishing the evidence rather than claiming it: anonymized
-post-mortems of small correctness bugs that never raised an exception, the
-ventures actually shipping, the open source actually maintained, and the tools
-actually kept. Success is a qualified inbound; the writing is the proof, not
-the product.
+The site exists to convert demonstrated judgement into work. It does that by
+publishing the evidence rather than claiming it: anonymized post-mortems of
+small correctness bugs that never raised an exception, the products actually
+shipping, and the code actually maintained. Success is a qualified inbound; the
+writing is the proof, not the product.
 
 ## Positioning
 
-The overlap is the position: six years on payment rails *and* applied LLM work,
-which is why "never let a model move money — let it draft the intent, let the
-ledger decide" is a rule here rather than a slogan. A neighboring AI consultancy
-cannot truthfully claim the ledger years; a payments engineer cannot truthfully
-claim the eval practice.
+The position is the whole span: one person who takes a product from typed edges
+to deploy to the design decisions in between, and a studio whose stated stance
+is "less software, better software" — own products first, ship less, spend the
+saved time on the details people feel. A studio that only does client work
+cannot claim the first part; an engineer without shipped products cannot claim
+the second.
 
 The writing reinforces it in a way a portfolio cannot be copied into: each post
 is a real bug that stayed silent — no exception, no alert, green build, wrong
@@ -79,9 +81,22 @@ split if it carries two.
 **Development.** `bun dev` serves `localhost:4321`; per `AGENTS.md`, start it as
 `astro dev --background` and manage it with `astro dev stop|status|logs`.
 `bunx astro check` type-checks components, TypeScript, and content schemas.
-Deployment is GitHub Pages, published by `.github/workflows/deploy.yml` on
-every push to `main` (`bun run build` → `dist`, uploaded as a Pages artifact).
-The custom domain is bound by `public/CNAME`; `base` stays unset because of it.
+Deployment is GitHub Pages, but **not from this repository**: on every push to
+`main`, `.github/workflows/deploy.yml` runs `bun run build` and force-pushes
+`dist` as one commit to the `master` branch of `raelsei/raelsei.github.io`,
+using a write-enabled deploy key held here as `PAGES_DEPLOY_KEY`. The reason is
+that `koray.dev` is the custom domain of that *user* site, and GitHub serves
+every project site of the account beneath it — ten demo pages, including
+`koray.dev/pocketbase-ts-starter/`, exist only while the domain stays there.
+`master` is the target rather than a `gh-pages` branch because the Pages source
+there already points at it, so a deploy needs no panel step; the 2019 site it
+replaced is kept as the `legacy-2019` branch, which is now the only copy of
+that history. Two consequences are binding: `public/.nojekyll` must ship (a
+branch-published site runs through Jekyll, which skips `_astro/`), and
+`public/CNAME` must ship (Pages unbinds the domain without it). The workflow
+asserts both before pushing. `raelsei.github.io` therefore cannot be archived —
+archived repos are read-only and the push would fail. `base` stays unset
+because the output lands at a domain root.
 
 ## Capabilities and Constraints
 
@@ -130,8 +145,8 @@ Technical facts that stay true regardless:
   extension are exempt, so `/rss.xml` stays slash-less — `/rss.xml/` is a 404
   on a real file host even though `astro preview` normalises it.
 
-**Terminology.** *ventures* (things built, not clients) · *advisory slots* ·
-*colophon* (the signed-off line closing a post).
+**Terminology.** *ventures* (things built, not clients) · *client projects*
+(koative takes a few a year) · *colophon* (the signed-off line closing a post).
 
 ## Brand Commitments
 
@@ -142,10 +157,10 @@ Technical facts that stay true regardless:
   numbers over adjectives, no launch-post enthusiasm. The stated stance:
   *"most of my writing is an argument with a younger version of myself who
   thought clever was the point."*
-- **House rules**, meant to be visible in the work: money is stored in minor
-  units as integers; a model may draft intent, only the ledger commits it;
-  every dependency must justify its own line in the lockfile; if it cannot run
-  unattended for a year, it is not finished.
+- **House rules**, meant to be visible in the work: types live at the edges, so
+  a mistyped field fails `tsc` rather than production; one artifact to deploy;
+  every dependency must justify its own line in the lockfile; ship less, and
+  spend the saved time on the details people feel.
 - **Standing preference: the category standard, played straight.** The user
   chose [AstroPaper](https://github.com/satnaing/astro-paper) as the visual and
   structural system, used as a theme rather than forked into something else.
@@ -158,8 +173,37 @@ Technical facts that stay true regardless:
 
 ## Evidence on Hand
 
-Confirmed real by the user — all of it is citable as fact:
+Verified against live sources on 2026-09-13 — GitHub's API for
+[github.com/raelsei](https://github.com/raelsei), and koative.com itself. All
+of it is citable:
 
+- **Identity.** Koray Güler, İstanbul. GitHub `raelsei` (account since October
+  2018, 46 own repositories, 41 gists), X `raelsei`, blog `koray.dev`, GitHub
+  `company: @koative`.
+- **Studio (published, `/projects`):** koative LLC — "independent software
+  studio, est. 2026", stance *"less software, better software"*. Ships its own
+  products first and takes a few client projects a year; services are iOS and
+  Android apps, web platforms, and product and brand design. Studio principles
+  as published on koative.com/studio: calm by default, less software better
+  software, own products first, craft over hype, made to last. Replies within
+  48h.
+- **Product (published, `/projects`):** Lumi — iOS, *coming soon*. A daily card
+  drawn for the user's sky, a mood check, one line on how the day meets their
+  chart, synastry between two full birth charts, and a premium Past / Present /
+  Future spread each sunrise. Screens exist on koative.com/lumi; they are the
+  studio's assets, not this site's.
+- **Code (published, `/projects`), all three with write-ups:**
+  `pocketbase-ts-starter` — strict-TypeScript PocketBase hooks and migrations,
+  esbuild, multi-stage Docker, superuser IP allowlist, rate limiter, encrypted
+  settings. `arcstack` — minimal Bun monorepo on built-in workspaces, Next.js
+  plus Hono, shared versions pinned once in the root `catalog`, no Turborepo.
+  `keel` — SaaS starter whose layering is enforced by Biome and a GritQL plugin
+  rather than documented: services cannot import `hono`, handlers cannot call
+  `c.json`, one `{ data } / { error }` envelope, internal `/api/*` versus
+  frozen `/v1/*`, and the lint rules are themselves tested. The learning-era
+  repositories (`express-typescript-starter`, `sse-react-nodejs`, `crypto-x`
+  and the 2020–21 Vue/React exercises) are deliberately **not** listed: they
+  are real, but they are not evidence of current judgement.
 - **Writing (published):** ten posts in `src/content/posts/`, on silent
   correctness bugs — `math-floor-is-not-a-floor`,
   `idempotent-writes-idempotent-side-effects`, `a-signing-key-in-the-browser`,
@@ -169,55 +213,54 @@ Confirmed real by the user — all of it is citable as fact:
   `a-missing-capability-beats-a-threshold`,
   `the-endpoint-that-succeeded-at-doing-nothing`,
   `the-label-was-not-the-identity`. The first and last are `featured: true`.
-- **Ventures (published, `/projects`):** koative — applied-AI studio,
-  bootstrapped, İstanbul, three engineers and one designer, funds its own
-  fintech products and takes one partner engagement a year. lumi — household
-  finance copilot in private beta: 40 households, 94% categorised, 180 ms p95
-  sync. bine — invoice reconciliation for small merchants in Türkiye, alpha.
-  Each carries a write-up, so each has its own page.
-- **Open source (published, `/projects`):** ledger-kit, sse-stream, tr-iban as
-  libraries; prompt-forge, rag-lab, dotfiles as tools. Rows linking to their
-  repositories, no write-ups yet. The star counts the previous site carried
-  (412 / 289 / 174 / 143 / 96 / 64) were **dropped on purpose**: hand-authored,
-  so they decay between edits, and a link to the repository is proof where a
-  stale number is a claim. Do not reintroduce them without a live source.
-- **Published elsewhere on the site:** the advisory offer and the house rules
-  (`/about`), and two tool links (`/bookmarks`).
 - **Assets:** `public/favicon.svg` and `public/apple-touch-icon.png` (rasterised
   180×180 from the favicon) are the only binary assets; OG images are generated
   per post at build time.
 
-**Still true, but not published.** Citable, and recoverable from git history on
-`main`, where the previous implementation also lives:
+**Retracted on 2026-09-13, and never to be reintroduced.** The previous
+revision of this document asserted an unverifiable fintech persona as fact, and
+the site published it: six years inside payments teams (reconciliation,
+ledgers, KYC), koative as an "applied-AI fintech studio" with three engineers
+and one designer, "two advisory slots", lumi as a household finance copilot
+with invented metrics (40 households / 94% categorised / 180 ms p95 sync), a
+venture called `bine`, and six open-source entries — `ledger-kit`,
+`sse-stream`, `tr-iban`, `prompt-forge`, `rag-lab`, `dotfiles` — whose
+repositories do not exist, so every row was a 404 waiting to ship. Also
+retracted: the house rules about minor units and ledgers, and the track-record
+line ("lead product engineer on a payments platform 2023–26; product engineer,
+marketplace and checkout 2021–23; freelance 2019–21"), which has no source.
 
-- **Track record:** koative 2026—; lead product engineer on a payments platform
-  2023–26; product engineer, marketplace and checkout 2021–23; freelance
-  2019–21.
-- **Other:** dated notes, the annual-audit stack, two dotfiles write-ups, three
-  published prompts. Prompts were considered for their own section and
-  **declined by the user** for now; the argument for them was long-tail search,
-  the argument against was that they are undated reference material and would
-  land in the RSS feed as if they were posts.
-- **One contradiction to settle:** the old `stack.yaml` listed `zsh + fzf`
-  while the dotfiles write-up said it had been ported off zsh to fish. The
-  write-up is the more specific source, so `/projects` says fish. Confirm.
+**Open gap.** Employment history is genuinely unknown to this document.
+LinkedIn (`in/raelsei`) is behind an authwall — HTTP 999 direct, `/authwall` in
+a headless browser, and the same through text proxies — so job titles, dates
+and employers can only come from the user. Until they do, no page states a
+career timeline. `/about` covers the path in general terms ("front end, then
+the parts that decide whether a product survives") and stops there.
+
+**Unverified but published, by the user's choice:** the contact address
+`id@koray.dev`, and the `t.me/raelsei` and `linkedin.com/in/raelsei` handles.
+Note the live `koray.dev` still served the 2020 site at the time of writing —
+"Koray Güler | Front-end Developer", with `koray.guler@hotmail.com`,
+`github.com/korayguler`, `twitter.com/koraycode`, `korayguler.medium.com` and
+`linkedin.com/in/koray-guler`. Those are legacy handles; the `raelsei` set is
+current.
 
 Absent, and future work must not invent them: **no testimonials, no named
 clients or employers, no case studies, no press, no pricing, no logo wall, no
-photography, and no product screenshots.** Employer and client names are
-deliberately withheld, not missing — the posts anonymize them on purpose.
+photography, and no product screenshots.** A number without a live source is a
+claim, not evidence.
 
 ## Product Principles
 
 1. **Proof, not claims.** Credibility is earned by publishing a real failure
    and the decision it forced. Nothing on this site asserts competence it
    cannot show.
-2. **The advisory slot is the conversion path.** Every surface either builds
+2. **The client project is the conversion path.** Every surface either builds
    the judgement case or makes the email easy. Reach that does neither is not
    a goal.
-3. **Correctness is the subject.** Money is the domain where wrong is
-   unambiguous; that standard applies to the site itself as much as to the
-   posts.
+3. **Correctness is the subject.** A bug that never raises an exception is the
+   most expensive kind; that standard applies to the site itself as much as to
+   the posts.
 4. **Everything earns its line.** Dependencies, kilobytes, links on the
    bookmarks page. Scarcity is the editorial position, not a limitation.
 5. **The lesson is public, the client is not.** Anonymization is a permanent

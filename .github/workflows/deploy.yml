@@ -1,4 +1,17 @@
-name: Deploy to GitHub Pages
+name: Deploy
+
+# The source of truth is this repository; the published bytes live in
+# `raelsei/raelsei.github.io`, because the `koray.dev` custom domain is
+# configured on that *user* site. GitHub serves every project site of this
+# account under the user site's domain, so `koray.dev/pocketbase-ts-starter/`
+# and nine sibling demos only keep working while the domain stays there.
+# Moving the domain to this repository would 404 all of them.
+#
+# That rules out `actions/deploy-pages`, which can only publish to its own
+# repository's Pages. The build is therefore pushed as a commit to `master` on
+# the user site — its default branch, and already what its Pages serves from,
+# so no panel setting has to be flipped for a deploy to go live. The 2019 site
+# that used to live on that branch is preserved as `legacy-2019` there.
 
 on:
   push:
@@ -6,44 +19,59 @@ on:
   # Lets a deploy be re-run from the Actions tab without an empty commit.
   workflow_dispatch:
 
+# Writing to the other repository goes through the deploy key, never through
+# `GITHUB_TOKEN` — which cannot reach another repository anyway.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 # A newer push should win, but never cancel a deploy that is already publishing.
 concurrency:
-  group: pages
+  group: publish
   cancel-in-progress: false
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Install, build, and upload
-        uses: withastro/action@v6
-        with:
-          # Stated rather than defaulted: Node is the build runtime here, and
-          # Astro requires >=22.12.0. See "Why Node builds this, not Bun".
-          node-version: "24"
-        # The action detects `bun.lock` and installs with Bun, then installs Node
-        # and runs `bun run build` — so Bun is the package manager and Node is the
-        # build runtime, which is what this project wants.
-        #
-        # `bun run build` also runs `astro check` and the Pagefind index, so
-        # search works on the deployed site. Do not override `build-cmd` with a
-        # bare `astro build`.
+      # Bun is the package manager; Node is the build runtime (`engines.node`
+      # requires >=22.12.0). Both are installed on purpose: `bun run build`
+      # executes the scripts, and the `astro` binary runs under Node.
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy
-        id: deployment
-        uses: actions/deploy-pages@v5
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      # `bun run build` is `astro check && astro build && pagefind --site dist`.
+      # A bare `astro build` ships a site whose `/search` finds nothing.
+      - name: Build
+        run: bun run build
+
+      # `dist/CNAME` (from `public/CNAME`) must survive into the published
+      # branch: Pages drops the custom domain the moment that file disappears.
+      # `dist/.nojekyll` matters just as much — a branch-published site is run
+      # through Jekyll otherwise, and Jekyll skips `_astro/`, which is every
+      # stylesheet and script on the site.
+      - name: Verify the publish guards
+        run: test -f dist/.nojekyll && grep -qx 'koray.dev' dist/CNAME
+
+      - name: Publish to raelsei.github.io
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          deploy_key: ${{ secrets.PAGES_DEPLOY_KEY }}
+          external_repository: raelsei/raelsei.github.io
+          publish_branch: master
+          publish_dir: ./dist
+          # The build output is derived, so its history is noise: every deploy
+          # replaces the branch with a single commit. Hashed asset filenames
+          # would otherwise add a new copy of `_astro/*` on every build.
+          force_orphan: true
+          commit_message: "deploy: koray.dev@${{ github.sha }}"

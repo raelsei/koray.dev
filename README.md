@@ -126,32 +126,44 @@ with `astro dev stop|status|logs`.
 
 ## Deploying
 
-GitHub Pages, built and published by
+Built here, published to **`raelsei/raelsei.github.io`** by
 [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) on every push to
-`main`. Nothing is committed to a branch; the workflow uploads `dist/` as a
-Pages artifact.
+`main`, as a single force-pushed commit on that repository's `master` branch —
+its default branch, and the branch its Pages already serves.
 
-**One setting is not in this repo:** Settings → Pages → **Source** must be
-**GitHub Actions**. Without it the workflow runs green and publishes nothing.
+**Why the output lives in another repository.** The `koray.dev` custom domain is
+configured on the *user* site, `raelsei.github.io`. GitHub serves every project
+site of the account under the user site's domain, so
+`koray.dev/pocketbase-ts-starter/` — and nine sibling demo pages — exist only
+while the domain stays there. Moving the domain onto this repository would 404
+all of them, and GitHub issues no redirect for the old paths.
 
-The workflow is the official [`withastro/action`](https://github.com/withastro/action),
-and three of its behaviours are what this project relies on:
+That constraint rules out `actions/deploy-pages`, which publishes only to its
+own repository's Pages. The build is pushed as a commit instead, via
+[`peaceiris/actions-gh-pages`](https://github.com/peaceiris/actions-gh-pages).
+Publishing onto `master` rather than a `gh-pages` branch is deliberate: the
+Pages source there already points at `master`, so a deploy needs no panel
+setting and goes live on merge. `force_orphan` replaces that branch on every
+run, so the 2019 site that used to occupy it is preserved as the
+**`legacy-2019`** branch — do not delete it, it is the only copy of that
+history.
 
-- It finds `bun.lock` — the text lockfile Bun ≥ 1.2 writes — installs with Bun,
-  **and separately installs Node** to run the build. That is exactly the split
-  this project wants, with no configuration.
-- It runs the package `build` script, so `astro check` and the Pagefind index
-  both happen. Do not override `build-cmd` with a bare `astro build`: search is
-  an index generated from `dist` _after_ the build, and `astro build` alone
-  ships a site whose `/search` finds nothing.
-- It publishes through `upload-pages-artifact` / `deploy-pages`, which serves
-  the artifact as-is. **Jekyll never runs**, so `_astro/` is safe and
-  `public/.nojekyll` is unnecessary. That file is folklore carried over from the
-  old deploy-from-a-branch flow; do not add it back.
+**One setting is not in this repo:** `raelsei.github.io` → Settings → Deploy
+keys → a **write-enabled** key, whose private half is this repository's
+`PAGES_DEPLOY_KEY` secret. `GITHUB_TOKEN` cannot reach another repository, so
+there is no token-only variant of this.
 
-The branch-based limitation that made GitHub Pages a bad fit before — it only
-served `/` or `/docs` from a branch, so you had to commit the build — does not
-apply to the Actions flow.
+Because the publish is a branch commit rather than an artifact, **Jekyll does
+run** unless told not to, and Jekyll skips paths beginning with `_` — which is
+all of `_astro/`, every stylesheet and script on the site. Hence
+[`public/.nojekyll`](public/.nojekyll). The workflow asserts both that file and
+`dist/CNAME` before pushing, because either one missing is a silent outage: a
+styleless site, or a domain that reverts to `raelsei.github.io`.
+
+The build itself installs Bun and Node separately and runs the package `build`
+script, so `astro check` and the Pagefind index both happen. Do not reduce it
+to a bare `astro build`: search is an index generated from `dist` _after_ the
+build, and `astro build` alone ships a site whose `/search` finds nothing.
 
 ### URL shape
 
@@ -178,16 +190,22 @@ autodiscovery link in `Layout.astro` strips the slash that
 domain; `site` in `astro-paper.config.ts` matches it and **`base` is
 deliberately unset**.
 
-DNS must point the apex at GitHub Pages' `A`/`AAAA` addresses. If the zone
-stays on Cloudflare, keep those records **DNS-only (grey cloud)**: a proxied
-record blocks the HTTP validation GitHub uses to issue the certificate, and the
-site answers with a TLS error rather than a redirect, which reads like a DNS
-problem and is not one.
+DNS must point the apex at GitHub Pages' `A`/`AAAA` addresses, and those
+records already exist — the domain has been bound to the user site since the
+previous site. The zone is on Cloudflare; keep the records **DNS-only (grey
+cloud)**: a proxied record blocks the HTTP validation GitHub uses to issue the
+certificate, and the site then answers with a TLS error rather than a redirect,
+which reads like a DNS problem and is not one.
 
-> Dropping the custom domain is not a one-line change. The site would move to
-> `https://raelsei.github.io/koray.dev/`, which makes `base: "/koray.dev"`
-> mandatory and rewrites every internal URL. `site` and `base` must be changed
-> together with the `CNAME`, or every asset 404s.
+The domain is **not verified** yet (`protected_domain_state: unverified`). Add
+the `_github-pages-challenge-raelsei` TXT record Settings → Pages offers, or
+the domain stays open to a takeover if Pages is ever disabled there.
+
+> Dropping the custom domain is not a one-line change, but it is cheaper than
+> it used to be: the output sits on the *user* site, so the site would fall
+> back to `https://raelsei.github.io/` and `base` would stay unset. `site` in
+> `astro-paper.config.ts` and `public/CNAME` must still change together, or
+> every canonical URL points at a domain the site no longer answers on.
 
 ### Why Node builds this, not Bun
 
@@ -276,12 +294,12 @@ Drop a Markdown file in `src/content/projects/`. Required frontmatter is `name`,
 
 ```md
 ---
-name: ledger-kit
-kind: library
-order: 1
-summary: Double-entry primitives that refuse to lose a cent.
-repo: https://github.com/raelsei/ledger-kit
-lang: go
+name: arcstack
+kind: starter
+order: 2
+summary: Minimal Bun monorepo — workspaces and a version catalogue, no build orchestrator.
+repo: https://github.com/raelsei/arcstack
+lang: typescript
 ---
 ```
 

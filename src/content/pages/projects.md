@@ -1,12 +1,13 @@
 ---
 title: "Projects"
 description: >-
-  Ventures, libraries and tools built by Koray Güler — applied-AI fintech from
-  İstanbul, plus the open-source code underneath it.
+  Things built by Koray Güler — koative and Lumi, plus the starters the work
+  settled into.
 ---
 
-Things I built, not things I used. Ventures first, because that is where the
-money and the mistakes are; the libraries and tools below came out of them.
+Things I built, not things I used. The studio and its products first, because
+that is where the decisions cost something; the starters below are the shape
+those decisions settled into.
 
 Anything with a write-up links to its own page. Everything else links straight
 to the source, because a repository says more than a paragraph about it would.

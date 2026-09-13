@@ -5,7 +5,7 @@ export default defineAstroPaperConfig({
     url: "https://koray.dev",
     title: "koray.dev",
     description:
-      "Koray Güler — founder and product engineer. Fintech, applied AI, and small teams. Notes on money, models and shipping alone.",
+      "Koray Güler — product engineer and founder of koative, an independent software studio in İstanbul. Notes on typed edges, small dependency lists and calm software.",
     author: "Koray Güler",
     profile: "https://koray.dev/about/",
     lang: "en",

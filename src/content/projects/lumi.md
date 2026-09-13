@@ -2,19 +2,17 @@
 name: lumi
 kind: venture
 order: 2
-status: private beta
+status: coming soon
 period: "2026"
-summary: Personal finance copilot. Forecasts, not dashboards.
-metrics:
-  - value: "40"
-    label: households
-  - value: "94%"
-    label: categorised
-  - value: "180ms"
-    label: p95 sync
-tags: [under koative]
+summary: A daily ritual on iOS — one card, one mood check, one line about your sky.
+url: https://koative.com/lumi/
+tags: [under koative, iOS]
 ---
 
-A finance copilot for households. It reads your accounts, learns the shape of
-your month, and tells you what will hurt in three weeks — instead of another
-pie chart of last month.
+Lumi opens to one card drawn for the day, a quiet check on how you feel, and a
+single line on how today's sky meets your chart. Add the people who matter and
+it reads the connection between two full birth charts, exact to the hour.
+Premium opens a Past, Present, Future spread every sunrise.
+
+The free ritual stays free. The design constraint is that the app has one
+screen worth opening per day, and nothing to catch up on if you skip it.
