@@ -39,9 +39,9 @@ Two things follow from that, and both bite quietly:
   the site 404s. Without the second, the domain unbinds. The workflow refuses
   to publish if either is missing.
 
-The longer story (why the output lives in another repository, what is ours and
-what came with the theme, the palette, the structured data) is in
-[`PRODUCT.md`](PRODUCT.md) and [`DESIGN.md`](DESIGN.md).
+The rest of it (why the output lives in another repository, the content rules,
+the palette, the things that have already broken once) is in
+[`AGENTS.md`](AGENTS.md).
 
 ## Licence
 
