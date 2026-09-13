@@ -2,7 +2,6 @@
 import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import Breadcrumb from "@/components/Breadcrumb.astro";
 import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
 import Tag from "@/components/Tag.astro";
@@ -36,9 +35,7 @@ const schema = [
 >
   <Header />
 
-  <Breadcrumb />
-
-  <Main pageTitle={t.pages.tagsTitle} pageDesc={t.pages.tagsDesc}>
+  <Main pageTitle={t.pages.tagsTitle} pageDesc={t.pages.tagsDesc} class="mt-8">
     <ul class="flex flex-wrap gap-6">
       {tags.map(({ tag, tagName }) => (
         <Tag {tag} {tagName} />

@@ -3,7 +3,6 @@ import type { GetStaticPaths } from "astro";
 import { getCollection, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import Breadcrumb from "@/components/Breadcrumb.astro";
 import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
 import { page as pageNode, project as projectNode } from "@/utils/schema";
@@ -57,9 +56,11 @@ const links = [
 >
   <Header />
 
-  <Breadcrumb />
-
-  <Main pageTitle={name} titleTransitionName={toTransitionName(project.id)}>
+  <Main
+    pageTitle={name}
+    titleTransitionName={toTransitionName(project.id)}
+    class="mt-8"
+  >
     <div class="text-muted-foreground flex flex-wrap items-center gap-x-2 text-sm">
       {status && <span>{status}</span>}
       {status && period && <span aria-hidden="true">·</span>}

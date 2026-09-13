@@ -3,7 +3,6 @@ import { getRelativeLocaleUrl } from "astro:i18n";
 import "@pagefind/default-ui/css/ui.css";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import Breadcrumb from "@/components/Breadcrumb.astro";
 import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
 import { getAssetPath } from "@/utils/withBase";
@@ -34,9 +33,11 @@ const t = useTranslations(locale);
 >
   <Header />
 
-  <Breadcrumb />
-
-  <Main pageTitle={t.pages.searchTitle} pageDesc={t.pages.searchDesc}>
+  <Main
+    pageTitle={t.pages.searchTitle}
+    pageDesc={t.pages.searchDesc}
+    class="mt-8"
+  >
     <div
       id="pagefind-search"
       transition:persist

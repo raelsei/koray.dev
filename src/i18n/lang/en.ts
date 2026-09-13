@@ -45,6 +45,7 @@ export default {
 
     tagsTitle: "Tags",
     tagsDesc: "All the tags used in posts.",
+    allTags: "All tags",
 
     postsTitle: "Posts",
     postsDesc: "All the articles I've posted.",

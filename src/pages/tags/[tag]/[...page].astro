@@ -1,10 +1,12 @@
 ---
 import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
 import type { GetStaticPathsOptions } from "astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Main from "@/components/Main.astro";
-import Breadcrumb from "@/components/Breadcrumb.astro";
+import LinkButton from "@/components/LinkButton.astro";
+import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import Card from "@/components/Card.astro";
 import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
@@ -65,7 +67,17 @@ const schema = [
 >
   <Header />
 
-  <Breadcrumb />
+  {/* The nav does not carry Tags, and `Tag.astro` links straight to a single
+      tag, so without this link `/tags/` is reachable from nowhere on the site. */}
+  <div class="app-layout flex items-center justify-start">
+    <LinkButton
+      href={getRelativeLocaleUrl(locale, "tags/")}
+      class="focus-outline hover:text-foreground/75 -ms-2 mt-8 mb-2"
+    >
+      <IconChevronLeft class="inline-block size-6 rtl:rotate-180" />
+      <span>{t.pages.allTags}</span>
+    </LinkButton>
+  </div>
 
   {/* `Tag.astro` already names each chip after the tag slug, but nothing here
       carried the matching name, so that directive animated an exit and read as

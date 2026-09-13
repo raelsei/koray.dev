@@ -66,9 +66,11 @@ export function identity(config: ResolvedConfig): Node[] {
 }
 
 /**
- * Breadcrumb for an interior page, derived from the canonical path so it cannot
- * drift from the visible `Breadcrumb` component. Returns `null` for the home
- * page, which has nothing to trail.
+ * Breadcrumb for an interior page, derived from the canonical path. The visible
+ * trail was removed from the routes in favour of the nav, which already carries
+ * every top-level destination; this markup stays, because it is what puts the
+ * path under the title in a search result. Returns `null` for the home page,
+ * which has nothing to trail.
  */
 export function breadcrumb(
   config: ResolvedConfig,

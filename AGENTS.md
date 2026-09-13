@@ -89,6 +89,14 @@ attached to. Consequences, each of which has already broken once:
   text token clears 4.5:1 against both the page background and the muted
   surface. Change a lightness and re-check both grounds.
 - **English only.** `lang: en`, and no second locale is planned.
+- **No visible breadcrumb.** The nav carries every top-level destination, so a
+  `Home » Bookmarks` trail only repeated it. The `BreadcrumbList` JSON-LD is
+  still emitted for every interior page from the canonical path, because that is
+  what puts the path under the title in a search result. Post pages keep their
+  `Go back` button, which returns to the listing you arrived from.
+- **`/tags/` is reachable from exactly one place**: the `All tags` link on a
+  single-tag page. Tags are not in the nav, and `Tag.astro` links straight to a
+  tag, so removing that link orphans the index.
 - Accessibility floor to preserve: the skip link is the first focusable element
   and moves focus to `#main-content`, the theme toggle is a real button with
   `aria-live="polite"`, and the focus ring is set globally so a new component

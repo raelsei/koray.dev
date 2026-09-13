@@ -43,6 +43,7 @@ export interface UIStrings {
 
     tagsTitle: string;
     tagsDesc: string;
+    allTags: string;
 
     postsTitle: string;
     postsDesc: string;

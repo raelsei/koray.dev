@@ -2,7 +2,6 @@
 import { getCollection, getEntry, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import Breadcrumb from "@/components/Breadcrumb.astro";
 import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
 import { itemList, page as pageNode } from "@/utils/schema";
@@ -54,9 +53,7 @@ const schema = [
 >
   <Header />
 
-  <Breadcrumb />
-
-  <Main pageTitle={intro.data.title}>
+  <Main pageTitle={intro.data.title} class="mt-8">
     <div class="app-prose max-w-none">
       <Content />
     </div>
