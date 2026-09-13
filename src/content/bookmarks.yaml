@@ -1,12 +1,64 @@
-# Tools that were reopened. Nothing is listed here speculatively — if it is on
-# this page it earned its place by being opened a second time.
-- id: tools
-  group: Tools
+# Tools I open while making something. Grouped by the job they do, not by
+# vendor. A link earns its place by being useful twice; nothing is listed
+# speculatively, and a dead host gets deleted rather than kept for the archive.
+- id: agents
+  group: Coding agents
   order: 1
   links:
+    - name: omp
+      url: https://omp.sh/
+      note: "Terminal coding agent with the IDE wired in: subagents, LSP, DAP, plan mode."
+    - name: Herdr
+      url: https://herdr.dev/
+      note: "Keeps real terminals open for agents, so the work survives closing the lid."
+    - name: Orca
+      url: https://www.onorca.dev/
+      note: "Runs Claude Code, Codex, Gemini and other CLI agents in parallel, in one place."
+    - name: Hermes Agent
+      url: https://hermes-agent.nousresearch.com/
+      note: "Self-hosted agent with persistent memory and its own skills, by Nous Research."
+
+- id: design-context
+  group: Design context for agents
+  order: 2
+  links:
+    - name: getdesign.md
+      url: https://getdesign.md
+      note: "Design system analyses of known sites, ready to drop in as agent reference."
+    - name: Refero Styles
+      url: https://styles.refero.design
+      note: "Curated DESIGN.md library: colours, type, spacing and rules from real products."
+    - name: DesignMD
+      url: https://designmd.me
+      note: "Paste a URL, get a DESIGN.md with its tokens, typography and component styles."
+    - name: designmd.supply
+      url: https://designmd.supply
+      note: "The same idea, stripped down: a generated DESIGN.md for any domain."
+
+- id: builders
+  group: Prompt-to-page builders
+  order: 3
+  links:
+    - name: Aura
+      url: https://aura.build
+      note: "Prompt to landing page, exportable to HTML and Figma."
+    - name: Neuform
+      url: https://neuform.ai
+      note: "Landing pages from prompts, plus reusable DESIGN.md files for the agent."
+    - name: TypeUI
+      url: https://typeui.sh
+      note: "Design a site with AI, then read visitor behaviour and performance in one tool."
+
+- id: tools
+  group: Tools
+  order: 4
+  links:
+    - name: crt.name
+      url: https://crt.name/
+      note: "Subdomain enumeration from the Certificate Transparency firehose. Send an apex."
     - name: Shots
       url: https://shots.so/
-      note: Mockups and animated device frames, in a click.
+      note: "Mockups and animated device frames, in a click."
     - name: Better-T-Stack
       url: https://www.better-t-stack.dev/
-      note: Scaffolds an end-to-end type-safe TypeScript project.
+      note: "Scaffolds an end-to-end type-safe TypeScript project."

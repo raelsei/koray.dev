@@ -1,4 +1,5 @@
 ---
+import { existsSync } from "node:fs";
 import { getCollection, getEntry, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
@@ -6,6 +7,7 @@ import Breadcrumb from "@/components/Breadcrumb.astro";
 import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
 import { itemList, page as pageNode } from "@/utils/schema";
+import { getAssetPath } from "@/utils/withBase";
 import config from "@/config";
 
 const bookmarks = await getEntry("pages", "bookmarks");
@@ -21,6 +23,24 @@ const { Content } = await render(bookmarks);
 const groups = (await getCollection("bookmarks")).sort(
   (a, b) => a.data.order - b.data.order
 );
+
+/**
+ * Favicons are fetched once at authoring time into `public/favicons/<host>.png`
+ * rather than hotlinked from Google's favicon service, so a reader of this page
+ * is not announced to a third party and the build stays offline-safe. The path
+ * is derived from the URL, never hand-authored, and a missing file fails the
+ * build instead of shipping a broken image.
+ */
+function iconFor(url: string) {
+  const host = new URL(url).hostname.replace(/^www\./, "");
+  if (!existsSync(`public/favicons/${host}.png`)) {
+    throw new Error(
+      `Missing bookmark favicon: public/favicons/${host}.png - fetch it with ` +
+        `curl -sL "https://www.google.com/s2/favicons?domain=${host}&sz=64" -o public/favicons/${host}.png`
+    );
+  }
+  return getAssetPath(`/favicons/${host}.png`);
+}
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 
@@ -62,15 +82,26 @@ const schema = [
         <h2 class="text-xl font-semibold">{data.group}</h2>
         <ul class="mt-4">
           {data.links.map(link => (
-            <li class="my-6">
-              <a
-                href={link.url}
-                rel="noopener"
-                class="text-accent inline-block text-lg font-medium decoration-dashed underline-offset-4 hover:underline focus-visible:no-underline focus-visible:underline-offset-0"
-              >
-                {link.name}
-              </a>
-              <p>{link.note}</p>
+            <li class="my-6 flex gap-3">
+              <img
+                src={iconFor(link.url)}
+                alt=""
+                width="20"
+                height="20"
+                loading="lazy"
+                decoding="async"
+                class="mt-1.5 size-5 shrink-0 rounded"
+              />
+              <div>
+                <a
+                  href={link.url}
+                  rel="noopener"
+                  class="text-accent inline-block text-lg font-medium decoration-dashed underline-offset-4 hover:underline focus-visible:no-underline focus-visible:underline-offset-0"
+                >
+                  {link.name}
+                </a>
+                <p>{link.note}</p>
+              </div>
             </li>
           ))}
         </ul>

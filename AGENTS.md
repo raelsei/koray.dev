@@ -28,6 +28,17 @@ shipping blank.
 Reading time, archive year groups, tag counts, the Pagefind index and the OG
 images are derived at build time. Never hand-author any of them.
 
+Bookmarks carry a favicon, stored once in `public/favicons/<host>.png` and never
+hotlinked, so a reader is not announced to a third party. The path is derived
+from the URL, so adding a link means adding its icon:
+
+```sh
+curl -sL "https://www.google.com/s2/favicons?domain=<host>&sz=64" \
+  -o "public/favicons/<host>.png"
+```
+
+A missing file throws during the build rather than shipping a broken image.
+
 ## Honesty
 
 The site published an invented biography once: six years in payments, koative as
