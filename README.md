@@ -1,8 +1,55 @@
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/home-dark.webp" />
+  <img alt="koray.dev — the home page, dark and light" src=".github/readme/home-light.webp" width="880" />
+</picture>
+
 # koray.dev
 
-Personal site. [AstroPaper](https://github.com/satnaing/astro-paper) v6, used as
-the theme rather than forked into something else, with this site's own palette,
-content and identity on top.
+**The personal site of Koray Güler** — product engineer in İstanbul, founder of
+[koative](https://koative.com), an independent software studio.
+
+[![live](https://img.shields.io/badge/koray.dev-live-9ccc47?labelColor=08090a)](https://koray.dev)
+[![deploy](https://github.com/raelsei/koray.dev/actions/workflows/deploy.yml/badge.svg)](https://github.com/raelsei/koray.dev/actions/workflows/deploy.yml)
+[![astro](https://img.shields.io/badge/Astro-7-bc52ee?logo=astro&logoColor=white&labelColor=08090a)](https://astro.build)
+[![tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwindcss&logoColor=white&labelColor=08090a)](https://tailwindcss.com)
+[![theme](https://img.shields.io/badge/theme-AstroPaper%20v6-f8fbfa?labelColor=08090a)](https://github.com/satnaing/astro-paper)
+
+</div>
+
+## What this is
+
+A static site with three jobs: publish the writing, show the work, and make an
+email easy. The writing is post-mortems of correctness bugs that never raised
+an exception — no stack trace, green build, wrong answer. `/projects` carries
+koative and Lumi plus the starters the work settled into
+([keel](https://github.com/raelsei/keel),
+[arcstack](https://github.com/raelsei/arcstack),
+[pocketbase-ts-starter](https://github.com/raelsei/pocketbase-ts-starter)).
+Nothing here claims something it cannot show.
+
+Two facts that surprise people reading the repo for the first time:
+
+- **No editorial string lives in a component.** Every sentence on the site,
+  including the home page's headline, is a Zod-validated content collection
+  entry under `src/content/`. A malformed field fails the build instead of
+  shipping blank.
+- **The build is not published from here.** `main` pushes the built site to
+  `raelsei/raelsei.github.io`, because that user site owns the `koray.dev`
+  domain. See [Deploying](#deploying).
+
+```sh
+bun install
+bun dev            # localhost:4321
+bun run build      # astro check + astro build + Pagefind index
+bunx astro check   # types, components, content schemas
+```
+
+Built with [AstroPaper](https://github.com/satnaing/astro-paper) v6, used as a
+theme rather than forked into something else, with this site's own palette,
+content and identity on top. The rest of this file is the reference for that
+boundary — what is ours, what is upstream's, and why each local edit exists.
 
 ## What is ours and what is the theme's
 
