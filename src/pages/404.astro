@@ -1,32 +1,35 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import PageHeader from '../components/ui/PageHeader.astro';
-import Row from '../components/ui/Row.astro';
-import Section from '../components/ui/Section.astro';
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import LinkButton from "@/components/LinkButton.astro";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { useTranslations } from "@/i18n";
+import config from "@/config";
 
-import { list } from '../lib/collections';
-
-const nav = await list('nav');
+const locale = Astro.currentLocale ?? config.site.lang;
+const t = useTranslations(locale);
 ---
 
-<BaseLayout title="404" description="No such file or directory." route="index" noindex>
-	<div class="pt-[52px]">
-		<PageHeader prompt="$ cat ." title="No such file or directory." measure="max-w-[20ch]" />
+<Layout title={`${t.notFound.title} | ${config.site.title}`} noindex>
+  <Header />
 
-		<p class="text-body leading-prose text-soft animate-fade-in stagger-2 mt-5 max-w-[60ch]">
-			<span class="text-red">exit 1</span> — the path you followed does not resolve. Everything
-			that does is listed below, or type a section name into the prompt at the bottom of the page.
-		</p>
+  <main
+    id="main-content"
+    class="app-layout my-1 flex flex-1 items-center justify-center"
+  >
+    <div class="mb-14 flex flex-col items-center justify-center">
+      <h1 class="text-accent text-9xl font-bold">404</h1>
+      <span aria-hidden="true"> ¯\_(ツ)_/¯ </span>
+      <p class="mt-4 text-2xl sm:text-3xl">{t.notFound.message}</p>
+      <LinkButton
+        href={getRelativeLocaleUrl(locale, "")}
+        class="my-6 text-lg underline decoration-dashed underline-offset-8"
+      >
+        {t.notFound.goHome}
+      </LinkButton>
+    </div>
+  </main>
 
-		<Section title="$ ls" meta="valid paths" animateRule class="animate-fade-in stagger-3 mt-14">
-			{
-				nav.map((item) => (
-					<Row href={item.data.href} cols="grid-cols-[96px_minmax(0,1fr)] gap-[18px]">
-						<span slot="lead" class="text-meta text-dim">~/{item.id}</span>
-						<span class="text-item text-fg">{item.data.href}</span>
-					</Row>
-				))
-			}
-		</Section>
-	</div>
-</BaseLayout>
+  <Footer />
+</Layout>

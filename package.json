@@ -7,26 +7,46 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro check && astro build && pagefind --site dist && cp -r dist/pagefind public/",
+    "build:bun": "astro check && bunx --bun astro build && pagefind --site dist && cp -r dist/pagefind public/",
+    "verify:runtime": "bun run build && find dist -name '*.png' | sort | xargs shasum -a 256 > /tmp/og-node.txt && bun run build:bun && find dist -name '*.png' | sort | xargs shasum -a 256 > /tmp/og-bun.txt && diff /tmp/og-node.txt /tmp/og-bun.txt && echo 'OG images identical under both runtimes'",
     "preview": "astro preview",
-    "check": "astro check",
-    "astro": "astro"
+    "sync": "astro sync",
+    "astro": "astro",
+    "format:check": "prettier --check .",
+    "format": "prettier --write .",
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "^7.2.2",
+    "@astrojs/mdx": "^8.0.1",
     "@astrojs/rss": "^4.0.19",
-    "@astrojs/sitemap": "^3.7.3",
-    "astro": "^7.1.6",
-    "unist-util-visit": "^5.1.0"
+    "@astrojs/sitemap": "^3.7.4",
+    "@tailwindcss/vite": "^4.3.3",
+    "astro": "^7.3.2",
+    "dayjs": "^1.11.23",
+    "lodash.kebabcase": "^4.1.1",
+    "@astrojs/markdown-remark": "^7.3.1",
+    "rehype-callouts": "^2.2.0",
+    "remark-collapse": "^0.1.2",
+    "remark-toc": "^9.0.0",
+    "satori": "^0.33.4",
+    "sharp": "^0.35.4",
+    "slugify": "^1.6.9",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "@tailwindcss/vite": "^4.3.3",
-    "@types/hast": "^3.0.5",
-    "@types/js-yaml": "^4.0.9",
-    "js-yaml": "^4.3.0",
-    "shiki": "^4.4.1",
-    "tailwindcss": "^4.3.3",
-    "typescript": "^6"
+    "@pagefind/default-ui": "^1.5.2",
+    "@shikijs/transformers": "^4.4.3",
+    "@tailwindcss/typography": "^0.5.20",
+    "@types/lodash.kebabcase": "^4.1.9",
+    "@typescript-eslint/parser": "^8.70.0",
+    "eslint": "^10.10.0",
+    "eslint-plugin-astro": "^3.1.0",
+    "pagefind": "^1.5.2",
+    "prettier": "3.9.6",
+    "prettier-plugin-astro": "1.0.0",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "typescript": "^6.0.3"
   }
 }

@@ -1,92 +1,51 @@
 ---
-import { getEntry, render } from 'astro:content';
+import { getEntry, render } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import Footer from "@/components/Footer.astro";
+import { page as pageNode } from "@/utils/schema";
+import config from "@/config";
 
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Cta from '../components/ui/Cta.astro';
-import Longform from '../components/ui/Longform.astro';
-import PageHeader from '../components/ui/PageHeader.astro';
-import Row from '../components/ui/Row.astro';
-import Section from '../components/ui/Section.astro';
+const about = await getEntry("pages", "about");
 
-import { breadcrumbs, webPage } from '../lib/schema';
-import { cn } from '../lib/cn';
-import { list } from '../lib/collections';
+if (!about) {
+  throw new Error(
+    "Missing content entry: `about.md` or `about.mdx` in `src/content/pages/`"
+  );
+}
 
-const page = await getEntry('pages', 'about')!;
-const { Content } = await render(page);
+const { Content } = await render(about);
 
+const canonical =
+  about.data.canonicalURL ?? new URL(Astro.url.pathname, Astro.site).href;
+
+// ProfilePage, with the sitewide Person as its main entity: this is the page
+// that tells a crawler who the site is about.
 const schema = [
-	webPage({ path: '/about', title: page.data.head.title, description: page.data.description, type: 'ProfilePage' }, Astro.site!),
-	breadcrumbs([{ name: 'About', path: '/about' }], Astro.site!),
+  pageNode(config, canonical, {
+    kind: "ProfilePage",
+    name: about.data.title,
+    description: about.data.description,
+  }),
 ];
-
-const [manual, timeline, contacts] = await Promise.all([
-	list('manual'),
-	list('timeline'),
-	list('contacts'),
-]);
 ---
 
-<BaseLayout title={page.data.title} description={page.data.description} route="about" schema={schema}>
-	<div class="pt-[52px]">
-		<PageHeader prompt={page.data.head.prompt} title={page.data.head.title} />
+<Layout
+  title={`${about.data.title} | ${config.site.title}`}
+  description={about.data.description}
+  ogImage={about.data.ogImage}
+  canonicalURL={canonical}
+  {schema}
+>
+  <Header />
 
-		<dl class="animate-fade-in stagger-2 mt-11 grid grid-cols-[120px_minmax(0,1fr)] gap-x-[22px] gap-y-[14px] max-sm:grid-cols-1 max-sm:gap-y-[7px]">
-			{
-				manual.map((entry) => (
-					<>
-						<dt class="text-nano tracking-rule text-dim pt-[5px] uppercase">{entry.data.term}</dt>
-						<dd class="text-item leading-relaxed text-fg">{entry.data.body}</dd>
-					</>
-				))
-			}
-		</dl>
+  <Breadcrumb />
 
-		<Longform class="animate-fade-in stagger-3 mt-11">
-			<Content />
-		</Longform>
+  <Main pageTitle={about.data.title} class="app-prose">
+    <Content />
+  </Main>
 
-		<Section
-			title="$ git log --oneline"
-			meta={`${timeline.length} commits`}
-			class="animate-fade-in stagger-4 mt-15"
-		>
-			{
-				timeline.map((entry) => (
-					<Row cols="grid-cols-[96px_minmax(0,1fr)] gap-[18px] max-sm:grid-cols-1 max-sm:gap-[7px]">
-						<span
-							slot="lead"
-							class={cn('text-meta', entry.data.tone === 'accent' ? 'text-lime' : 'text-dim')}
-						>
-							{entry.data.period}
-						</span>
-						<span class="text-item text-fg">{entry.data.body}</span>
-					</Row>
-				))
-			}
-		</Section>
-
-		<Section
-			title="$ cat ~/.contacts"
-			meta="elsewhere"
-			class="animate-fade-in stagger-5 mt-14"
-		>
-			{
-				contacts.map((contact) => (
-					<Row
-						href={contact.data.href}
-						cols="grid-cols-[96px_minmax(0,1fr)] gap-[18px] max-sm:grid-cols-1 max-sm:gap-[7px]"
-					>
-						<span slot="lead" class="text-meta text-dim">{contact.data.channel}</span>
-						<span class="text-item text-fg">
-							{contact.data.handle}
-							{contact.data.external && ' ↗'}
-						</span>
-					</Row>
-				))
-			}
-		</Section>
-
-		{page.data.cta && <Cta {...page.data.cta} class="animate-fade-in stagger-6 mt-16" />}
-	</div>
-</BaseLayout>
+  <Footer />
+</Layout>

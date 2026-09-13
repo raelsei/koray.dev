@@ -1,18 +1,6 @@
 ---
-head:
-  prompt: $ man koray
-  title: Koray Güler, in longer form.
-title: About
-description: >-
-  Product engineer turned founder. Six years in payments, now building applied-AI
-  fintech from İstanbul.
-cta:
-  prompt: $ hire --slots 2
-  email: id@koray.dev
-  body: >-
-    Best fit: fintech teams putting an LLM somewhere near real money, or founders
-    who need a first engineer's judgement for six weeks.
-  aside: replies in 24h
+title: "About"
+description: "Product engineer turned founder. Six years in payments, now building applied-AI fintech from İstanbul."
 ---
 
 I am a product engineer who ended up in fintech and stayed, because money is the
@@ -32,3 +20,18 @@ younger version of myself who thought clever was the point.
 
 Outside of work: long walks along the Bosphorus, filter coffee measured to the
 gram, and a bookshelf of half-read systems books I keep promising to finish.
+
+## Rules I work by
+
+- Money is stored in minor units, as integers. Always.
+- A model may draft intent. Only the ledger commits it.
+- Every dependency must justify its own line in the lockfile.
+- If it cannot run unattended for a year, it is not finished.
+
+## Working together
+
+Two advisory slots are open at a time. Best fit: fintech teams putting an LLM
+somewhere near real money, or founders who need a first engineer's judgement for
+six weeks.
+
+Mail [id@koray.dev](mailto:id@koray.dev) — replies in 24h.

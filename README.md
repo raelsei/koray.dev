@@ -1,229 +1,359 @@
-# koray.dev — void terminal
+# koray.dev
 
-Personal site. Astro, Tailwind v4, JetBrains Mono, no UI framework.
+Personal site. [AstroPaper](https://github.com/satnaing/astro-paper) v6, used as
+the theme rather than forked into something else, with this site's own palette,
+content and identity on top.
 
-Every route is a real, statically generated page. The only client JavaScript is
-a ~3 kB bundle: a clock, a reading-progress rule, copy buttons, and the command
-bar at the bottom of the screen.
+## What is ours and what is the theme's
 
-## Deploying
+Keeping this boundary clear is what makes the next theme upgrade cheap.
 
-Cloudflare Pages, connected to this repository. `koray.dev` is already a zone
-in the same Cloudflare account, so the custom domain wires itself up — no DNS
-records to add by hand and no `CNAME` file in the repo.
+| Ours                                                                                    | The theme's                                  |
+| :-------------------------------------------------------------------------------------- | :------------------------------------------- |
+| `astro-paper.config.ts` — domain, author, timezone, socials, share links, feature flags | every component under `src/components/`      |
+| `src/styles/theme.css` — the seven colour tokens, light and dark                        | `src/styles/global.css`, `typography.css`    |
+| `src/content/posts/` — the writing                                                      | every route under `src/pages/`               |
+| `src/content/pages/` — `home`, `about`, `bookmarks`, `projects`                         | `src/utils/` except `schema.ts`, `src/i18n/` |
+| `src/content/bookmarks.yaml` — the bookmark links, as data                              | `src/layouts/` structure                     |
+| `src/content/projects/` — one file per thing built                                      | everything else                              |
+| `src/utils/schema.ts` — all JSON-LD                                                     |                                              |
+| `src/utils/projects.ts` — project grouping and link resolution                          |                                              |
+| `src/pages/projects/` — the two project routes                                          |                                              |
+| `public/favicon.svg`, `public/apple-touch-icon.png`, `public/CNAME`                     |                                              |
+| `.github/workflows/deploy.yml` — the Pages deploy                                       |                                              |
 
-| Setting | Value |
-| :--- | :--- |
-| Framework preset | Astro |
-| Build command | `bun run build` |
-| Build output directory | `dist` |
-| Production branch | `main` |
+### Local edits against upstream
 
-Every push to `main` triggers a build; other branches get preview URLs. There
-is no workflow file and no build output committed anywhere — `dist/` stays
-ignored.
+Each is marked with a comment explaining why. Keeping this list short is what
+makes a theme bump a merge rather than a rewrite.
 
-> GitHub Pages was the previous target and is switched off. It only serves `/`
-> or `/docs` from a branch, which meant either committing the build or naming a
-> directory after something it is not. The old static site that lived here
-> before the rebuild is kept at the `archive/pages-site-2021` tag.
+| File                                                        | Edit                                                                                                                                                                             |
+| :---------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/pages/index.astro`                                     | Hero copy read from the content collection; feed icon moved into the social row                                                                                                  |
+| `src/components/Header.astro`, `src/i18n/`                  | Nav is `Posts · Projects · Bookmarks · About`: `Projects` and `Bookmarks` added, `Tags` dropped from the bar, `About` moved last; the list wraps instead of clipping (see below) |
+| `astro.config.ts`                                           | Dark code theme; `/search/` filtered out of the sitemap                                                                                                                          |
+| `src/layouts/Layout.astro`                                  | `schema` and `noindex` props; dead `favicon.ico` link removed; `og:locale`; static `theme-color`; `apple-touch-icon`; RSS href without a trailing slash                          |
+| `src/layouts/PostLayout.astro`                              | Post JSON-LD routed through the shared graph instead of its own block                                                                                                            |
+| `src/pages/search.astro`                                    | Dev notice only when the index is genuinely missing, naming `bun run build`                                                                                                      |
+| `src/content.config.ts`                                     | `seoTitle` on pages; the `bookmarks` and `projects` collections                                                                                                                  |
+| `src/components/Main.astro`, `Datetime.astro`, `Card.astro` | Optional `titleTransitionName` / `transitionName`, and the card date named, so a listing-to-detail View Transition morphs both halves (see below)                                |
+| Listing and page routes                                     | Page-specific JSON-LD; the meta description the theme rendered but never set; paired View Transition names on the tag and project pages                                          |
 
-## Generated files
+#### Why the nav list wraps
 
-Nothing in this table is hand-maintained. Each is an endpoint under
-`src/pages/`, built from the same collections the site renders, so none of them
-can drift from what is actually published.
+The theme's horizontal nav overflows its own container rather than wrapping,
+and when it overflows it clips from the right: the search icon cut in half, the
+theme toggle off-screen entirely. That was already true at 640 px with the
+theme's own four links, before this site changed anything — the excess spilled
+into the right margin, which looks fine on a wide screen, so the defect only
+shows once the viewport is narrow enough to reach it.
 
-| Path                 | Built by                        | Contents                                        |
-| :------------------- | :------------------------------ | :---------------------------------------------- |
-| `/sitemap-index.xml` | `@astrojs/sitemap`              | Every route; `404` excluded automatically        |
-| `/rss.xml`           | `src/pages/rss.xml.ts`          | Writing feed, newest first                       |
-| `/robots.txt`        | `src/pages/robots.txt.ts`       | Allow-all plus absolute sitemap and llms links   |
-| `/llms.txt`          | `src/pages/llms.txt.ts`         | [llmstxt.org](https://llmstxt.org) index         |
-| `/llms-full.txt`     | `src/pages/llms-full.txt.ts`    | Every page, post *and dataset* inlined as Markdown |
-| `/og.png`            | `public/og.png`                 | Static social card — one of two assets checked in |
+Measured in the built page, at the current four text links and three icons: the
+items need 420 px of content, so the row wants 539 px. Desktop widths allocate
+598 px, and 640 px allocates 470 px — it fits wide and cannot fit at the `sm`
+breakpoint, which is exactly where the clipping appeared.
 
-`llms-full.txt` inlines the YAML collections too, not just Markdown bodies —
-otherwise `/work`, `/stack` and `/library` would ship as empty headings and the
-"full text" claim would be false. See `routeData()` in
-[`src/lib/llms.ts`](src/lib/llms.ts).
+So the only change is `flex-wrap` plus a row gap, which degrades to a second
+row instead of hiding a control and keeps the theme's own `gap-x-5` spacing.
+Verified from 375 px to 1920 px: one row from 768 px up, two rows in the
+640–767 px band, the hamburger below that, and no horizontal page scroll at any
+width.
 
-Absolute URLs come from `site` in `astro.config.mjs`, which reads `SITE.url`.
-Change the domain in one place and all five files follow.
+A nav entry costs roughly 60 px of the 598 px budget. Past it nothing breaks;
+the row just wraps at a wider viewport than before.
+
+#### View transitions
+
+`ClientRouter` in `Layout.astro` makes navigation a client-side swap, and
+`view-transition-name` morphs a listing element into its detail counterpart.
+The rule that matters: **the same CSS ident must exist on the page being left
+and the page being entered.** Two failure modes, both silent:
+
+- A name on only one side animates as an exit, which reads as a flicker rather
+  than a transition. `Tag.astro` shipped in exactly this state — every chip was
+  named and nothing on `/tags/<tag>/` matched.
+- The same name twice on one page disables the animation for that name
+  entirely.
+
+Names come from [`toTransitionName`](src/utils/toTransitionName.ts), which
+sanitises to a valid CSS `<custom-ident>`: dots stripped (`Math.floor` would
+otherwise be invalid), no leading digit, non-ASCII hex-encoded. An invalid name
+fails the same silent way.
+
+The pairs currently in place:
+
+| Listing              | Detail                     | Name                      |
+| :------------------- | :------------------------- | :------------------------ |
+| `Card.astro` title   | post `<h1>`                | `<post-id>`               |
+| `Card.astro` date    | post `Datetime`            | `<post-id>-date`          |
+| `Tag.astro` chip     | `/tags/<tag>/` `<h1>`      | `<tag>`                   |
+| `/projects/` heading | `/projects/<slug>/` `<h1>` | `<project-id>`            |
+| `/projects/` metric  | `/projects/<slug>/` metric | `<project-id>-metric-<i>` |
+
+A project row without a write-up links to its repository, so its heading is
+deliberately left unnamed — there is no second half to morph into.
+
+Reduced motion needs no work: Astro ships `@media (prefers-reduced-motion)`
+rules that set `animation: none` on the view-transition pseudo-elements. Do not
+hand-roll a second set.
+
+Note for testing: headless Chromium exposes `document.startViewTransition` but
+runs no transition, so the animation cannot be captured there. Verify the
+pairing by diffing the idents per page in `dist`; the frames need a real
+browser.
 
 ## Commands
 
-| Command             | Action                                            |
-| :------------------ | :------------------------------------------------ |
-| `bun install`       | Install dependencies                              |
-| `bun dev`           | Dev server on `localhost:4321`                    |
-| `bun build`         | Build to `./dist/`                                |
-| `bun preview`       | Serve the build locally                           |
-| `bunx astro check`  | Type-check `.astro`, `.ts`, and content schemas   |
+| Command                  | Action                                                      |
+| :----------------------- | :---------------------------------------------------------- |
+| `bun install`            | Install dependencies                                        |
+| `bun dev`                | Dev server on `localhost:4321`                              |
+| `bun run build`          | Type-check, build to `./dist/`, then index with Pagefind    |
+| `bun run build:bun`      | Same, but `astro build` runs on the Bun runtime — see below |
+| `bun run verify:runtime` | Builds both ways and diffs the OG images byte-for-byte      |
+| `bun preview`            | Serve the build locally                                     |
+| `bunx astro check`       | Type-check `.astro`, `.ts`, and content schemas             |
+| `bun run format`         | Prettier                                                    |
+| `bun run lint`           | ESLint                                                      |
+
+Per `AGENTS.md`, start the dev server as `astro dev --background` and manage it
+with `astro dev stop|status|logs`.
+
+> **TypeScript stays on 6.x.** TypeScript 7's native compiler does not yet expose
+> the programmatic API `astro check` relies on, so bumping it breaks both
+> `astro check` and `bun run build`. Track
+> [withastro/roadmap#1321](https://github.com/withastro/roadmap/discussions/1321).
+
+## Deploying
+
+GitHub Pages, built and published by
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) on every push to
+`main`. Nothing is committed to a branch; the workflow uploads `dist/` as a
+Pages artifact.
+
+**One setting is not in this repo:** Settings → Pages → **Source** must be
+**GitHub Actions**. Without it the workflow runs green and publishes nothing.
+
+The workflow is the official [`withastro/action`](https://github.com/withastro/action),
+and three of its behaviours are what this project relies on:
+
+- It finds `bun.lock` — the text lockfile Bun ≥ 1.2 writes — installs with Bun,
+  **and separately installs Node** to run the build. That is exactly the split
+  this project wants, with no configuration.
+- It runs the package `build` script, so `astro check` and the Pagefind index
+  both happen. Do not override `build-cmd` with a bare `astro build`: search is
+  an index generated from `dist` _after_ the build, and `astro build` alone
+  ships a site whose `/search` finds nothing.
+- It publishes through `upload-pages-artifact` / `deploy-pages`, which serves
+  the artifact as-is. **Jekyll never runs**, so `_astro/` is safe and
+  `public/.nojekyll` is unnecessary. That file is folklore carried over from the
+  old deploy-from-a-branch flow; do not add it back.
+
+The branch-based limitation that made GitHub Pages a bad fit before — it only
+served `/` or `/docs` from a branch, so you had to commit the build — does not
+apply to the Actions flow.
+
+### URL shape
+
+`trailingSlash: "always"` in `astro.config.ts`, because a static host is
+stricter than the dev server and the difference is easy to miss. `astro dev`
+and `astro preview` both normalise a URL that a plain file host would reject,
+so a link shape can look fine locally and cost a redirect — or a 404 — once
+published. Two things this setting buys:
+
+- Astro's `paginate()` stops emitting `/posts/2` while the sitemap and the
+  canonical tag say `/posts/2/`. Every internal link, canonical URL and sitemap
+  entry now agrees on one form.
+- The dev server rejects the slash-less form, so the mismatch surfaces while
+  you are working rather than after a deploy.
+
+Routes with a file extension are exempt, so `/rss.xml` stays slash-less — which
+matters, because `/rss.xml/` is a 404 on a real file host. The RSS
+autodiscovery link in `Layout.astro` strips the slash that
+`getRelativeLocaleUrl` appends for exactly that reason.
+
+### Custom domain
+
+[`public/CNAME`](public/CNAME) contains `koray.dev`, which is what binds the
+domain; `site` in `astro-paper.config.ts` matches it and **`base` is
+deliberately unset**.
+
+DNS must point the apex at GitHub Pages' `A`/`AAAA` addresses. If the zone
+stays on Cloudflare, keep those records **DNS-only (grey cloud)**: a proxied
+record blocks the HTTP validation GitHub uses to issue the certificate, and the
+site answers with a TLS error rather than a redirect, which reads like a DNS
+problem and is not one.
+
+> Dropping the custom domain is not a one-line change. The site would move to
+> `https://raelsei.github.io/koray.dev/`, which makes `base: "/koray.dev"`
+> mandatory and rewrites every internal URL. `site` and `base` must be changed
+> together with the `CNAME`, or every asset 404s.
+
+### Why Node builds this, not Bun
+
+Bun is the package manager and script runner. It is **not** the build runtime:
+`astro` and `pagefind` ship `#!/usr/bin/env node` shebangs, so `bun run build`
+hands the actual work to Node. That is deliberate, and it is what
+[Astro's Bun recipe](https://docs.astro.build/en/recipes/bun/) documents — the
+`--bun` flag it recommended in 2024 has since been removed from those docs.
+
+Locally the Bun runtime looks fine: `bun run verify:runtime` produces
+**byte-identical** OG images and builds about 12% faster. That result is from
+macOS arm64 and does not transfer to CI.
+
+> **The blocker.** GitHub's runners are Ubuntu x86_64.
+> [oven-sh/bun#20372](https://github.com/oven-sh/bun/issues/20372) — a `sharp`
+> segfault under Bun, labelled `napi` / `crash` / `linux` / `runtime` — is open
+> and unassigned, and its reporter notes it works on macOS arm64 and crashes on
+> Linux. `sharp` is irreplaceable here: it converts satori's SVG into the OG
+> PNGs, and Bun's own `Bun.Image` cannot decode SVG at all.
+
+The trade is asymmetric — half a second on a build that runs once per deploy,
+against a segfault class on the build platform with no fallback. So `build`
+stays on Node. To revisit it: confirm #20372 is closed, run
+`bun run verify:runtime` on an `ubuntu-latest` runner, and only then set
+`build-cmd: bun --bun run build` on the action.
+
+## Colour
+
+Seven tokens, defined once in [`src/styles/theme.css`](src/styles/theme.css) and
+registered for Tailwind in the same file. Components reference them by role
+(`bg-background`, `text-muted-foreground`, `border-border`), never by value.
+
+The neutrals sit at OKLCH hue 160–178 — a green cast rather than slate — so the
+greys read as phosphor next to the accent. The dark accent is `#b6ff3d`; light
+mode cannot use it (≈1.3:1 on a light ground), so it becomes the same hue at
+OKLCH L50, `#4c7100`.
+
+> Every text pair clears WCAG AA for normal text (4.5:1) against **both** the
+> page background and the muted surface, because `--muted-foreground` and
+> `--accent` are each used over both. Changing a lightness means re-checking two
+> grounds, not one.
+
+`--muted` is one step lighter than the palette's default stroke on purpose: the
+theme uses it as a borderless fill (inline code, copy buttons, striped rows), so
+it has to read as a surface on its own.
 
 ## Editing content
 
-**No copy lives in a component.** Everything is a content collection, validated
-by Zod in [`src/content.config.ts`](src/content.config.ts). Change a file, the
-site changes; the build fails loudly if a field is missing or malformed.
+No copy lives in a component. Everything is a content collection validated by
+Zod in [`src/content.config.ts`](src/content.config.ts); a malformed field fails
+the build instead of shipping blank.
 
 ```
 src/content/
-├── pages/       one Markdown file per route — eyebrow, headline, CTA, intro prose
-├── writing/     posts; frontmatter drives the header, the body drives the article
-├── data/        ordered YAML lists (nav, ventures, oss, stack, rules, contacts, …)
-└── shelves/     one file per /library shelf
+├── posts/      the writing — one Markdown file per post
+├── projects/   one file per thing built
+├── pages/      home hero, about, bookmarks, projects intro
+└── bookmarks.yaml
 ```
-
-Only `src/consts.ts` holds non-content configuration: domain, author, timezone,
-and the status-line chrome (shell user, coordinates, availability badge). Set
-`terminal.availability` to `null` to hide the availability indicator.
-
-### Ordering
-
-Astro's data store re-sorts every collection by `id`, so authored array order is
-lost by the time `getCollection()` runs. The `ordered()` loader in
-`content.config.ts` stamps each item's position in the file as `order`, and
-`list()` in [`src/lib/collections.ts`](src/lib/collections.ts) sorts by it.
-
-> Read ordered collections with `list('nav')`, never `getCollection('nav')`.
-
-### Derived values
-
-These are computed, never authored — so they cannot drift from the content:
-
-| Value                        | Derived from                            |
-| :--------------------------- | :-------------------------------------- |
-| Reading time                 | word count of the Markdown body         |
-| Archive year groups, counts  | `pubDate`                               |
-| Library tab counts           | number of items on the shelf            |
-| Outbound link labels         | the URL's hostname                      |
-| `01` / `02` ordinals         | array position                          |
-| Post section numbers         | a CSS counter on `.longform h2`            |
 
 ### Writing a post
 
-Drop a Markdown file in `src/content/writing/`. `description` becomes the lede
-and the archive-row summary. `##` headings are auto-numbered. A fenced block
-gains a filename caption and a copy button when the fence carries `file=`:
+Drop a Markdown or MDX file in `src/content/posts/`. Required frontmatter is
+`title`, `description` and `pubDatetime`; `tags` defaults to `["others"]`. Add
+`featured: true` to lift a post into the home page's Featured block, and
+`draft: true` to keep it out of the build.
 
-````md
-```ts file="money.ts" accent
-type Money = { minor: bigint; currency: "TRY" | "USD" | "EUR" };
-```
-````
-
-`accent` adds the lime rule down the left edge. The same chrome is produced by
-[`CodeBox.astro`](src/components/ui/CodeBox.astro) for YAML-sourced code, and by
-[`rehype-code-box.ts`](src/lib/rehype-code-box.ts) for Markdown — both emit
-`[data-code-box]`, which is styled and wired in exactly one place.
-
-## Design system
-
-Every colour, size, tracking and animation is a token in
-[`src/styles/global.css`](src/styles/global.css). Components compose utilities;
-none of them hardcodes a hex or a pixel value that isn't layout.
-
-```
-src/components/
-├── primitives/  Rule · Prompt · Cursor · Tag · Badge
-├── ui/          Section · Row · Panel · Stat · Metric · CodeBox · Tree ·
-│                PageHeader · Cta · Longform
-└── layout/      TopBar · NavRail · Footer · CommandBar · Scanlines
+```md
+---
+title: "Math.floor is not a floor"
+description: The obvious fix drops a step. The clever fix rounds past the input.
+pubDatetime: 2026-02-26T06:00:00.000Z
+tags: [correctness]
+featured: true
+---
 ```
 
-`Row` is the workhorse: one grid row that becomes a link (with hover fill) when
-given an `href`. The page owns the column template, because that is layout;
-the component owns spacing, dividers and interaction, because that is chrome.
+A fenced block gains a filename caption when the fence carries a filename, and a
+copy button either way.
 
-Markdown has no class attributes, so `.longform` and `[data-code-box]` are typeset
-by selector in `global.css` — the one place both Markdown output and component
-slots are styled.
+### Adding a project
 
-### Invariants worth knowing before you edit
+Drop a Markdown file in `src/content/projects/`. Required frontmatter is `name`,
+`kind`, `order` and `summary`; `status`, `period`, `url`, `repo`, `lang`,
+`metrics` and `tags` are optional.
 
-Each of these is a trap that stays silent — the build goes green and the site
-ships something wrong. All four are load-bearing.
+```md
+---
+name: ledger-kit
+kind: library
+order: 1
+summary: Double-entry primitives that refuse to lose a cent.
+repo: https://github.com/raelsei/ledger-kit
+lang: go
+---
+```
 
-**Type-scale names must stay outside Tailwind's own scale.** `--text-sm`,
-`--text-base`, `--text-lg`, `--text-xl`, `--text-2xl`, `--text-3xl` are Tailwind
-defaults. Redefining one overrides only the font-size: the paired
-`--text-<name>--line-height` survives, and the utility then emits a line-height
-computed from Tailwind's *original* rem size. Hence `--text-row`, `--text-item`,
-`--text-entry`, `--text-venture`, `--text-flagship`, `--text-contact`.
+`kind` is one of `venture`, `library`, `starter`, `tool`. It only decides which
+group the entry lands in on `/projects/`, in the order fixed by `KIND_GROUPS` in
+[`src/utils/projects.ts`](src/utils/projects.ts); a group with no entries is not
+rendered, so a kind can be named before anything fills it. `order` ranks within
+the group — the index never sorts alphabetically.
 
-**YAML lists use block mappings, never flow mappings.** `{ note: 4 years, still
-rebuilding }` parses as `note: "4 years"` plus a null-valued key `still
-rebuilding`, which Zod strips without a word. Half the sentence just disappears.
+**The body decides whether there is a page.** Write something under the
+frontmatter and the entry gets `/projects/<slug>/`, with the index linking
+there. Leave the body empty and the entry stays a row linking to `url` or
+`repo`. That is deliberate: it means no page ships carrying a single sentence,
+and the page cannot disagree with whether there is anything on it.
 
-**Internal links go through [`src/lib/urls.ts`](src/lib/urls.ts).** `trailingSlash:
-'always'` makes the slash-less form a hard 404 in dev, so a mistake surfaces on
-the first click instead of in Search Console six weeks later.
-
-**Ordered collections are read with `list()`, never `getCollection()`.** See
-[Ordering](#ordering).
-
-### Colour
-
-The palette lives in the `@theme` block and nowhere else.
-[`src/lib/palette.ts`](src/lib/palette.ts) parses it at build time so the Shiki
-theme derives from the same source — recolouring a token reaches code blocks too.
-
-### Deliberately absent
-
-The site has one rule about this in `rules.txt`: *every dependency must justify
-its own line in the lockfile*. These three are omitted on purpose, not by
-oversight — each is one command away if it ever earns its place.
-
-| Package | Why not |
-| :--- | :--- |
-| `sharp` | Astro's image service. The design has no images; the aesthetic is pure type. Add an image and Astro says exactly what to install. |
-| `@astrojs/mdx` | Zero `.mdx` files. Code blocks already get their chrome from `rehype-code-box`, so nothing needs component syntax yet. `astro add mdx` restores it. |
-| `@tailwindcss/typography` | Its `.prose` ships a full type scale, colour set and spacing that this design would have to override wholesale — more CSS to undo defaults than `.longform` costs to write. Measured: +12.6 kB, +51%. |
+Two things are absent on purpose. There are **no per-kind tag routes** —
+filtered listings with no prose of their own are near-duplicates of the index,
+and at this count a filter is worse UX than one grouped page. And there are **no
+star counts**: hand-authored numbers decay silently between edits, so the
+repository link carries the proof instead. Both are worth revisiting past
+roughly 25 projects, not before.
 
 ## Structured data
 
-Every page emits one `application/ld+json` block containing a single `@graph`.
-Entities are declared once with a stable `@id` and referenced by `@id` elsewhere,
-so the Person, WebSite and Organization are never duplicated within a document.
+Every page emits exactly one `application/ld+json` block containing a single
+`@graph`. Entities are declared once with a stable `@id` and referenced by
+`@id` thereafter, so the `Person` and `WebSite` are never duplicated inside a
+document and a crawler reading two pages sees the same two entities. All of it
+is built in [`src/utils/schema.ts`](src/utils/schema.ts); a route passes only
+what is unique to itself through `Layout`'s `schema` prop.
 
-| Route | Nodes |
-| :--- | :--- |
-| all | `Person` · `WebSite` · `Organization` |
-| `/` | `WebPage` |
-| `/work`, `/library/*` | `CollectionPage` · `BreadcrumbList` |
-| `/writing` | `CollectionPage` · `ItemList` · `BreadcrumbList` |
-| `/writing/<slug>` | `BlogPosting` · `BreadcrumbList` |
-| `/about` | `ProfilePage` · `BreadcrumbList` |
+| Route                   | Nodes                                                          |
+| :---------------------- | :------------------------------------------------------------- |
+| all                     | `Person` · `WebSite` · `BreadcrumbList` (except the home page) |
+| `/`                     | `WebPage`                                                      |
+| `/about`                | `ProfilePage`, with the `Person` as its `mainEntity`           |
+| `/posts`, `/tags/<tag>` | `CollectionPage` · `ItemList` of the posts on that page        |
+| `/tags`, `/archives`    | `CollectionPage`                                               |
+| `/bookmarks`            | `CollectionPage` · `ItemList` of the links                     |
+| `/posts/<slug>`         | `WebPage` · `BlogPosting`, authored by the `Person`            |
 
-Social profiles come from `contacts.yaml`, the studio from `ventures.yaml`, word
-counts and reading time from the Markdown body. Nothing is authored twice. See
-[`src/lib/schema.ts`](src/lib/schema.ts).
+Breadcrumbs are derived from the canonical path, so they cannot drift from the
+visible `Breadcrumb` component, and a numeric segment renders as `Page 2`
+rather than as a crumb of its own.
 
-## Accessibility
+> A dangling `@id` — a reference to a node the document never declares — is the
+> failure mode worth testing for. Nothing validates it at build time.
 
-Decisions that are easy to undo by accident:
+## Search Console
 
-- `TopBar` renders a `<header>` and `Footer` sits *outside* `<main>` — a
-  `<footer>` nested in `main` exposes no `contentinfo` landmark.
-- The command bar's `<output>` is never toggled with `hidden`; a hidden element
-  is out of the accessibility tree, so mutations to it are not announced.
-- `.longform` lists keep their `list-style` and empty the `::marker` instead.
-  `list-style: none` makes WebKit drop list semantics entirely.
-- Generated content uses the `content: '…' / ''` alt-text form, so screen
-  readers do not read the `##`, `>` and `-` glyphs aloud.
-- `Tree` carries the hierarchy in nested `<ul role="list">`; the box-drawing
-  characters are `aria-hidden` decoration.
+`astro.config.ts` declares `PUBLIC_GOOGLE_SITE_VERIFICATION` as an optional
+public env var. It is read at build time, so it has to be set where the build
+runs: add it to the `env:` block of the `withastro/action` step in
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), sourced from a
+repository variable or secret. Leave it unset and no tag is emitted.
 
-## Command bar
+## Generated
 
-Resolves against the same route table the navigation renders, so `cd work` and
-clicking the tab perform the identical navigation. Aliases live in
-`src/content/data/nav.yaml`.
+| Path                      | Built by                                                 |
+| :------------------------ | :------------------------------------------------------- |
+| `/sitemap-index.xml`      | `@astrojs/sitemap`                                       |
+| `/rss.xml`                | `src/pages/rss.xml.ts`                                   |
+| `/robots.txt`             | `src/pages/robots.txt.ts`                                |
+| `/og.png`                 | `src/pages/og.png.ts` — Satori, drawn with the site font |
+| `/posts/<slug>/index.png` | per-post OG image, same generator                        |
+| `/pagefind/*`             | Pagefind, from `dist` after the build                    |
 
-```
-help · ls · cd <section> · cat <post> · whoami · time · mail · clear
-```
+There is no static OG image checked in: `features.dynamicOgImage` generates one
+per post and a site default, so a social card can never fall out of date with
+the post it belongs to.
 
-`⌥/` focuses the prompt from anywhere; `Esc` clears it. The bar is
-`transition:persist`ed, so its log survives navigation.
+## Licence
+
+AstroPaper is MIT-licensed by [Sat Naing](https://github.com/satnaing); see
+[`LICENSE`](LICENSE). The writing and the palette are not part of that licence.

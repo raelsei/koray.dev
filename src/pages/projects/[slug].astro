@@ -1,0 +1,118 @@
+---
+import type { GetStaticPaths } from "astro";
+import { getCollection, render } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import Footer from "@/components/Footer.astro";
+import { page as pageNode, project as projectNode } from "@/utils/schema";
+import { hasWriteup, type Project } from "@/utils/projects";
+import { toTransitionName } from "@/utils/toTransitionName";
+import config from "@/config";
+
+// Only entries with something written in them. An entry that is just
+// frontmatter stays a row on the index and links to its source instead.
+export const getStaticPaths = (async () => {
+  const projects = await getCollection("projects");
+  return projects.filter(hasWriteup).map(project => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = { project: Project };
+
+const { project } = Astro.props;
+const { name, status, period, summary, url, repo, lang, metrics, tags } =
+  project.data;
+
+const { Content } = await render(project);
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+
+const schema = [
+  pageNode(config, canonical, { name, description: summary }),
+  projectNode(config, canonical, {
+    name,
+    description: summary,
+    url,
+    repo,
+    lang,
+    tags,
+  }),
+];
+
+const links = [
+  url && { href: url, label: "visit" },
+  repo && { href: repo, label: "source" },
+].filter(Boolean) as Array<{ href: string; label: string }>;
+---
+
+<Layout
+  title={`${name} | ${config.site.title}`}
+  description={summary}
+  canonicalURL={canonical}
+  {schema}
+>
+  <Header />
+
+  <Breadcrumb />
+
+  <Main pageTitle={name} titleTransitionName={toTransitionName(project.id)}>
+    <div class="text-muted-foreground flex flex-wrap items-center gap-x-2 text-sm">
+      {status && <span>{status}</span>}
+      {status && period && <span aria-hidden="true">·</span>}
+      {period && <span>{period}</span>}
+      {(status || period) && lang && <span aria-hidden="true">·</span>}
+      {lang && <span>{lang}</span>}
+    </div>
+
+    {/* Paired with the same metric on the index, so the numbers travel to
+        their new place instead of fading out and back in. */}
+    {metrics && (
+      <ul class="mt-6 flex flex-wrap gap-x-8 gap-y-2">
+        {metrics.map((metric, i) => (
+          <li
+            style={{
+              viewTransitionName: `${toTransitionName(project.id)}-metric-${i}`,
+            }}
+          >
+            <span class="text-accent text-lg font-medium">{metric.value}</span>{" "}
+            <span class="text-muted-foreground text-sm">{metric.label}</span>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    <div class="app-prose mt-6 max-w-none">
+      <Content />
+    </div>
+
+    {links.length > 0 && (
+      <ul class="mt-8 flex flex-wrap gap-x-6">
+        {links.map(link => (
+          <li>
+            <a
+              href={link.href}
+              rel="noopener"
+              class:list={[
+                "text-accent font-medium",
+                "decoration-dashed underline-offset-4 hover:underline",
+                "focus-visible:no-underline focus-visible:underline-offset-0",
+              ]}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+
+    {tags.length > 0 && (
+      <p class="text-muted-foreground mt-8 text-sm">{tags.join(" · ")}</p>
+    )}
+  </Main>
+
+  <Footer />
+</Layout>

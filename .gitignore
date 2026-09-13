@@ -1,17 +1,14 @@
-# build output — published to the gh-pages branch, never committed to main
+# build output — CI builds and uploads this, it is never committed
 dist/
-# generated types
+
+# generated types and font cache
 .astro/
 
 # dependencies
 node_modules/
 
 # logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
+bun-debug.log*
 
 # environment variables
 .env
@@ -22,3 +19,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# pagefind index — generated from dist/ by the build
+public/pagefind

@@ -1,36 +1,22 @@
-import rss from '@astrojs/rss';
-import type { APIRoute } from 'astro';
+import rss from "@astrojs/rss";
+import { getCollection } from "astro:content";
+import { getSortedPosts } from "@/utils/getSortedPosts";
+import { getPostUrl } from "@/utils/getPostPaths";
+import config from "@/config";
 
-import { SITE } from '../consts';
-import { WRITING, absolute, post as postPath } from '../lib/urls';
-import { getPosts } from '../lib/writing';
+export async function GET() {
+  const posts = await getCollection("posts");
+  const sortedPosts = getSortedPosts(posts);
 
-export const GET: APIRoute = async (context) => {
-	const site = context.site!;
-	const posts = await getPosts();
-
-	return rss({
-		title: `${SITE.title} — writing`,
-		description: SITE.description,
-		site,
-		xmlns: { atom: 'http://www.w3.org/2005/Atom' },
-		items: posts.map((post) => ({
-			title: post.data.title,
-			description: post.data.description,
-			pubDate: post.data.pubDate,
-			categories: post.data.tags,
-			// RSS 2.0 <author> is email-first by spec.
-			author: `${SITE.email} (${SITE.author})`,
-			link: postPath(post.id),
-		})),
-		customData: [
-			`<language>${SITE.locale}</language>`,
-			// The feed's scope is the archive, not the home page.
-			`<link>${absolute(WRITING, site)}</link>`,
-			`<atom:link href="${absolute('/rss.xml', site)}" rel="self" type="application/rss+xml"/>`,
-			...(posts[0]
-				? [`<lastBuildDate>${posts[0].data.pubDate.toUTCString()}</lastBuildDate>`]
-				: []),
-		].join(''),
-	});
-};
+  return rss({
+    title: config.site.title,
+    description: config.site.description,
+    site: config.site.url,
+    items: sortedPosts.map(({ data, id, filePath }) => ({
+      link: getPostUrl(id, filePath, config.site.lang),
+      title: data.title,
+      description: data.description,
+      pubDate: new Date(data.modDatetime ?? data.pubDatetime),
+    })),
+  });
+}

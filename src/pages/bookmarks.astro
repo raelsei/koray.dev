@@ -1,0 +1,82 @@
+---
+import { getCollection, getEntry, render } from "astro:content";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Breadcrumb from "@/components/Breadcrumb.astro";
+import Main from "@/components/Main.astro";
+import Footer from "@/components/Footer.astro";
+import { itemList, page as pageNode } from "@/utils/schema";
+import config from "@/config";
+
+const bookmarks = await getEntry("pages", "bookmarks");
+
+if (!bookmarks) {
+  throw new Error(
+    "Missing content entry: `bookmarks.md` or `bookmarks.mdx` in `src/content/pages/`"
+  );
+}
+
+const { Content } = await render(bookmarks);
+
+const groups = (await getCollection("bookmarks")).sort(
+  (a, b) => a.data.order - b.data.order
+);
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+
+// The same links the page renders, emitted as an ItemList so the page is worth
+// crawling rather than reading as two stray anchors in prose.
+const schema = [
+  pageNode(config, canonical, {
+    kind: "CollectionPage",
+    name: bookmarks.data.title,
+    description: bookmarks.data.description,
+  }),
+  itemList(
+    canonical,
+    groups.flatMap(({ data }) =>
+      data.links.map(link => ({ name: link.name, url: link.url }))
+    )
+  ),
+];
+---
+
+<Layout
+  title={`${bookmarks.data.title} | ${config.site.title}`}
+  description={bookmarks.data.description}
+  ogImage={bookmarks.data.ogImage}
+  canonicalURL={bookmarks.data.canonicalURL ?? canonical}
+  {schema}
+>
+  <Header />
+
+  <Breadcrumb />
+
+  <Main pageTitle={bookmarks.data.title}>
+    <div class="app-prose max-w-none">
+      <Content />
+    </div>
+
+    {groups.map(({ data }) => (
+      <section class="mt-10">
+        <h2 class="text-xl font-semibold">{data.group}</h2>
+        <ul class="mt-4">
+          {data.links.map(link => (
+            <li class="my-6">
+              <a
+                href={link.url}
+                rel="noopener"
+                class="text-accent inline-block text-lg font-medium decoration-dashed underline-offset-4 hover:underline focus-visible:no-underline focus-visible:underline-offset-0"
+              >
+                {link.name}
+              </a>
+              <p>{link.note}</p>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </Main>
+
+  <Footer />
+</Layout>

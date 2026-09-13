@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  # Lets a deploy be re-run from the Actions tab without an empty commit.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# A newer push should win, but never cancel a deploy that is already publishing.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Install, build, and upload
+        uses: withastro/action@v6
+        with:
+          # Stated rather than defaulted: Node is the build runtime here, and
+          # Astro requires >=22.12.0. See "Why Node builds this, not Bun".
+          node-version: "24"
+        # The action detects `bun.lock` and installs with Bun, then installs Node
+        # and runs `bun run build` — so Bun is the package manager and Node is the
+        # build runtime, which is what this project wants.
+        #
+        # `bun run build` also runs `astro check` and the Pagefind index, so
+        # search works on the deployed site. Do not override `build-cmd` with a
+        # bare `astro build`.
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v5
