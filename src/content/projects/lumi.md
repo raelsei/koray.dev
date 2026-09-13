@@ -4,7 +4,7 @@ kind: venture
 order: 2
 status: coming soon
 period: "2026"
-summary: A daily ritual on iOS — one card, one mood check, one line about your sky.
+summary: "A daily ritual on iOS: one card, one mood check, one line about your sky."
 url: https://koative.com/lumi/
 tags: [under koative, iOS]
 ---

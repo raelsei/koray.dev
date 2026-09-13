@@ -9,7 +9,7 @@ tags: [llm]
 
 The system pairs an exact computation engine with a language model. The engine
 owns every quantity. The model owns only phrasing. Users read the prose as
-authoritative, so an invented number is not a glitch — it is the product lying
+authoritative, so an invented number is not a glitch; it is the product lying
 fluently, in a sentence indistinguishable from a true one.
 
 The engine's output is also conditionally available: some values only exist if
@@ -61,7 +61,7 @@ specific-and-false.
 > prompt text is a hint. The assembly is the enforcement.
 
 Caps belong here too. The engine can rank dozens of derived items; the prompt
-takes the top three. Not to save tokens — to stop the model padding a thin
+takes the top three. Not to save tokens, but to stop the model padding a thin
 answer by enumerating everything it was handed.
 
 ## the model doesn't get to write names either
@@ -76,7 +76,7 @@ That pattern points at <<ref 47>> more than anything else this week.
 
 The client resolves the reference to a localised name. This deletes a bug class.
 The model can no longer misname or invent a record, and the worst available
-failure is an unresolvable reference — loud and cosmetic instead of quiet and
+failure is an unresolvable reference: loud and cosmetic instead of quiet and
 wrong.
 
 That last claim only holds if the client enforces the same set. An allowlist
@@ -84,7 +84,7 @@ injected into the prompt is a prompt-side constraint, which is precisely the kin
 of guarantee the rest of this post refuses to trust. The render-side check is the
 one that makes it true: resolve **only** against the ids sent for this request,
 and reject anything else. Look the id up in the full catalog instead and a
-fabricated reference renders a real, wrong name — the exact failure the design
+fabricated reference renders a real, wrong name, the exact failure the design
 claims to have removed.
 
 An earlier version emitted the reference next to the name. That version could
@@ -116,4 +116,4 @@ users see raw markers.
 What it does buy is a clean line of responsibility. When a number is wrong, it is
 the engine's fault, and there is exactly one place to look.
 
-_written in İstanbul, july 2026 — EOF_
+_written in İstanbul, july 2026 · EOF_

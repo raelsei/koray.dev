@@ -8,7 +8,7 @@ tags: [correctness]
 ## one write, three consequences
 
 An offline-first client queues records and pushes them on reconnect. The same
-batch can arrive more than once — a retry, a relaunch with queued work, a second
+batch can arrive more than once: a retry, a relaunch with queued work, a second
 device echoing back its own write. So the write is an upsert keyed on a
 client-minted id, and replaying it is a no-op. That part took an afternoon.
 
@@ -44,13 +44,13 @@ breaking loudly.
 
 It is also **not a documented contract**. It works because the conflict path must
 take a row lock before it can compute the updated tuple, and that lock lives in
-`xmax` — an artifact of the locking implementation that has been stable for a
+`xmax`, an artifact of the locking implementation that has been stable for a
 decade and is still nobody's promise. Postgres 18 exposes `OLD` in `RETURNING`,
 which says the same thing supportably; on 18 or later, use that. Either way it
 wants a comment and a test that fails loudly on a major-version upgrade.
 
 And the `where` guard on the update is not decoration. Without it the clause is
-unconditional last-write-wins, and a replayed batch is by definition old — a
+unconditional last-write-wins, and a replayed batch is by definition old: a
 retry from a client that has been offline for a day would happily overwrite newer
 server state with its own stale copy.
 
@@ -83,7 +83,7 @@ back.
 > system to be told.
 
 Two conditions make this safe. The derivation rules must be **pure**, so
-re-running them costs nothing but time. And they must be **monotonic** — a rule
+re-running them costs nothing but time. And they must be **monotonic**, because a rule
 that can become false again would un-record an award, or worse, re-fire it later.
 
 The payoff is that the system self-heals. Add a rule later and it retroactively
@@ -101,7 +101,7 @@ with a comment saying it exists for the animation and not for correctness.
 The complementary problem is stranger. Two consecutive pushes producing an
 _identical_ aggregate should still celebrate twice, and value equality swallows
 the second. So the emitted value carries a fresh id per emission purely to trip
-the change observer — a deliberate inequality, for a UI watching for change
+the change observer, a deliberate inequality, for a UI watching for change
 rather than reading state.
 
 ## when this stops working
@@ -117,7 +117,7 @@ it and the entries insert did.
 The award diff has a smaller hole. Under read-committed, `do nothing` may skip a
 row conflicting with an _uncommitted_ concurrent insert without waiting for it.
 If that transaction rolls back, the award is neither returned nor recorded. The
-next write re-derives it, so it self-heals — but it means the returned set is
+next write re-derives it, so it self-heals, but it means the returned set is
 "what this call recorded", not quite "what became true".
 
 Re-deriving the full fact set on every write is fine at per-user scale, and the
@@ -126,4 +126,4 @@ the client-side coalescing is best-effort: anything queued during an in-flight
 push waits for the next flush, which is correct, and adds latency that someone
 will eventually file as a bug.
 
-_written in İstanbul, march 2026 — EOF_
+_written in İstanbul, march 2026 · EOF_

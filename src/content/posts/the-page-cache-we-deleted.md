@@ -32,7 +32,7 @@ Object storage bills writes at roughly twelve times reads. So the question is no
 "does the cache hit" but _how many writes does one useful read cost_.
 
 Rendered HTML is the bad shape. Pages are numerous, individually low-value, and
-revalidate on a timer — so the store is charged a write per page per window
+revalidate on a timer, so the store is charged a write per page per window
 across the whole surface, whether or not anyone asked for that page. Listing to
 discover tags is itself a write-class operation, which made the tag machinery
 more expensive than the thing it was indexing.
@@ -44,7 +44,7 @@ of saying the cache should be worse at its job. When the tuning direction is
 ## the same machinery, kept
 
 We did not throw the code away. The versioned prefix, the lifecycle rule, the
-tiered lookup — all of it still runs, on thumbnails.
+tiered lookup: all of it still runs, on thumbnails.
 
 ```typescript file="image-cache.ts" accent
 const inflight = new Map<string, Promise<Response>>();
@@ -83,7 +83,7 @@ hurts.
 
 The single-flight map is module scope, which on this runtime means per isolate.
 It collapses concurrent misses _inside_ one isolate; it does nothing across the
-fleet. A globally cold key still costs one write per location that gets asked —
+fleet. A globally cold key still costs one write per location that gets asked,
 the same fan-out the page cache died of, reduced by a couple of orders of
 magnitude rather than removed. If that ever stops being enough, the honest next
 step is a coordination primitive, not a bigger map.
@@ -92,7 +92,7 @@ Reverting to in-process page caching gives up cross-location reuse of rendered
 HTML, and that would be a straight regression except two other things were true.
 The CDN in front was configured to cache the HTML, which needed an explicit
 override: the adapter marks those responses `private, no-cache`, and `private`
-is the operative half — it forbids a shared cache from storing them at all.
+is the operative half: it forbids a shared cache from storing them at all.
 (`no-cache` is the commonly misread one; it permits storage and demands
 revalidation.) And the underlying queries had separately been made cheap, so a
 re-render was no longer worth avoiding at the cost of a write per page per
@@ -103,4 +103,4 @@ ordering is the part worth keeping: the page cache was solving a problem two
 cheaper layers were better placed to solve, and we only found that out by paying
 for the expensive version first.
 
-_written in İstanbul, may 2026 — EOF_
+_written in İstanbul, may 2026 · EOF_

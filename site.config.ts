@@ -5,7 +5,7 @@ export default defineSiteConfig({
     url: "https://koray.dev",
     title: "koray.dev",
     description:
-      "Koray Güler — product engineer and founder of koative, an independent software studio in İstanbul. Notes on typed edges, small dependency lists and calm software.",
+      "Koray Güler builds product at koative, an independent software studio in İstanbul. Notes on typed edges, small dependency lists and calm software.",
     author: "Koray Güler",
     profile: "https://koray.dev/about/",
     lang: "en",

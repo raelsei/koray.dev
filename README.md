@@ -2,7 +2,7 @@
 
 ![koray.dev](.github/readme/banner.svg)
 
-**Koray Güler** — product engineer in İstanbul, founder of
+**Koray Güler**, product engineer in İstanbul, founder of
 [koative](https://koative.com).
 
 [![live](https://img.shields.io/badge/koray.dev-live-9ccc47?labelColor=08090a)](https://koray.dev)
@@ -11,7 +11,7 @@
 </div>
 
 My corner of the internet. I write about the bugs that never raise an
-exception — green build, no alert, wrong answer — and I keep a list of the
+exception: green build, no alert, wrong answer. And I keep a list of the
 things I actually shipped.
 
 ## Writing
@@ -39,8 +39,8 @@ Two things follow from that, and both bite quietly:
   the site 404s. Without the second, the domain unbinds. The workflow refuses
   to publish if either is missing.
 
-The longer story — why the output lives in another repository, what is ours and
-what came with the theme, the palette, the structured data — is in
+The longer story (why the output lives in another repository, what is ours and
+what came with the theme, the palette, the structured data) is in
 [`PRODUCT.md`](PRODUCT.md) and [`DESIGN.md`](DESIGN.md).
 
 ## Licence

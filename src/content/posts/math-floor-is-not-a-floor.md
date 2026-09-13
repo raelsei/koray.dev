@@ -9,7 +9,7 @@ featured: true
 ## the missing step
 
 A downstream system takes numeric fields as strings, at a decimal scale the
-receiver supplies per field, and the value must be **floored** — never rounded.
+receiver supplies per field, and the value must be **floored**, never rounded.
 Standard implementation:
 
 ```typescript file="serialize.ts"
@@ -58,7 +58,7 @@ That reasoning is wrong. Rounding the last digit **carries**.
 ```
 
 Both results are larger than the input. What this function does is round to
-`scale + 1` and then truncate exactly — a floor with half a step of tolerance at
+`scale + 1` and then truncate exactly: a floor with half a step of tolerance at
 the guard position. The tolerance is genuinely useful, because it is what
 absorbs the representation error and turns `0.58` back into `0.58`. It is also
 not free: any value sitting within that tolerance of a boundary crosses it.
@@ -99,7 +99,7 @@ a value above its input and never lands more than one step below it. Both of the
 earlier versions do one or the other.
 
 The three rejections matter more than the cut does. Each one is a case where the
-previous versions produced a confident, plausible, wrong string — and the whole
+previous versions produced a confident, plausible, wrong string, and the whole
 argument of this post is that those are the expensive ones.
 
 ## the exemption nobody reads
@@ -119,7 +119,7 @@ const encodeRate = (value: number) =>
 An early return, above the rounding. Two caveats I would not have written the
 first time: `toPrecision` goes exponential once the integer part outgrows the
 budget, so this is only safe because values on this path are bounded well below
-that — and the trailing-zero strip is the third bug in this family. On the
+that, and the trailing-zero strip is the third bug in this family. On the
 _amount_ path, not this one, stripping zeros without first checking for a decimal
 point turned `4500` into `45`. A hundredfold error, introduced by a tidy-up,
 caught in review because the diff was small enough to read.
@@ -128,7 +128,7 @@ caught in review because the diff was small enough to read.
 
 The order matters more than the fix. Write tests that encode today's behaviour
 and the intended behaviour, run them, and confirm that exactly the expected set
-fails. If anything else fails, stop — the contract is not what you assumed and
+fails. If anything else fails, stop: the contract is not what you assumed and
 everything after that is speculation. Only then change one function at a time.
 
 That is what caught the trailing-zero bug. It was not in the audit and not in the
@@ -145,4 +145,4 @@ the value came from a form or a payload. It is wrong when the value is the outpu
 of a long computation, where the extra digits are real and you meant to cut them.
 Same function, opposite correctness, depending on where the number has been.
 
-_written in İstanbul, february 2026 — EOF_
+_written in İstanbul, february 2026 · EOF_

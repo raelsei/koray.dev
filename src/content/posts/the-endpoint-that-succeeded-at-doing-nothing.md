@@ -8,7 +8,7 @@ tags: [cloudflare]
 ## the counter that never moved
 
 Detail pages are cached with a long revalidation window, so a view counter cannot
-be incremented during render — it would freeze into the cached HTML with
+be incremented during render; it would freeze into the cached HTML with
 everything else. Standard move: a tiny endpoint the client pings, and don't make
 the user wait for it.
 
@@ -23,7 +23,7 @@ export async function POST(
 }
 ```
 
-The counter did not move. Not slowly, not sometimes — at all. Meanwhile the
+The counter did not move. Not slowly, not sometimes. Not at all. Meanwhile the
 endpoint reported success on every call, the platform logged a clean outcome, and
 there were no exceptions, no error rate, no timeouts.
 
@@ -34,7 +34,7 @@ way to see it is to go and read the row.
 
 My first explanation was a compatibility flag about carrying promise resolution
 across request contexts. That flag is real, it was enabled, and it is not what
-happened — it governs continuations scheduled from a _different_ request.
+happened; it governs continuations scheduled from a _different_ request.
 
 The actual rule is duller and much more important: this runtime cancels any
 promise still pending when the invocation ends, unless it was handed to the
@@ -76,8 +76,8 @@ Being honest about this fix: awaiting is the _second_ best answer. The platform'
 background-work API extends execution for a bounded window after the response is
 sent, and analytics writes are the textbook use for it. I awaited because the
 framework's route handler does not hand me the platform context, so that API is
-not reachable from this file. Where it is reachable — the cache writes in the
-image proxy, which run outside the framework's routing — that is what those use,
+not reachable from this file. Where it is reachable (the cache writes in the
+image proxy, which run outside the framework's routing), that is what those use,
 and it is the better tool there too.
 
 ## the client half fails open
@@ -92,7 +92,7 @@ investigate, because it looks plausible.
 
 ## when this stops working
 
-There is no user-visible latency cost — the beacon never reads the response. The
+There is no user-visible latency cost: the beacon never reads the response. The
 real cost is coupling: a very high frequency endpoint now fails when the database
 does, where before it failed silently and looked fine. That is an improvement,
 and it is still a new dependency on the hot path.
@@ -104,4 +104,4 @@ that breaks.
 So: any time you write `void something()`, ask what owns the lifetime after this
 function returns. If the answer is "the runtime, I assume", check.
 
-_written in İstanbul, june 2026 — EOF_
+_written in İstanbul, june 2026 · EOF_

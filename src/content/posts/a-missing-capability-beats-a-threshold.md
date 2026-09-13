@@ -20,7 +20,7 @@ correlated with attention by construction.
 
 First fix was a per-process throttle. It was wrong twice.
 
-It was per-_instance_, so it bounded nothing horizontally — two containers meant
+It was per-_instance_, so it bounded nothing horizontally: two containers meant
 two budgets, and the number it enforced was a number nobody had chosen. And it
 sat in front of the scheduled retry as well, which was the mechanism supposed to
 refill the cache once quota recovered. The throttle's job was to protect the
@@ -55,22 +55,22 @@ until something evicts it. Leaving the miss in place is what makes the next run
 self-healing.
 
 Each user is keyed on their own local day, which makes the scheduler naturally
-idempotent. Re-running it — after a deploy, after a crash, after someone runs it
-by hand to check something — only spends on users who have actually rolled into
+idempotent. Re-running it (after a deploy, after a crash, after someone runs it
+by hand to check something) only spends on users who have actually rolled into
 a new day. That property is what lets you re-run it without thinking, and being
 able to re-run a batch job without thinking is most of its operational value.
 
 ## when this stops working
 
 The cost model inverts. Warming everyone every day scales with the size of the
-user table, not with who opened the app — so you now pay for dormant accounts.
+user table, not with who opened the app, so you now pay for dormant accounts.
 For a product whose core surface is regenerated on a fixed cadence and is the
 reason people open it, that is the right trade. For one where most registrations
 never come back, it is upside down, and a lazy path with a real limiter is
 correct after all.
 
-Users the scheduler hasn't reached yet — new signups, someone in a timezone that
-rolled over between runs — always see the fallback. Which means the fallback is
+Users the scheduler hasn't reached yet (new signups, someone in a timezone that
+rolled over between runs) always see the fallback. Which means the fallback is
 not an error state, it is a product surface, and it deserves the same attention
 as the generated version. Mine did not get that for the first two months.
 
@@ -79,4 +79,4 @@ incremented before the call and refunded if it fails, and the refund has to cove
 the metering step itself throwing. That sounds paranoid right up until the first
 user loses a credit to an error that never reached the model.
 
-_written in İstanbul, april 2026 — EOF_
+_written in İstanbul, april 2026 · EOF_

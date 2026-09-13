@@ -3,8 +3,8 @@ title: "About"
 description: "Product engineer in İstanbul. Founder of koative, an independent software studio shipping its own products first."
 ---
 
-I am a product engineer in İstanbul. I started on the front end — HTML, SCSS,
-then Vue, then React — and kept walking backwards into the parts that decide
+I am a product engineer in İstanbul. I started on the front end: HTML, SCSS,
+then Vue, then React, and kept walking backwards into the parts that decide
 whether a product survives: the types at the edges, the deploy, the one field
 name that is wrong only at runtime.
 
@@ -30,8 +30,8 @@ argument with a younger version of myself who thought clever was the point.
 
 ## Working together
 
-koative takes on a few client projects a year — iOS and Android apps, web
+koative takes on a few client projects a year: iOS and Android apps, web
 platforms, and the product design in between. Best fit: a team that would
 rather cut scope than cut care.
 
-Mail [id@koray.dev](mailto:id@koray.dev) — replies within 48h.
+Mail [id@koray.dev](mailto:id@koray.dev). Replies within 48h.

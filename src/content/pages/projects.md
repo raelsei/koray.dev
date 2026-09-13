@@ -1,7 +1,7 @@
 ---
 title: "Projects"
 description: >-
-  Things built by Koray Güler — koative and Lumi, plus the starters the work
+  Things built by Koray Güler: koative and Lumi, plus the starters the work
   settled into.
 ---
 

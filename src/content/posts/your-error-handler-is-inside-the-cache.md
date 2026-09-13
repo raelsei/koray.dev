@@ -24,7 +24,7 @@ export async function getPage(slug: string) {
 The caller mapped `undefined` to a 404. Fine everywhere else in the codebase.
 Not fine here, because of the directive on line one.
 
-The content backend restarted — routine, about thirty seconds. During that window
+The content backend restarted: routine, about thirty seconds. During that window
 every detail and landing page threw, caught, and returned `undefined`. The cache
 saw a function that completed normally and returned a value, so it stored the
 value. The backend came back healthy. The site kept serving 404s for the rest of
@@ -63,8 +63,8 @@ correctly been taught to do everywhere else.
 A month or so later, same class, different mechanism. The static params generator
 swallowed a backend failure into an empty array, with a comment asserting the
 route would simply fall back to rendering on demand. That had been true under the
-previous rendering model. Under the one this codebase is now on — the one the
-cache directive requires — an empty params array is a hard build error.
+previous rendering model. Under the one this codebase is now on (the one the
+cache directive requires), an empty params array is a hard build error.
 
 Which is the good outcome, and the reason to prefer it: the build fails, nothing
 ships, and the previous image keeps serving.
@@ -89,11 +89,11 @@ toward.
 
 Users now see an error page during a backend outage. That is the correct trade
 here: the alternative was a cached 404, and a 404 tells a crawler the page is
-gone — which crawlers remember better than we did. A 5xx tells them to come back.
+gone, which crawlers remember better than we did. A 5xx tells them to come back.
 
 The larger caveat is that the fix rests on a guarantee I did not write and cannot
 find documented: that this cache layer stores returned values and not rejected
-ones. I verified it; it is not a promise. It also does not generalise — one layer
+ones. I verified it; it is not a promise. It also does not generalise: one layer
 down, a fetch that resolves to a 500 is a _returned_ response and gets stored
 like any other value.
 
@@ -101,4 +101,4 @@ Which is the same shape as the comment two sections up. If that behaviour is eve
 withdrawn, this file becomes wrong without being edited, exactly like the last
 one did.
 
-_written in İstanbul, april 2026 — EOF_
+_written in İstanbul, april 2026 · EOF_

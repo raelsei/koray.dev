@@ -10,7 +10,7 @@ featured: true
 
 Upstream names a tradable instrument with one bare field. Everything a person
 reads is synthesised locally: the pair label, the URL slug, the quote leg. And
-the thing the wire wants is none of those — it is a numeric address that looks
+the thing the wire wants is none of those; it is a numeric address that looks
 like an array index and is not one, on any instrument listed by a third-party
 operator rather than the venue itself.
 
@@ -73,7 +73,7 @@ compiler because every identity in the system is spelled `string` or `number`.
 
 ## what actually fixes it
 
-The honest answer is branded types — give each identity its own nominal type so
+The honest answer is branded types: give each identity its own nominal type so
 passing a label where an address belongs is a compile error rather than a
 support ticket. I did not do it. It means a cast at every upstream boundary,
 which on a surface this size is a lot of ceremony bought with real friction.
@@ -91,7 +91,7 @@ What I did instead, in descending order of how much it helped:
 ## when this stops working
 
 None of that is enforcement. Everything above is convention plus one grep, and
-a fourth instance of the same bug is a matter of time — the type system still
+a fourth instance of the same bug is a matter of time; the type system still
 cannot tell a label from an address.
 
 The session-level cache of the listing groups has its own version of the
@@ -103,4 +103,4 @@ in the code can see it.
 Which is the pattern, one level up. Every bug here was a value that was wrong
 while being perfectly well-formed.
 
-_written in İstanbul, july 2026 — EOF_
+_written in İstanbul, july 2026 · EOF_

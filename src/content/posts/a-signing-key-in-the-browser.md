@@ -1,6 +1,6 @@
 ---
 title: I put a signing key in the browser on purpose
-description: What that buys, split by what the attacker can already do — and why the property that actually protects the user is not in my code at all.
+description: What that buys, split by what the attacker can already do, and why the property that actually protects the user is not in my code at all.
 pubDatetime: 2026-05-30T06:00:00.000Z
 tags: [signing]
 ---
@@ -9,7 +9,7 @@ tags: [signing]
 
 Each action needs a signature. At the interaction rate involved, a wallet prompt
 per action is not a product. And the whole premise is that no server ever holds
-key material, so moving the key server-side is not a tradeoff — it is the thing
+key material, so moving the key server-side is not a tradeoff; it is the thing
 being sold.
 
 That leaves a signing key living in a browser tab, which is the one place
@@ -41,7 +41,7 @@ The plaintext is zeroed after sealing and again after every unseal. Loading
 checks expiry first and an expired record deletes itself rather than handing back
 a key that would fail later as an opaque signature error. Clearing removes the
 ciphertext _and_ the wrapper. Signing out treats that deletion as a
-precondition — if it throws, the sign-out aborts loudly, because the alternative
+precondition. If it throws, the sign-out aborts loudly, because the alternative
 is leaving a signing-capable tab on a shared machine while the UI says otherwise.
 
 ## be precise about what this buys
@@ -55,8 +55,8 @@ exported once and held offline.
 Non-extractability changes what an attacker walks away with. It does not change
 what they can do while they are there:
 
-- **Storage read access** — a stolen disk, another local account, devtools on an
-  unattended machine — yields ciphertext and a handle that will not export. In
+- **Storage read access** (a stolen disk, another local account, devtools on an
+  unattended machine) yields ciphertext and a handle that will not export. In
   practice, nothing. This is the case the design defeats.
 - **Script execution in the page** yields full signing capability for as long as
   the tab is compromised. They cannot steal the key. They do not need to; they
@@ -70,7 +70,7 @@ what they can do while they are there:
 
 The delegated key is scope-limited by the upstream protocol to a specific class
 of action. It cannot move funds. That is the property doing the real work here,
-and I did not implement it — I depend on it.
+and I did not implement it; I depend on it.
 
 Which means the honest risk statement is not about my encryption. It is that if
 that upstream scope were ever widened, every line above becomes an elaborate way
@@ -79,7 +79,7 @@ downstream of somebody else's authorisation model, and it is worth knowing which
 of your security properties you own and which you are renting.
 
 The same reasoning drives the split between the two signers. Rare, high-authority
-actions — granting the delegation, setting the fee ceiling — are signed by the
+actions (granting the delegation, setting the fee ceiling) are signed by the
 main wallet. Frequent, low-authority ones are signed by the delegate. The split
 is not by how often the button is pressed; it is by what you would accept an
 injected script authorising on your behalf. The fee ceiling belongs on the
@@ -101,7 +101,7 @@ a side effect of a display-name convention.
 
 ## when this stops working
 
-The gate is checked on both sides — a local record that exists and has not
+The gate is checked on both sides: a local record that exists and has not
 expired, and an address present in the upstream delegation list with its own
 unexpired stamp. Neither side is scoped to the connected account. Switch wallet
 accounts mid-session and the local key is still there, still valid, still
@@ -112,10 +112,10 @@ There is no proactive rotation and no revocation from this surface. The recovery
 story for an expired or lost key is re-running setup, which costs one wallet
 signature. That is acceptable, and it is not the same thing as designed.
 
-Payload canonicalisation — field ordering, nonce, replay window — is entirely
+Payload canonicalisation (field ordering, nonce, replay window) is entirely
 the vendored client's. Replay resistance is therefore a property I assume rather
 than verify, and the one failure mode that leaks through is clock skew: a device
 with a wrong clock produces rejections with no message that would ever lead
 someone to look at their clock.
 
-_written in İstanbul, may 2026 — EOF_
+_written in İstanbul, may 2026 · EOF_
