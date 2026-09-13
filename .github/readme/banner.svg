@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 140" width="560" height="140" role="img" aria-label="koray.dev">
+  <title>koray.dev</title>
+  <style>
+    .wordmark {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 68px;
+      font-weight: 700;
+      fill: #08090a;
+      letter-spacing: 1px;
+    }
+    .accent { fill: #5c8a1e; }
+    .rule { fill: #08090a; }
+    @media (prefers-color-scheme: dark) {
+      .wordmark { fill: #f8fbfa; }
+      .accent { fill: #9ccc47; }
+      .rule { fill: #f8fbfa; }
+    }
+  </style>
+
+  <text class="wordmark" x="40" y="86">koray<tspan class="accent">.</tspan>dev<tspan
+      class="accent" dx="6">_<animate attributeName="opacity" values="1;1;0;0" dur="1.1s"
+        calcMode="discrete" repeatCount="indefinite"/></tspan></text>
+
+  <!-- The rule is always drawn; the accent dash travels along it. Renderers that
+       ignore SMIL show the static wordmark, rule and dash, which is the point. -->
+  <rect class="rule" x="40" y="112" width="424" height="3" rx="1.5" opacity="0.18"/>
+  <rect class="accent" x="40" y="112" width="76" height="3" rx="1.5">
+    <animate attributeName="x" values="40;388;40" dur="4.4s" calcMode="spline"
+      keyTimes="0;0.5;1" keySplines="0.4 0 0.2 1;0.4 0 0.2 1" repeatCount="indefinite"/>
+  </rect>
+</svg>

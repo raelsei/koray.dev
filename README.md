@@ -1,11 +1,6 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset=".github/readme/home-dark.webp" />
-  <img alt="koray.dev — the home page, dark and light" src=".github/readme/home-light.webp" width="880" />
-</picture>
-
-# koray.dev
+![koray.dev](.github/readme/banner.svg)
 
 **Koray Güler** — product engineer in İstanbul, founder of
 [koative](https://koative.com).
@@ -18,16 +13,6 @@
 My corner of the internet. I write about the bugs that never raise an
 exception — green build, no alert, wrong answer — and I keep a list of the
 things I actually shipped.
-
-If you are here for the source: it is a static site, every sentence on it is a
-content file, and the whole thing is four commands.
-
-```sh
-bun install
-bun dev            # localhost:4321
-bun run build
-bunx astro check
-```
 
 ## Writing
 
