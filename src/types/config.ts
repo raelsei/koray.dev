@@ -92,7 +92,7 @@ interface ShareLink {
   linkTitle?: string;
 }
 
-interface AstroPaperConfig {
+interface UserConfig {
   site: SiteConfig;
   posts?: PostsConfig;
   features?: FeaturesConfig;
@@ -117,7 +117,7 @@ type ResolvedSiteConfig = Required<
 > &
   Pick<SiteConfig, "profile" | "googleVerification">;
 
-export interface ResolvedAstroPaperConfig {
+export interface ResolvedConfig {
   site: ResolvedSiteConfig;
   posts: Required<PostsConfig>;
   features: Required<FeaturesConfig>;
@@ -126,11 +126,9 @@ export interface ResolvedAstroPaperConfig {
 }
 
 /**
- * Type helper for astro-paper.config.ts.
+ * Type helper for site.config.ts.
  * Provides full IntelliSense without any runtime overhead.
  */
-export function defineAstroPaperConfig(
-  config: AstroPaperConfig
-): AstroPaperConfig {
+export function defineSiteConfig(config: UserConfig): UserConfig {
   return config;
 }

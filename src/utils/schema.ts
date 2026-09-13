@@ -10,7 +10,7 @@
  * Pass page-specific nodes through `Layout`'s `schema` prop; `graph()` prepends
  * the sitewide identity and appends a breadcrumb derived from the URL.
  */
-import type { ResolvedAstroPaperConfig } from "@/types/config";
+import type { ResolvedConfig } from "@/types/config";
 
 type Node = Record<string, unknown>;
 
@@ -39,7 +39,7 @@ const SEGMENT_LABELS: Record<string, string> = {
  * The two sitewide entities. `sameAs` carries only real profile URLs — a
  * `mailto:` is not a profile, and Google treats a bad `sameAs` as a bad signal.
  */
-export function identity(config: ResolvedAstroPaperConfig): Node[] {
+export function identity(config: ResolvedConfig): Node[] {
   const { site, socials } = config;
   const base = trimEnd(site.url);
 
@@ -71,7 +71,7 @@ export function identity(config: ResolvedAstroPaperConfig): Node[] {
  * page, which has nothing to trail.
  */
 export function breadcrumb(
-  config: ResolvedAstroPaperConfig,
+  config: ResolvedConfig,
   canonical: string
 ): Node | null {
   const base = trimEnd(config.site.url);
@@ -119,7 +119,7 @@ type PageKind = "WebPage" | "CollectionPage" | "ProfilePage";
 
 /** The page node itself, tied to the website and attributed to the person. */
 export function page(
-  config: ResolvedAstroPaperConfig,
+  config: ResolvedConfig,
   canonical: string,
   {
     kind = "WebPage",
@@ -162,7 +162,7 @@ export function itemList(
 
 /** One published post. Authored by the Person node, part of the WebSite. */
 export function blogPosting(
-  config: ResolvedAstroPaperConfig,
+  config: ResolvedConfig,
   canonical: string,
   post: {
     title: string;
@@ -197,7 +197,7 @@ export function blogPosting(
  * graph stays connected instead of introducing a second author.
  */
 export function project(
-  config: ResolvedAstroPaperConfig,
+  config: ResolvedConfig,
   canonical: string,
   item: {
     name: string;
@@ -227,7 +227,7 @@ export function project(
 
 /** Compose the document's single graph. */
 export function graph(
-  config: ResolvedAstroPaperConfig,
+  config: ResolvedConfig,
   canonical: string,
   nodes: Node[] = []
 ) {

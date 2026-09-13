@@ -1,6 +1,6 @@
 ---
 name: koray.dev
-description: AstroPaper played straight, wearing a phosphor palette — one monospaced face, one accent, two themes derived from the same hues.
+description: The category standard played straight, wearing a phosphor palette — one monospaced face, one accent, two themes derived from the same hues.
 colors:
   background: "#08090a"
   foreground: "#d9dedb"
@@ -109,7 +109,7 @@ components:
 
 **Creative North Star: "The Standard, Played Straight"**
 
-This is AstroPaper used as a theme, not forked into something else. The decision
+This is a third-party Astro theme used as a theme, not forked into something else. The decision
 behind every open question here is the same one: do what the theme does. The
 previous identity — a dark terminal emulation with a command bar and a scanline
 overlay — is a deliberate anti-reference, not a fallback, and nothing from it
@@ -299,7 +299,7 @@ inert breaks the signal.
 
 ## Components
 
-Every component below is upstream AstroPaper. Three files carry a local edit,
+Every component below is upstream theme code. Three files carry a local edit,
 each commented in place: `index.astro` (hero copy from the content collection,
 feed icon moved into the social row), `Header.astro` plus `src/i18n/` (the
 Bookmarks entry), and `astro.config.ts` (the dark code theme).

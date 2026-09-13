@@ -1,4 +1,4 @@
-import type { ResolvedAstroPaperConfig } from "@/types/config";
+import type { ResolvedConfig } from "@/types/config";
 import { getAssetPath } from "./withBase";
 
 const publicFiles = import.meta.glob("/public/*", { eager: false });
@@ -19,7 +19,7 @@ function existsInPublic(filename: string): boolean {
  * - When disabled, requires `public/{site.ogImage}` to exist.
  */
 export function resolveDefaultOgImagePath(
-  config: ResolvedAstroPaperConfig
+  config: ResolvedConfig
 ): string {
   const filename = config.site.ogImage;
   if (
@@ -40,7 +40,7 @@ export function resolveDefaultOgImagePath(
 
   if (!existsInPublic(filename)) {
     throw new Error(
-      `AstroPaper: missing public/${filename}. Add that file, or set site.ogImage to an existing file under public/, or enable features.dynamicOgImage to fall back to /og.png.`
+      `koray.dev: missing public/${filename}. Add that file, or set site.ogImage to an existing file under public/, or enable features.dynamicOgImage to fall back to /og.png.`
     );
   }
 

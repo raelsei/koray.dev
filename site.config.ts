@@ -1,6 +1,6 @@
-import { defineAstroPaperConfig } from "./src/types/config";
+import { defineSiteConfig } from "./src/types/config";
 
-export default defineAstroPaperConfig({
+export default defineSiteConfig({
   site: {
     url: "https://koray.dev",
     title: "koray.dev",

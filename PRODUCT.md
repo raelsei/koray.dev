@@ -104,7 +104,7 @@ Binding, and future work must preserve them:
 
 - **Static only.** Every route is prerendered; there is no server runtime.
 - **No editorial string lives in a component.** All copy is Zod-validated
-  content collections. `astro-paper.config.ts` holds configuration only
+  content collections. `site.config.ts` holds configuration only
   (domain, author, timezone, socials, feature flags). The home hero reads its
   headline and body from `src/content/pages/home.md` rather than from
   `index.astro`, which is a deliberate local edit against the theme.
@@ -113,7 +113,7 @@ Binding, and future work must preserve them:
   "Türkiye".
 
 **Superseded — the client JavaScript ceiling.** This record previously carried a
-binding "~3 kB client JavaScript" constraint. Adopting AstroPaper knowingly
+binding "~3 kB client JavaScript" constraint. Adopting the upstream theme knowingly
 ended it: the shipped payload is now roughly **10 kB gzipped per page**
 (≈5.7 kB for Astro's view-transition ClientRouter, ≈4.6 kB of inline behaviour
 for the theme toggle, copy buttons, reading progress and menu), plus a
@@ -161,10 +161,12 @@ Technical facts that stay true regardless:
   a mistyped field fails `tsc` rather than production; one artifact to deploy;
   every dependency must justify its own line in the lockfile; ship less, and
   spend the saved time on the details people feel.
-- **Standing preference: the category standard, played straight.** The user
-  chose [AstroPaper](https://github.com/satnaing/astro-paper) as the visual and
-  structural system, used as a theme rather than forked into something else.
-  Future work extends within the theme's own vocabulary and keeps the local
+- **Standing preference: the category standard, played straight.** The visual
+  and structural system is a third-party Astro theme, used as a theme rather
+  than forked into something else; it is named in `package.json` and nowhere
+  in public-facing copy, because the provenance is an implementation detail and
+  not part of this site's identity. Future work extends within the theme's own
+  vocabulary and keeps the local
   edits against upstream minimal and commented, so a theme upgrade stays a
   merge. The retired *void terminal* identity is an anti-reference, not a
   fallback.
