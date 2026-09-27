@@ -85,8 +85,17 @@
       @apply flex-[1_0_100%] bg-inherit p-0;
     }
 
+    /* Quieter than the body, but through the muted token (5.71:1 light,
+       6.99:1 dark) rather than opacity, which stacks with whatever sits
+       underneath and cannot be measured from the palette. */
     blockquote {
-      @apply border-s-accent/80 wrap-break-word opacity-80;
+      @apply border-s-accent/80 wrap-break-word;
+
+      p,
+      strong,
+      em {
+        @apply text-muted-foreground;
+      }
     }
 
     pre {

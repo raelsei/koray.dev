@@ -201,9 +201,15 @@ const ogImage = ogImageUrl
     for (const heading of headings) {
       heading.classList.add("group");
       const link = document.createElement("a");
+      // px-1.5 makes the "#" a 24px-wide target; the label names it, since
+      // the glyph itself is hidden from assistive technology.
       link.className =
-        "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+        "heading-link ms-0.5 inline-block px-1.5 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
       link.href = "#" + heading.id;
+      link.setAttribute(
+        "aria-label",
+        `Link to section: ${heading.textContent}`
+      );
 
       const span = document.createElement("span");
       span.ariaHidden = "true";

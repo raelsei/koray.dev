@@ -7,6 +7,7 @@ import {
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 import { transformerFileName } from "./src/utils/transformers/fileName";
+import { transformerContrast } from "./src/utils/transformers/contrast";
 import config from "./site.config";
 
 export default defineConfig({
@@ -43,7 +44,10 @@ export default defineConfig({
       themes: { light: "min-light", dark: "vitesse-dark" },
       defaultColor: false,
       wrap: false,
-      transformers: [transformerFileName({ style: "v2", hideDot: false })],
+      transformers: [
+        transformerFileName({ style: "v2", hideDot: false }),
+        transformerContrast(),
+      ],
     },
   },
   vite: {
@@ -51,13 +55,37 @@ export default defineConfig({
   },
   fonts: [
     {
+      // What browsers load: one variable woff2 per subset and style, so a
+      // page fetches only the ranges it uses. latin-ext carries İ, ı, ğ, ş.
       name: "Google Sans Code",
       cssVariable: "--font-google-sans-code",
       provider: fontProviders.google(),
       fallbacks: ["monospace"],
       weights: [300, 400, 500, 600, 700],
       styles: ["normal", "italic"],
-      formats: ["woff", "ttf"],
+      subsets: ["latin", "latin-ext"],
+      formats: ["woff2"],
+      // The whole site is set in this face, so a flash of the Courier New
+      // fallback is the flicker readers notice. With both upright files
+      // preloaded, `block` holds text for the few milliseconds they take to
+      // arrive instead of painting the fallback and swapping; past the
+      // browser's ~3s block period it still falls back, so text never stays
+      // hidden on a bad connection.
+      display: "block",
+    },
+    {
+      // The same face as static ttf, for Satori, which renders the OG images
+      // and cannot read woff2. Build-time only: no <Font> renders it, so no
+      // page ever downloads these files. Kept apart from the web family on
+      // purpose: in one family the ttf faces were declared last with no
+      // unicode-range, so browsers fetched them over the woff2 and swapped.
+      name: "Google Sans Code",
+      cssVariable: "--font-og",
+      provider: fontProviders.google(),
+      fallbacks: [],
+      weights: [400, 700],
+      styles: ["normal"],
+      formats: ["ttf"],
     },
   ],
   env: {

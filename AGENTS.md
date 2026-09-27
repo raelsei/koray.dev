@@ -90,6 +90,13 @@ attached to. Consequences, each of which has already broken once:
   index ("Failed to load Pagefind metadata"), so every query came back empty
   while the same bundle works on the main thread. Do not remove the flag
   without checking a real query returns results.
+- **The font is two families on purpose.** `--font-google-sans-code` is what
+  pages load: woff2 only, `display: "block"`, and both upright subsets
+  preloaded in `Layout.astro`, which is what stopped the Courier New flash on
+  load. `--font-og` is the same face as static ttf for Satori, which cannot
+  read woff2; nothing renders a `<Font>` for it, so no page downloads it.
+  Merging them back puts ttf faces with no `unicode-range` after the woff2
+  ones, and browsers fetch the ttf and swap mid-page.
 - **TypeScript stays on 6.x.** TypeScript 7's native compiler does not expose
   the programmatic API `astro check` uses, so a bump breaks the type check and
   the build.
@@ -100,6 +107,10 @@ attached to. Consequences, each of which has already broken once:
   theme, each with its measured contrast ratio in a comment beside it. Every
   text token clears 4.5:1 against both the page background and the muted
   surface. Change a lightness and re-check both grounds.
+- **Syntax colours are patched for contrast.** `min-light` and `vitesse-dark`
+  each ship a few token colours under 4.5:1 (light comments at 1.76:1).
+  `src/utils/transformers/contrast.js` moves exactly those; change a Shiki
+  theme and re-measure every token colour it emits.
 - **English only.** `lang: en`, and no second locale is planned.
 - **No visible breadcrumb.** The nav carries every top-level destination, so a
   `Home » Bookmarks` trail only repeated it. The `BreadcrumbList` JSON-LD is

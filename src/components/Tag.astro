@@ -23,7 +23,8 @@ const locale = Astro.currentLocale ?? config.site.lang;
       "border-foreground border-b-2 border-dashed",
       "hover:border-accent hover:text-accent hover:-mt-0.5",
       "focus-visible:text-accent focus-visible:border-none",
-      { "text-sm": size === "sm" },
+      // 24px tall at the small size: WCAG 2.2's minimum target.
+      { "min-h-6 text-sm": size === "sm" },
       { "text-lg": size === "lg" },
     ]}
   >
