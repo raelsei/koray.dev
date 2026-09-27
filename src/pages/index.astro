@@ -11,13 +11,12 @@ import Card from "@/components/Card.astro";
 import LinkButton from "@/components/LinkButton.astro";
 import { getSortedPosts } from "@/utils/getSortedPosts";
 import { page as pageNode } from "@/utils/schema";
-import { useTranslations } from "@/i18n";
+import { t } from "@/i18n";
 import config from "@/config";
 
 const { socials, posts: postsConfig } = config;
 
 const locale = Astro.currentLocale ?? config.site.lang;
-const t = useTranslations(locale);
 
 const posts = await getCollection("posts");
 const sortedPosts = getSortedPosts(posts);
@@ -29,9 +28,7 @@ const homePath = getRelativeLocaleUrl(locale, "");
 const hero = await getEntry("pages", "home");
 
 if (!hero) {
-  throw new Error(
-    "Missing content entry: `home.md` or `home.mdx` in `src/content/pages/`"
-  );
+  throw new Error("Missing content entry: `home.md` in `src/content/pages/`");
 }
 
 const { Content: HeroContent } = await render(hero);

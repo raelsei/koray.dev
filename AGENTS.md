@@ -26,7 +26,14 @@ thing built in `src/content/projects/`, and bookmarks are
 shipping blank.
 
 Reading time, archive year groups, tag counts, the Pagefind index and the OG
-images are derived at build time. Never hand-author any of them.
+images are derived at build time. Never hand-author any of them. Reading time
+comes from the Markdown body (`src/utils/getReadingTime.ts`): prose at 230
+words a minute, each line of code counted like a short sentence.
+
+Code fences take a file name and an optional bare `accent` flag after the
+language, as in `ts file="money.ts" accent`. `accent` marks the block a post
+turns on (the output that shows the bug, or the fix) and draws it with the
+accent edge and a faint accent wash.
 
 Bookmarks carry a favicon, stored once in `public/favicons/<host>.png` and never
 hotlinked, so a reader is not announced to a third party. The path is derived
@@ -78,6 +85,11 @@ attached to. Consequences, each of which has already broken once:
 
 - **`bun run build`, never a bare `astro build`.** Pagefind indexes `dist` after
   the build; skipping it ships a site whose `/search` finds nothing.
+- **Pagefind runs on the main thread (`noWorker: true`).** Pagefind 1.5
+  searches in a web worker by default, and that worker fails to load this
+  index ("Failed to load Pagefind metadata"), so every query came back empty
+  while the same bundle works on the main thread. Do not remove the flag
+  without checking a real query returns results.
 - **TypeScript stays on 6.x.** TypeScript 7's native compiler does not expose
   the programmatic API `astro check` uses, so a bump breaks the type check and
   the build.

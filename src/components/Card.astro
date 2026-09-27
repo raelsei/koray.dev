@@ -2,13 +2,14 @@
 import type { CollectionEntry } from "astro:content";
 import { getPostUrl } from "@/utils/getPostPaths";
 import { toTransitionName } from "@/utils/toTransitionName";
+import { getReadingTime } from "@/utils/getReadingTime";
 import Datetime from "./Datetime.astro";
 
 type Props = {
   variant?: "h2" | "h3";
 } & CollectionEntry<"posts">;
 
-const { variant: Heading = "h2", id, data, filePath } = Astro.props;
+const { variant: Heading = "h2", id, data, filePath, body } = Astro.props;
 
 const { title, description, ...props } = data;
 ---
@@ -24,6 +25,10 @@ const { title, description, ...props } = data;
   >
     <Heading transition:name={toTransitionName(id)}>{title}</Heading>
   </a>
-  <Datetime {...props} transitionName={`${toTransitionName(id)}-date`} />
+  <Datetime
+    {...props}
+    readingTime={getReadingTime(body)}
+    transitionName={`${toTransitionName(id)}-date`}
+  />
   <p>{description}</p>
 </li>

@@ -1,10 +1,9 @@
 ---
 import LinkButton from "@/components/LinkButton.astro";
-import { tplStr, useTranslations } from "@/i18n";
+import { t } from "@/i18n";
 import config from "@/config";
 
 const { shareLinks } = config;
-const t = useTranslations(Astro.currentLocale);
 
 const icons = import.meta.glob<{
   default: (_props: Record<string, unknown>) => unknown;
@@ -23,7 +22,7 @@ const items = await Promise.all(
       linkTitle ??
       (name === "mail"
         ? t.post.sharePostViaEmail
-        : tplStr(t.post.sharePostOn, { platform: platformLabel(name) }));
+        : t.post.sharePostOn(platformLabel(name)));
     return { url, title, Icon };
   })
 );

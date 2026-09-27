@@ -1,18 +1,15 @@
-import kebabcase from "lodash.kebabcase";
-import slugify from "slugify";
-
-const hasNonLatin = (str: string): boolean => /[^\x00-\x7F]/.test(str);
-
 /**
- * Slugify a string using a hybrid approach:
- * - Latin strings: slugify (e.g. "E2E Testing" → "e2e-testing")
- * - Strings with non-Latin chars: lodash.kebabcase (preserves non-Latin chars)
+ * Lowercase, accents folded, anything that is not a letter or a digit
+ * collapsed to one hyphen: "E2E Testing" → "e2e-testing", "Güvenlik" →
+ * "guvenlik". Letters of other scripts are kept rather than dropped.
  */
-export const slugifyStr = (str: string): string => {
-  if (hasNonLatin(str)) {
-    return kebabcase(str);
-  }
-  return slugify(str, { lower: true });
-};
+export const slugifyStr = (str: string): string =>
+  str
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .replace(/ı/g, "i")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, "-")
+    .replace(/^-+|-+$/g, "");
 
 export const slugifyAll = (arr: string[]) => arr.map(str => slugifyStr(str));

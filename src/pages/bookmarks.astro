@@ -13,7 +13,7 @@ const bookmarks = await getEntry("pages", "bookmarks");
 
 if (!bookmarks) {
   throw new Error(
-    "Missing content entry: `bookmarks.md` or `bookmarks.mdx` in `src/content/pages/`"
+    "Missing content entry: `bookmarks.md` in `src/content/pages/`"
   );
 }
 

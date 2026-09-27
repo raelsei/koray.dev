@@ -1,13 +1,7 @@
 ---
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
 import IconCalendar from "@/assets/icons/IconCalendar.svg";
 import config from "@/config";
-import { useTranslations } from "@/i18n";
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
+import { t } from "@/i18n";
 
 type Props = {
   class?: string;
@@ -15,6 +9,8 @@ type Props = {
   pubDatetime: string | Date;
   timezone?: string;
   modDatetime?: string | Date | null;
+  /** Minutes, from `getReadingTime`; omitted where a date stands alone. */
+  readingTime?: number;
   /**
    * Local edit. Without this the post title morphs to the detail page while
    * the date directly beneath it cross-fades with the rest of the page, so the
@@ -32,18 +28,25 @@ const {
   size = "sm",
   class: className = "",
   timezone: postTimezone,
+  readingTime,
   transitionName,
 } = Astro.props;
 
-const t = useTranslations(Astro.currentLocale);
-
 const isModified = modDatetime && modDatetime > pubDatetime;
+const datetime = new Date(isModified ? modDatetime : pubDatetime);
 
-const datetime = dayjs(isModified ? modDatetime : pubDatetime).tz(
-  postTimezone ?? config.site.timezone
+// "4 Jul, 2026", in the post's zone (or the site's), not the build machine's.
+const parts = Object.fromEntries(
+  new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: postTimezone ?? config.site.timezone,
+  })
+    .formatToParts(datetime)
+    .map(({ type, value }) => [type, value])
 );
-
-const date = datetime.format("D MMM, YYYY");
+const date = `${parts.day} ${parts.month}, ${parts.year}`;
 ---
 
 <div
@@ -67,4 +70,12 @@ const date = datetime.format("D MMM, YYYY");
   >
     {date}
   </time>
+  {readingTime !== undefined && (
+    <>
+      <span aria-hidden="true">·</span>
+      <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
+        {t.post.readingTime(readingTime)}
+      </span>
+    </>
+  )}
 </div>

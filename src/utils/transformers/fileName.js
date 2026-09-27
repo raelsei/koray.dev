@@ -1,15 +1,19 @@
 /**
- * CustomShiki transformer that adds file name labels to code blocks.
+ * Custom Shiki transformer that adds file name labels to code blocks.
  *
  * This transformer looks for the `file="filename"` meta attribute in code blocks
  * and creates a styled label showing the filename. It supports two different
- * styling options and can optionally hide the green dot indicator.
+ * styling options and can optionally hide the dot indicator.
+ *
+ * A bare `accent` flag in the meta (```ts file="money.ts" accent) marks the
+ * block a post turns on: the pre gets `code-accent`, styled in
+ * `src/styles/typography.css`, and its label takes the accent colour.
  *
  * @param {Object} options - Configuration options for the transformer
  * @param {string} [options.style="v2"] - The styling variant to use
  *   - `"v1"`: Tab-style with rounded top corners, positioned at top-left
  *   - `"v2"`: Badge-style with border, positioned at top-left with offset
- * @param {boolean} [options.hideDot=false] - Whether to hide the green dot indicator
+ * @param {boolean} [options.hideDot=false] - Whether to hide the dot indicator
  */
 export const transformerFileName = ({
   style = "v2",
@@ -33,6 +37,9 @@ export const transformerFileName = ({
       metaMap.set(key, value.replace(/["'`]/g, ""));
     }
 
+    const accent = raw.includes("accent");
+    if (accent) this.addClassToHast(node, "code-accent");
+
     const file = metaMap.get("file");
 
     if (!file) return;
@@ -49,10 +56,11 @@ export const transformerFileName = ({
       tagName: "span",
       properties: {
         class: [
-          "absolute py-1 text-foreground text-xs font-medium leading-4",
+          "absolute py-1 text-xs font-medium leading-4",
+          accent ? "text-accent border-accent" : "text-foreground",
           hideDot
             ? "px-2"
-            : "pl-4 pr-2 before:inline-block before:size-1 before:bg-green-500 before:rounded-full before:absolute before:top-[45%] before:left-2",
+            : `pl-4 pr-2 before:inline-block before:size-1 ${accent ? "before:bg-accent" : "before:bg-green-500"} before:rounded-full before:absolute before:top-[45%] before:left-2`,
           style === "v1"
             ? "left-0 -top-6 rounded-t-md border border-b-0 bg-muted/50"
             : "left-2 top-(--file-name-offset) border rounded-md bg-background",

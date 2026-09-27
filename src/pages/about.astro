@@ -10,9 +10,7 @@ import config from "@/config";
 const about = await getEntry("pages", "about");
 
 if (!about) {
-  throw new Error(
-    "Missing content entry: `about.md` or `about.mdx` in `src/content/pages/`"
-  );
+  throw new Error("Missing content entry: `about.md` in `src/content/pages/`");
 }
 
 const { Content } = await render(about);

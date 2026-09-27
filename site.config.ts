@@ -22,8 +22,6 @@ export default defineSiteConfig({
     dynamicOgImage: true,
     showArchives: true,
     showBackButton: true,
-    // No public source repository to edit against; a dead link is worse than none.
-    editPost: { enabled: false },
     search: "pagefind",
   },
   socials: [

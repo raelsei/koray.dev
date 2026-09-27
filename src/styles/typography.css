@@ -47,14 +47,6 @@
       @apply border-border mx-auto border;
     }
 
-    img[role="button"] {
-      @apply cursor-zoom-in;
-
-      &:focus-visible {
-        @apply outline-2 outline-offset-2 outline-dashed;
-      }
-    }
-
     figcaption {
       @apply opacity-75;
     }
@@ -97,14 +89,6 @@
       @apply border-s-accent/80 wrap-break-word opacity-80;
     }
 
-    details:not(.callout) {
-      @apply text-foreground inline-block cursor-pointer select-none [&_p]:hidden [&_ul]:my-0!;
-    }
-
-    summary {
-      @apply focus-visible:outline-accent focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-dashed;
-    }
-
     pre {
       @apply focus-visible:outline-accent focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-dashed;
     }
@@ -119,20 +103,20 @@
     @apply bg-(--shiki-dark-bg) text-(--shiki-dark) [&_span]:text-(--shiki-dark);
   }
 
-  /* Styles for Shiki transformers */
-  /* https://shiki.style/packages/transformers */
-  .astro-code {
-    .line.diff.add {
-      @apply relative inline-block w-full bg-green-400/20 before:absolute before:-left-3 before:text-green-500 before:content-['+'];
-    }
-    .line.diff.remove {
-      @apply relative inline-block w-full bg-red-500/20 before:absolute before:-left-3 before:text-red-500 before:content-['-'];
-    }
-    .line.highlighted {
-      @apply inline-block w-full bg-slate-400/20;
-    }
-    .highlighted-word {
-      @apply border-border rounded-sm border px-0.5 py-px;
-    }
+  /* A fence marked `accent` is the block the post turns on: the output that
+     shows the bug, or the fix. It takes the accent edge and a faint wash of
+     it, over whichever theme's background is showing. */
+  .astro-code.code-accent {
+    border-color: var(--accent);
+    background-image: linear-gradient(
+      color-mix(in oklab, var(--accent) 7%, transparent),
+      color-mix(in oklab, var(--accent) 7%, transparent)
+    );
+  }
+
+  /* The inner <code> repaints the theme background; clear it so the wash
+     reaches every line, not just the gutter. */
+  .app-prose .astro-code.code-accent code {
+    background: transparent;
   }
 }

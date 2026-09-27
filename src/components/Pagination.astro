@@ -4,15 +4,13 @@ import type { CollectionEntry } from "astro:content";
 import IconArrowLeft from "@/assets/icons/IconArrowLeft.svg";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import LinkButton from "./LinkButton.astro";
-import { useTranslations } from "@/i18n";
+import { t } from "@/i18n";
 
 type Props = {
   page: Page<CollectionEntry<"posts">>;
 };
 
 const { page } = Astro.props;
-
-const t = useTranslations(Astro.currentLocale);
 ---
 
 {page.lastPage > 1 && (
