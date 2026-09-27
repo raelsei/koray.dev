@@ -32,8 +32,8 @@ words a minute, each line of code counted like a short sentence.
 
 Code fences take a file name and an optional bare `accent` flag after the
 language, as in `ts file="money.ts" accent`. `accent` marks the block a post
-turns on (the output that shows the bug, or the fix) and draws it with the
-accent edge and a faint accent wash.
+turns on (the output that shows the bug, or the fix) and draws it with a
+two-pixel accent edge and an accent file label.
 
 Bookmarks carry a favicon, stored once in `public/favicons/<host>.png` and never
 hotlinked, so a reader is not announced to a third party. The path is derived

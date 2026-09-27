@@ -104,19 +104,10 @@
   }
 
   /* A fence marked `accent` is the block the post turns on: the output that
-     shows the bug, or the fix. It takes the accent edge and a faint wash of
-     it, over whichever theme's background is showing. */
+     shows the bug, or the fix. It takes a two-pixel accent edge. Not a tinted
+     background: a 7% wash pulled several syntax colours below 4.5:1. */
   .astro-code.code-accent {
     border-color: var(--accent);
-    background-image: linear-gradient(
-      color-mix(in oklab, var(--accent) 7%, transparent),
-      color-mix(in oklab, var(--accent) 7%, transparent)
-    );
-  }
-
-  /* The inner <code> repaints the theme background; clear it so the wash
-     reaches every line, not just the gutter. */
-  .app-prose .astro-code.code-accent code {
-    background: transparent;
+    box-shadow: 0 0 0 1px var(--accent);
   }
 }
