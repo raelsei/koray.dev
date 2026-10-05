@@ -1,56 +1,55 @@
 ---
-title: We built a distributed page cache, then deleted it
-description: Three rounds of tuning to cut the write bill, then removal. The same machinery stayed for images.
+title: We moved our page cache to R2, then deleted it
+description: "R2 charges 12.5 times more for a write than a read. Rendered HTML that revalidates on a timer is the worst workload for that pricing, and images are the best."
 pubDatetime: 2026-05-14T06:00:00.000Z
 tags: [caching, cloudflare, cost]
 ---
 
-## the obvious idea
+The site runs Next.js on Cloudflare Workers. Rendered pages were cached in
+isolate memory, so every isolate in every location started cold and rendered
+pages on its own.
 
-The framework adapter's incremental page cache defaults to in-process memory. On
-a distributed edge runtime that means every isolate in every location is cold and
-re-renders independently.
+The obvious fix was a shared store. Here is how that went:
 
-The obvious fix is to persist rendered pages to a shared store, and we did:
+1. Rendered pages written to Workers KV.
+2. KV replaced with R2 behind a custom cache handler: a key prefix per deploy,
+   TTL checked on read, cache tags read from object metadata, and a short
+   in-memory tag cache to avoid listing on every lookup. A lifecycle rule
+   deleted old prefixes.
+3. Longer revalidation windows, to cut writes.
+4. Another pass to cut writes: deduplication, longer TTLs, and a pinned build
+   id, since an unstable one rewrote every key on every deploy.
+5. Deleted all of it.
 
-1. Pages written to the platform's eventually-consistent key-value store.
-2. Swapped for object storage behind a custom cache handler: a versioned prefix,
-   TTL checked on read, tags discovered from stored metadata, and a short
-   in-process tag cache so we weren't listing on every lookup. Deploys moved to a
-   new prefix and a lifecycle rule aged out the old one.
-3. Extended the revalidation windows, explicitly to cut write volume.
-4. A pass to cut write-class operations: dedupe, longer TTLs, and a pinned build
-   id, because an unstable one rewrites every key on every deploy.
-5. Deleted the whole thing.
+Steps three and four were the warning sign: two rounds in a row of tuning the
+cache to do less.
 
-Steps three and four are the tell. Each treated a symptom, and there were two of
-them in a row.
+## What we were paying for
 
-## what we were actually paying for
+On [R2](https://developers.cloudflare.com/r2/pricing/), a write (Class A)
+costs $4.50 per million and a read (Class B) $0.36 per million, so a write costs
+12.5 times as much. The useful question is not whether the cache hits. It is how
+many writes each useful read costs.
 
-Object storage bills writes at roughly twelve times reads. So the question is not
-"does the cache hit" but _how many writes does one useful read cost_.
+Rendered HTML is the wrong shape for that. There are many pages, each worth
+little, and they revalidate on a timer, so the store pays a write per page per
+window whether or not anyone visited. Listing objects to find tags is a Class A
+operation too, which made the tag index cost more than the pages it indexed.
 
-Rendered HTML is the bad shape. Pages are numerous, individually low-value, and
-revalidate on a timer, so the store is charged a write per page per window
-across the whole surface, whether or not anyone asked for that page. Listing to
-discover tags is itself a write-class operation, which made the tag machinery
-more expensive than the thing it was indexing.
+Every fix we tried was a way to write less often, which means making the cache
+worse at its job. When all your tuning points that way, the design is wrong, not
+the settings.
 
-Every mitigation we reached for was a way of writing less often, which is a way
-of saying the cache should be worse at its job. When the tuning direction is
-"make it do less", the thing to change is not the tuning.
+## The same code, kept for images
 
-## the same machinery, kept
-
-We did not throw the code away. The versioned prefix, the lifecycle rule, the
-tiered lookup: all of it still runs, on thumbnails.
+We did not throw the code away. The per-deploy prefix, the lifecycle rule and
+the layered lookup still run, for image thumbnails:
 
 ```typescript file="image-cache.ts" accent
 const inflight = new Map<string, Promise<Response>>();
 
 async function get(url: string, key: string) {
-  // The edge cache keys on a Request, and only matches GET.
+  // The edge cache keys on a Request and only matches GET.
   const req = new Request(url);
   try {
     const edge = await caches.default.match(req);
@@ -67,40 +66,40 @@ async function get(url: string, key: string) {
     fetching = fetchAndStore(url, key).finally(() => inflight.delete(key));
     inflight.set(key, fetching);
   }
-  // A Response body is a single-use stream, so every caller needs its own.
+  // A Response body can only be read once, so each caller gets a clone.
   return (await fetching).clone();
 }
 ```
 
-Images are the inverse workload. Immutable, so a write is paid once. Highly
-reused, so that write amortises. Expensive to regenerate, so a miss actually
-hurts.
+Images are the opposite workload. They never change, so each one is written
+once. They are requested often, so that write pays for itself. And they are
+expensive to regenerate, so a miss actually hurts.
 
-> Persist what is immutable and expensive. Don't persist what is numerous and
-> cheap to regenerate. Same primitive, opposite verdicts.
+Persist what is immutable and expensive to produce. Do not persist what is
+numerous and cheap to regenerate.
 
-## when this stops working
+## What made deleting it safe
 
-The single-flight map is module scope, which on this runtime means per isolate.
-It collapses concurrent misses _inside_ one isolate; it does nothing across the
-fleet. A globally cold key still costs one write per location that gets asked,
-the same fan-out the page cache died of, reduced by a couple of orders of
-magnitude rather than removed. If that ever stops being enough, the honest next
-step is a coordination primitive, not a bigger map.
+Going back to per-isolate caching gives up sharing rendered HTML across
+locations. That would have been a regression, except for two things.
 
-Reverting to in-process page caching gives up cross-location reuse of rendered
-HTML, and that would be a straight regression except two other things were true.
-The CDN in front was configured to cache the HTML, which needed an explicit
-override: the adapter marks those responses `private, no-cache`, and `private`
-is the operative half: it forbids a shared cache from storing them at all.
-(`no-cache` is the commonly misread one; it permits storage and demands
-revalidation.) And the underlying queries had separately been made cheap, so a
-re-render was no longer worth avoiding at the cost of a write per page per
-window.
+First, the CDN in front now caches the HTML. That needed an explicit override,
+because the adapter sends `Cache-Control: private, no-cache`. `private` is the
+part that matters: it forbids shared caches from storing the response at all.
+`no-cache` is the one people misread; it allows storage and requires
+revalidation.
 
-Without both of those, this reversal is a regression rather than a cleanup. The
-ordering is the part worth keeping: the page cache was solving a problem two
-cheaper layers were better placed to solve, and we only found that out by paying
-for the expensive version first.
+Second, the queries behind the pages had been made cheap separately, so a
+re-render was no longer worth avoiding at the price of a write per page.
 
-_written in İstanbul, may 2026 · EOF_
+The page cache was solving a problem that two cheaper layers were better placed
+to solve. We only learned that by paying for it first.
+
+## Limits
+
+The in-flight map lives in module scope, which on Workers means one per isolate.
+It merges concurrent misses inside an isolate, not across the fleet. A key that
+is cold everywhere still costs one write per location that asks for it. That is
+far less than the page cache paid, but it is not zero. If it ever matters, the
+next step is a coordination primitive such as a Durable Object, not a bigger
+map.

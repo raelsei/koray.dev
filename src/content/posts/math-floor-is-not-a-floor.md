@@ -1,24 +1,24 @@
 ---
 title: Math.floor is not a floor
-description: "The obvious fix drops a step. The clever fix rounds past the input. Neither raises an exception, and only one of them spends money you don't have."
+description: "Flooring a decimal for an API that wants strings: the obvious version drops a step, the clever one rounds up past the input, and neither throws."
 pubDatetime: 2026-02-26T06:00:00.000Z
 tags: [correctness]
 featured: true
 ---
 
-## the missing step
+An API I integrate with takes amounts as decimal strings, at a precision it sets
+per field, and requires them to be floored, never rounded. Sending more than the
+account holds gets rejected if you are lucky.
 
-A downstream system takes numeric fields as strings, at a decimal scale the
-receiver supplies per field, and the value must be **floored**, never rounded.
-Standard implementation:
+## The obvious version drops a step
 
 ```typescript file="serialize.ts"
 const encodeAmount = (value: number, scale: number) =>
   String(Math.floor(value * 10 ** scale) / 10 ** scale);
 ```
 
-Everyone writes this. It looks obviously correct. It survives the tests you would
-think to write, because the inputs that break it are ordinary decimals.
+This is what most people write, and it passes the tests most people write. It
+fails on ordinary inputs:
 
 ```text file="repl.txt" accent
 > 0.58 * 100
@@ -27,15 +27,14 @@ think to write, because the inputs that break it are ordinary decimals.
 0.57
 ```
 
-The nearest double to `0.58` sits a hair below it. Multiply and it stays below.
-Floor and you have dropped a whole step. Drain a balance to zero with this and it
-does not reach zero; something small is left behind, and nobody finds out from a
-log line.
+The closest double to `0.58` is slightly below it, and multiplying keeps it
+below. Flooring then drops a full step. Try to send a whole balance and a small
+remainder is always left behind. Nothing logs an error.
 
-## the guard digit, and why it isn't enough
+## The clever version rounds up
 
-The clever fix is to stop doing arithmetic: render one digit wider than you need,
-then cut the string.
+The usual fix avoids arithmetic: format one extra digit with `toFixed`, then cut
+it off.
 
 ```typescript file="serialize.ts"
 const encodeAmount = (value: number, scale: number) => {
@@ -45,45 +44,37 @@ const encodeAmount = (value: number, scale: number) => {
 };
 ```
 
-I shipped this, on the reasoning that `toFixed` can only round the digit you are
-about to throw away, so everything you keep is untouched.
-
-That reasoning is wrong. Rounding the last digit **carries**.
+I shipped this. My reasoning was that `toFixed` only rounds the digit I throw
+away. That is wrong, because rounding carries:
 
 ```text file="repl.txt" accent
-> (9.99999).toFixed(3)      // asking for 2 decimals
+> (9.99999).toFixed(3)      // scale 2
 '10.000'                    // → "10.00"
 > (1.2999999).toFixed(3)
 '1.300'                     // → "1.30"
 ```
 
-Both results are larger than the input. What this function does is round to
-`scale + 1` and then truncate exactly: a floor with half a step of tolerance at
-the guard position. The tolerance is genuinely useful, because it is what
-absorbs the representation error and turns `0.58` back into `0.58`. It is also
-not free: any value sitting within that tolerance of a boundary crosses it.
+Both outputs are larger than the input. The extra digit does absorb the
+representation error, which is why `0.58` now comes out right. But any value
+within half a step of the next boundary gets pushed over it.
 
-> The first version lands one step low. The second occasionally lands _high_.
-> Only one of those two spends money the account does not have.
+The two versions fail in opposite directions. The first leaves dust on the
+account. The second asks for more than the balance you checked a moment ago.
 
-Low is a residue and an awkward support thread. High is a request for more than
-the balance that was checked a moment earlier, rejected downstream if you are
-lucky and filled if you are not.
+## Cut the string instead
 
-## cut the string you already have
-
-Every double has a canonical decimal form: the shortest string that round-trips
-back to it. `String(value)` gives you that, and for a form field or an API
-payload it is the number someone actually typed. Cutting it needs no arithmetic.
+`String(value)` returns the shortest decimal that converts back to the same
+double. For a number that came from a form field or a JSON payload, that is the
+number the user typed. Truncating that string needs no arithmetic at all.
 
 ```typescript file="serialize.ts" accent
 const encodeAmount = (value: number, scale: number) => {
-  // Refuse rather than mangle. Negatives truncate toward zero here, which is
-  // not a floor; above 1e21 every renderer switches to exponent notation.
+  // Refuse instead of guessing: negatives would truncate toward zero (not a
+  // floor), and from 1e21 up every formatter switches to exponent notation.
   if (!Number.isFinite(value) || value < 0 || value >= 1e21)
     throw new RangeError(`not serialisable at scale ${scale}: ${value}`);
 
-  // Only sub-1e-6 values still render exponentially, and toFixed is plain there.
+  // Below 1e-6, String() uses exponent notation; toFixed stays plain there.
   let s = String(value);
   if (s.includes("e")) s = value.toFixed(Math.max(scale + 1, 20));
 
@@ -94,55 +85,29 @@ const encodeAmount = (value: number, scale: number) => {
 };
 ```
 
-Fuzzed over six hundred thousand values across seven scales, this never returns
-a value above its input and never lands more than one step below it. Both of the
-earlier versions do one or the other.
+I fuzzed it over 600,000 random values at seven scales. It never returned more
+than its input and never landed a full step below it. Each of the earlier
+versions fails one of those two checks.
 
-The three rejections matter more than the cut does. Each one is a case where the
-previous versions produced a confident, plausible, wrong string, and the whole
-argument of this post is that those are the expensive ones.
+The guard clause matters as much as the cut. Every input it rejects is one where
+the earlier versions returned a confident, wrong string.
 
-## the exemption nobody reads
+## Write characterization tests first
 
-The same boundary caps a different field at a fixed number of significant
-figures, with a carve-out for whole numbers. Implement the headline rule, miss
-the carve-out, and a round-number input is silently rewritten to a nearby
-different number.
+Before changing anything, I wrote tests for the current behaviour and the
+intended behaviour, and checked that exactly the expected ones failed. If
+anything else fails, the contract is not what you thought, and you stop there.
 
-```typescript file="serialize.ts"
-const encodeRate = (value: number) =>
-  Number.isInteger(value)
-    ? String(value)
-    : trimZeros(value.toPrecision(SIG_FIGS));
-```
+That step found a bug that was not in my plan: a tidy-up that stripped trailing
+zeros without first checking for a decimal point, turning `4500` into `45`. The
+`cut.includes(".")` check on the last line exists because of it.
 
-An early return, above the rounding. Two caveats I would not have written the
-first time: `toPrecision` goes exponential once the integer part outgrows the
-budget, so this is only safe because values on this path are bounded well below
-that, and the trailing-zero strip is the third bug in this family. On the
-_amount_ path, not this one, stripping zeros without first checking for a decimal
-point turned `4500` into `45`. A hundredfold error, introduced by a tidy-up,
-caught in review because the diff was small enough to read.
+## Limits
 
-## characterization tests first
+This is float in, string out. It makes sure the last step neither gains nor
+loses a unit. It is not exact arithmetic; if you sum thousands of floats before
+serialising, the error happened earlier.
 
-The order matters more than the fix. Write tests that encode today's behaviour
-and the intended behaviour, run them, and confirm that exactly the expected set
-fails. If anything else fails, stop: the contract is not what you assumed and
-everything after that is speculation. Only then change one function at a time.
-
-That is what caught the trailing-zero bug. It was not in the audit and not in the
-plan.
-
-## when this stops working
-
-This is float in, string out. It guarantees the last step neither loses nor gains
-a step. It is not exact arithmetic, and if you are summing thousands of values
-before serialising, the error you care about happened long before this function.
-
-It also takes the shortest round-trip decimal as the intent. That is right when
-the value came from a form or a payload. It is wrong when the value is the output
-of a long computation, where the extra digits are real and you meant to cut them.
-Same function, opposite correctness, depending on where the number has been.
-
-_written in İstanbul, february 2026 · EOF_
+It also treats the shortest round-trip form as what the user meant. That is
+right for values from a form or a payload. For the result of a long computation,
+the extra digits are real, and you may want a different rule.

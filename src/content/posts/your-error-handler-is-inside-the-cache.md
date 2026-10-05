@@ -1,13 +1,11 @@
 ---
 title: Your error handler is inside the cache
-description: A container restart took thirty seconds. The site stayed broken for an hour after it came back.
+description: 'A thirty-second backend restart became an hour of 404s, because a try/catch inside a "use cache" function cached the failure as a value.'
 pubDatetime: 2026-04-23T06:00:00.000Z
 tags: [caching, correctness]
 ---
 
-## a restart that outlived itself
-
-The page loader did the defensive, obviously-correct thing:
+The page loader did the defensive thing:
 
 ```typescript file="page-data.ts"
 "use cache";
@@ -21,84 +19,69 @@ export async function getPage(slug: string) {
 }
 ```
 
-The caller mapped `undefined` to a 404. Fine everywhere else in the codebase.
-Not fine here, because of the directive on line one.
+The caller turned `undefined` into a 404. That pattern was fine everywhere else
+in the codebase. It was not fine here, because of the first line.
 
-The content backend restarted: routine, about thirty seconds. During that window
-every detail and landing page threw, caught, and returned `undefined`. The cache
-saw a function that completed normally and returned a value, so it stored the
-value. The backend came back healthy. The site kept serving 404s for the rest of
-the cache lifetime.
+The CMS backend restarted, which took about thirty seconds. During that window
+every page fetch threw, got caught, and returned `undefined`. To the cache, the
+function had finished normally and returned a value, so it stored the value. The
+backend came back, and the site kept serving 404s for the rest of the cache
+lifetime, about an hour.
 
-Nothing was broken by then. The outage had been over for an hour. We had cached
-our own opinion of it.
-
-## the fix is a deletion
+## The fix is to delete the catch
 
 ```typescript file="page-data.ts" accent
 "use cache";
 
-// Deliberately uncaught. This cache stores what a function returns, and an
-// absent page and an unreachable backend must not return the same thing.
-// Catching here converts a half-minute outage into a full-lifetime one.
+// Deliberately uncaught. The cache stores whatever this returns, so a missing
+// page and an unreachable backend must not return the same value.
 export async function getPage(slug: string) {
   return cms.fetchOne("pages", slug);
 }
 ```
 
-Let it throw. Nothing is stored, so the next request retries and the page heals
-itself. An empty result from a query that _succeeded_ is still perfectly
-cacheable.
+If the fetch throws, nothing is cached and the next request tries again. An
+empty result from a fetch that succeeded is still safe to cache.
 
-The comment is load-bearing. The next person to read this file will want to put
-the try/catch back, because catching at an I/O boundary is what they have
-correctly been taught to do everywhere else.
+The comment matters. The next person to read this file will want to put the
+try/catch back, because catching at an I/O boundary is what they have been
+taught to do everywhere else.
 
-> Inside a memoisation boundary, an error and an empty result must not be
-> representable by the same value. Error handling does not compose across a
-> cache.
+Inside a cached function, an error and an empty result must never be the same
+value.
 
-## the same bug, one layer up
+## The same bug at build time
 
-A month or so later, same class, different mechanism. The static params generator
-swallowed a backend failure into an empty array, with a comment asserting the
-route would simply fall back to rendering on demand. That had been true under the
-previous rendering model. Under the one this codebase is now on (the one the
-cache directive requires), an empty params array is a hard build error.
+A month later the same mistake turned up somewhere else. `generateStaticParams`
+caught a backend failure and returned an empty array, with a comment saying the
+route would fall back to rendering on demand. That was true under the old
+rendering model. Under Cache Components, the model `"use cache"` runs on, an
+empty array is a build error.
 
-Which is the good outcome, and the reason to prefer it: the build fails, nothing
-ships, and the previous image keeps serving.
+That is the better failure: the build stops, nothing ships, and the previous
+deployment keeps serving. But the comment described a guarantee the framework
+had dropped between major versions. The code was correct when it was written and
+became wrong without anyone touching it.
 
-The detail I keep coming back to is the comment. It documented a guarantee the
-framework had silently withdrawn between major versions. The code was correct
-when written and became wrong without being edited.
+## When catching is still right
 
-## where catching is still right
+This is not a rule against try/catch. The same codebase still catches errors for
+a secondary list in the sidebar, which has a fallback query behind it and for
+which an empty list is a valid page.
 
-This is not a rule against try/catch. The same codebase still catches and returns
-an empty list for a secondary listing in the sidebar, which has a fallback query
-behind it and for which an empty result is a legitimate page.
+The question is per fetch: does the page make sense without this data? If not,
+let the error propagate. If the page is only less complete, degrade and cache. A
+shared wrapper or a lint rule pushes you to apply one policy to both, and that
+is the mistake.
 
-The judgement is per-fetch: **is this fetch load-bearing for the page's
-identity?** If the page is meaningless without it, the error must propagate. If
-the page is merely less good, degrade and cache. What you cannot do is apply one
-policy to both, which is exactly what a lint rule or a shared wrapper pushes you
-toward.
+## Trade-offs
 
-## when this stops working
+During a backend outage, users now see an error page instead of a 404. That is
+intended. A 404 tells crawlers the page is gone, and they remember. A 5xx tells
+them to come back later.
 
-Users now see an error page during a backend outage. That is the correct trade
-here: the alternative was a cached 404, and a 404 tells a crawler the page is
-gone, which crawlers remember better than we did. A 5xx tells them to come back.
-
-The larger caveat is that the fix rests on a guarantee I did not write and cannot
-find documented: that this cache layer stores returned values and not rejected
-ones. I verified it; it is not a promise. It also does not generalise: one layer
-down, a fetch that resolves to a 500 is a _returned_ response and gets stored
-like any other value.
-
-Which is the same shape as the comment two sections up. If that behaviour is ever
-withdrawn, this file becomes wrong without being edited, exactly like the last
-one did.
-
-_written in İstanbul, april 2026 · EOF_
+The fix also rests on behaviour I verified but could not find documented: that
+this cache stores returned values and not thrown errors. It does not hold one
+layer down, either. A `fetch` that resolves with a 500 is a returned value and
+gets cached like any other. If the cache's behaviour ever changes, this file
+becomes wrong without being edited, just like that comment did.

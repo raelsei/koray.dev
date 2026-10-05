@@ -18,6 +18,15 @@ export default defineConfig({
   // reject the slash-less form, so the mismatch surfaces locally instead of in
   // production. Routes with a file extension (`/rss.xml`) are exempt.
   trailingSlash: "always",
+  // Posts renamed on 2026-10-04. Each old URL was live, so it keeps working.
+  redirects: {
+    "/posts/a-missing-capability-beats-a-threshold":
+      "/posts/keep-the-model-call-off-the-request-path/",
+    "/posts/a-signing-key-in-the-browser":
+      "/posts/what-a-non-extractable-key-protects/",
+    "/posts/the-endpoint-that-succeeded-at-doing-nothing":
+      "/posts/fire-and-forget-on-cloudflare-workers/",
+  },
   integrations: [
     sitemap({
       filter: page => {

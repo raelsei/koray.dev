@@ -1,37 +1,32 @@
 ---
 title: "Your LLM can't hallucinate a number it was never given"
-description: Anti-hallucination gets written as a prompt rule. It belongs in the code that builds the prompt, and the sharpest version of it is one line long.
+description: "Preventing invented facts in the code that builds the prompt rather than in its instructions: no raw numbers, no empty fields, and opaque references instead of names."
 pubDatetime: 2026-07-18T06:00:00.000Z
 tags: [llm]
+featured: true
 ---
 
-## two halves that must not blur
+The system pairs a deterministic engine with a language model. The engine
+computes every quantity; the model only writes the prose. Users read that prose
+as authoritative, so an invented number is not a small glitch. It is the product
+stating something false in a sentence that looks exactly like a true one.
 
-The system pairs an exact computation engine with a language model. The engine
-owns every quantity. The model owns only phrasing. Users read the prose as
-authoritative, so an invented number is not a glitch; it is the product lying
-fluently, in a sentence indistinguishable from a true one.
+Some of the engine's output depends on an optional setup step that about half of
+users skip. So every prompt is built from a partly filled set of facts. The real
+question is not whether the model will make things up, but what happens in the
+place where a missing fact would have gone.
 
-The engine's output is also conditionally available: some values only exist if
-the user completed an optional part of setup, and about half haven't. So the
-prompt is assembled from a partially populated fact set on every request. That
-is the real problem. Not "will the model make things up" but "what happens to
-the slot where a fact should have been".
+## The model never sees a number
 
-## the model never sees a number
+The prompt contains nothing the model could do arithmetic on. The engine
+computes at full precision, rounds, maps the result to a named range, and
+translates that into the user's language before the prompt is built. What
+reaches the model is a finished phrase.
 
-The model receives nothing it could do arithmetic on. The engine computes at full
-precision, rounds, maps the result into a named band, and translates that band
-into the user's language before assembly. What lands in the prompt is a finished
-phrase; the underlying figure never appears.
+Translation happens before the prompt for the same reason. Ask a model to
+translate a proper noun and it will, plausibly and sometimes wrongly.
 
-Translation happens on the way in for the same reason. Ask a model to render a
-proper noun in another language and it will oblige, plausibly and wrongly, often
-enough to matter.
-
-## omit the line, don't blank it
-
-This is the rule.
+## Leave the line out, not blank
 
 ```typescript file="assemble.ts" accent
 const lines = [
@@ -45,75 +40,66 @@ const lines = [
 const facts = lines.filter((l): l is string => l !== null).join("\n");
 ```
 
-There is no `signals: none`. No `phase: unknown`. No null placeholder, no empty
-string, no `N/A`. A missing fact produces a missing _line_.
+There is no `signals: none`, no `phase: unknown`, no empty string, no `N/A`. A
+missing fact means a missing line.
 
-A blank field is an invitation. The model reads a labelled slot with nothing in
-it and fills it, because that is what the shape of the text asks for. An absent
-field asks for nothing.
+A labelled field with nothing in it invites the model to fill it, because that
+is what the shape of the text asks for. A field that is not there asks for
+nothing.
 
-Pair it with a prose rule that says what to do with the gap: _when a signal is
-given, that signal is the headline; if none is given, stay at the coarse level
-and invent nothing._ The system then degrades to vaguer-but-true instead of
-specific-and-false.
+The instructions cover the gap: if a signal is given, lead with it; if not, stay
+general and invent nothing. The output degrades to vaguer but true instead of
+specific and false. The instructions are a hint. What you put in the string is
+the actual limit.
 
-> The model's factual ceiling is what you physically put in the string. The
-> prompt text is a hint. The assembly is the enforcement.
+The top-three cap belongs here too. The engine can rank dozens of items; the
+prompt gets three. That is not about tokens. It stops the model padding a thin
+answer by listing everything it was given.
 
-Caps belong here too. The engine can rank dozens of derived items; the prompt
-takes the top three. Not to save tokens, but to stop the model padding a thin
-answer by enumerating everything it was handed.
+## The model does not write names either
 
-## the model doesn't get to write names either
-
-The escalation, on the conversational surface: when the model needs to reference
-an internal record, it may not write the name. It emits an opaque reference
-drawn from an id set injected for that request.
+In the chat feature, when the model refers to an internal record, it cannot
+write the record's name. It writes an opaque reference from a set of ids
+injected for that request:
 
 ```text file="reply.txt"
 That pattern points at <<ref 47>> more than anything else this week.
 ```
 
-The client resolves the reference to a localised name. This deletes a bug class.
-The model can no longer misname or invent a record, and the worst available
-failure is an unresolvable reference: loud and cosmetic instead of quiet and
-wrong.
+The client resolves the reference to a localised name. The model can no longer
+misname or invent a record. The worst case is a reference that does not resolve,
+which is visible and harmless instead of quiet and wrong.
 
-That last claim only holds if the client enforces the same set. An allowlist
-injected into the prompt is a prompt-side constraint, which is precisely the kind
-of guarantee the rest of this post refuses to trust. The render-side check is the
-one that makes it true: resolve **only** against the ids sent for this request,
-and reject anything else. Look the id up in the full catalog instead and a
-fabricated reference renders a real, wrong name, the exact failure the design
-claims to have removed.
+That only holds if the client enforces the same set. An allowlist in the prompt
+is a prompt-side constraint, which is exactly what this post argues against
+trusting. The client must resolve only against the ids sent for this request and
+reject anything else. If it looks ids up in the full catalogue instead, an
+invented reference renders a real but wrong name, the very failure this was
+meant to remove.
 
-An earlier version emitted the reference next to the name. That version could
-still be wrong; it just carried the right id beside the wrong word.
+An earlier version had the model write the name next to the reference. It could
+still be wrong; it just put the right id beside the wrong word.
 
-## how do you regression-test a prompt
+## Testing a prompt
 
-Conditional assembly means "the prompt" is a family of prompts. You cannot read
-one and conclude the system is correct. So the assembled prompts are snapshotted
-across every supported language, with the test file stating that a diff is a
-product change and must never be auto-accepted.
+Because lines are added conditionally, "the prompt" is really a family of
+prompts, and reading one tells you little. So the built prompts are
+snapshot-tested in every supported language, and the test file says a diff is a
+product change that must never be auto-accepted.
 
-The one that earns its keep is the negative test: feed it degraded input and
-assert the enrichment lines are **absent**, not empty. That is the rule in
-machine-checkable form, and it is the only thing standing between you and a
-future refactor that helpfully adds a fallback string.
+The most useful test is the negative one: give it incomplete input and assert
+that the optional lines are absent, not empty. That is the rule in a form a
+machine can check, and it is what stops a future refactor from adding a helpful
+fallback string.
 
-## what this doesn't buy you
+## What this does not cover
 
-Nothing here constrains interpretation. The model can still draw a wrong reading
-from a set of entirely correct facts, and no amount of assembly discipline
-touches that.
+None of this controls interpretation. The model can still draw a wrong
+conclusion from correct facts.
 
-The caps can truncate something significant if the ranking is wrong, which makes
-the sort key load-bearing in a way that is easy to forget. And the reference
-indirection introduces a contract between prompt and client; let those drift and
-users see raw markers.
+The cap can drop something important if the ranking is wrong, so the sort order
+matters more than it looks. And the reference scheme creates a contract between
+the prompt and the client; if the two drift apart, users see raw markers.
 
-What it does buy is a clean line of responsibility. When a number is wrong, it is
-the engine's fault, and there is exactly one place to look.
-
-_written in İstanbul, july 2026 · EOF_
+What it does give is a clear line of responsibility. If a number is wrong, the
+engine is at fault, and there is one place to look.
