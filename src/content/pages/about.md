@@ -34,4 +34,4 @@ koative takes on a few client projects a year: iOS and Android apps, web
 platforms, and the product design in between. Best fit: a team that would
 rather cut scope than cut care.
 
-Mail [id@koray.dev](mailto:id@koray.dev). Replies within 48h.
+Mail [hello@koray.dev](mailto:hello@koray.dev). Replies within 48h.

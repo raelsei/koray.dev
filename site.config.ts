@@ -29,7 +29,7 @@ export default defineSiteConfig({
     { name: "x", url: "https://x.com/raelsei" },
     { name: "linkedin", url: "https://linkedin.com/in/raelsei" },
     { name: "telegram", url: "https://t.me/raelsei" },
-    { name: "mail", url: "mailto:id@koray.dev" },
+    { name: "mail", url: "mailto:hello@koray.dev" },
   ],
   // Trimmed to where this audience actually shares: no Facebook, WhatsApp or Pinterest.
   shareLinks: [

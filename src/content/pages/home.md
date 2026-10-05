@@ -13,4 +13,4 @@ TypeScript end to end: React and Next in front, Bun, Express and PocketBase
 behind. I write about the correctness bugs that never raise an exception.
 
 koative takes on a few client projects a year.
-[Mail me](mailto:id@koray.dev). Replies within 48h.
+[Mail me](mailto:hello@koray.dev). Replies within 48h.
