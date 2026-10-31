@@ -38,8 +38,10 @@ const schema = [
 >
   <Header />
 
-  <Main pageTitle={about.data.title} class="mt-8 app-prose">
-    <Content />
+  <Main pageTitle={about.data.title}>
+    <div class="app-prose">
+      <Content />
+    </div>
   </Main>
 
   <Footer />

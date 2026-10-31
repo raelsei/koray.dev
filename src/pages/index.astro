@@ -1,144 +1,500 @@
 ---
 import { getCollection, getEntry, render } from "astro:content";
-import { getRelativeLocaleUrl } from "astro:i18n";
-import IconRss from "@/assets/icons/IconRss.svg";
-import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import { Picture } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import Socials from "@/components/Socials.astro";
-import Card from "@/components/Card.astro";
-import LinkButton from "@/components/LinkButton.astro";
-import { getSortedPosts } from "@/utils/getSortedPosts";
+import Koative from "@/components/Koative.astro";
+import portrait from "@/assets/portrait/koray-dark.jpg";
+import { getProducts, STATUS_LABEL } from "@/utils/products";
+import { formatDate } from "@/utils/formatDate";
 import { page as pageNode } from "@/utils/schema";
 import { t } from "@/i18n";
 import config from "@/config";
 
-const { socials, posts: postsConfig } = config;
+const entry = async (id: string) => {
+  const found = await getEntry("pages", id);
+  if (!found)
+    throw new Error(`Missing content entry: src/content/pages/${id}.md`);
+  return found;
+};
 
-const locale = Astro.currentLocale ?? config.site.lang;
+const [home, now, offKeyboard] = await Promise.all([
+  entry("home"),
+  entry("now"),
+  entry("off-the-keyboard"),
+]);
+const { Content: Now } = await render(now);
+const { Content: OffKeyboard } = await render(offKeyboard);
 
-const posts = await getCollection("posts");
-const sortedPosts = getSortedPosts(posts);
-const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
-const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
-const homePath = getRelativeLocaleUrl(locale, "");
+// The first sentence leads in full light; the rest, which opens the product
+// list, is softer.
+const [lead, rest] = (home.data.intro ?? "").split(/(?<=\.)\s+/);
 
-// The hero copy lives in the content collection, never in this component.
-const hero = await getEntry("pages", "home");
+const products = await getProducts();
+const log = (await getCollection("log")).sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
 
-if (!hero) {
-  throw new Error("Missing content entry: `home.md` in `src/content/pages/`");
-}
-
-const { Content: HeroContent } = await render(hero);
+const links = [
+  ...config.profiles.filter(p => p.listed),
+  { name: "Email", url: `mailto:${config.site.email}` },
+];
 
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
-
-// The sentence in the heading is the page's thesis, not a usable <title>; the
-// document title comes from `seoTitle` so tabs and search results stay legible.
-const documentTitle = hero.data.seoTitle ?? config.site.title;
-
 const schema = [
   pageNode(config, canonical, {
-    kind: "WebPage",
-    name: documentTitle,
-    description: hero.data.description,
+    kind: "ProfilePage",
+    name: home.data.title,
+    description: home.data.description,
   }),
 ];
 ---
 
 <Layout
-  title={documentTitle}
-  description={hero.data.description}
+  title={home.data.title}
+  description={home.data.description}
   canonicalURL={canonical}
   {schema}
 >
   <Header />
-  <main
-    id="main-content"
-    data-layout="index"
-    data-home-path={homePath}
-    class="app-layout my-1"
-  >
-    <section id="hero" class="border-border border-b pt-8 pb-6">
-      <h1 class="my-4 inline-block text-4xl font-bold sm:my-8 sm:text-5xl">
-        {hero.data.title}
-      </h1>
-      <div class="app-prose max-w-none">
-        <HeroContent />
+  <main id="main-content">
+    <section class="intro relative isolate flex flex-col lg:min-h-[min(44rem,calc(100svh-15rem))] lg:justify-end">
+      <div class="portrait">
+        <Picture
+          src={portrait}
+          formats={["avif", "webp"]}
+          widths={[480, 800, 1024]}
+          sizes="(min-width: 1024px) 50vw, 100vw"
+          alt="Black and white portrait of Koray Güler"
+          loading="eager"
+          fetchpriority="high"
+        />
       </div>
-      {/* The feed link belongs with the other subscribe-and-follow icons; beside
-          a three-line headline it renders as an orphan on its own row. */}
-      <div class="mt-4 flex max-sm:flex-col sm:items-center">
-        {socials.length > 0 && (
-          <div class="me-2 mb-1 whitespace-nowrap sm:mb-0">
-            {t.home.socialLinks}:
-          </div>
-        )}
-        <div class="flex flex-wrap items-center gap-1">
-          {socials.length > 0 && <Socials />}
-          <a
-            target="_blank"
-            href={`${import.meta.env.BASE_URL.replace(/\/?$/, "/")}rss.xml`}
-            class="group p-2 hover:rotate-6 sm:p-1"
-            aria-label="RSS Feed"
-            title="RSS Feed"
-          >
-            <IconRss class="stroke-accent inline-block size-6 scale-110 stroke-2 opacity-90 rtl:-rotate-90" />
-            <span class="sr-only">RSS Feed</span>
-          </a>
-        </div>
+      <div class="app-frame relative">
+        <h1 class="font-display max-w-[16ch] text-[clamp(2.25rem,4.6vw,4.75rem)] leading-[1.02] font-medium tracking-[-0.03em]">
+          {lead} <span class="text-soft block">{rest}</span>
+        </h1>
       </div>
     </section>
 
-    {featuredPosts.length > 0 && (
-      <section
-        id="featured"
-        class:list={[
-          "pt-12 pb-6",
-          { "border-border border-b": recentPosts.length > 0 },
-        ]}
-      >
-        <h2 class="text-2xl font-semibold tracking-wide">{t.home.featured}</h2>
-        <ul>
-          {featuredPosts.map(data => (
-            <Card variant="h3" {...data} />
-          ))}
-        </ul>
-      </section>
-    )}
+    <section
+      id="work"
+      class="app-frame section pt-12! lg:pt-16!"
+      aria-labelledby="work-title"
+    >
+      <div class="label">
+        <h2 id="work-title">{t.home.work}</h2>
+        <p>
+          {t.home.shippedUnder}{" "}
+          <a
+            href="https://koative.com/"
+            class="link-quiet hover:text-foreground"
+          >
+            <Koative />
+          </a>
+        </p>
+      </div>
+      <ul class="body work">
+        {products.map(product => (
+          <li class="group relative">
+            <span class="icon" aria-hidden="true">
+              {product.icon ? (
+                <img
+                  src={product.icon}
+                  alt=""
+                  width="48"
+                  height="48"
+                  loading="lazy"
+                />
+              ) : (
+                product.name.charAt(0).toUpperCase()
+              )}
+            </span>
+            <div class="min-w-0">
+              <h3>
+                <a href={product.website} class="stretched">
+                  {product.name}
+                </a>
+              </h3>
+              <p class="text-soft mt-1">{product.oneLiner}</p>
+            </div>
+            <div class="meta">
+              <span class:list={["status", product.status]}>
+                {STATUS_LABEL[product.status]}
+              </span>
+              <a
+                href={product.repo}
+                class="link-quiet hover:text-foreground relative z-10 -my-2 py-2"
+                aria-label={`${product.name} source on GitHub`}
+              >
+                {t.home.source}
+              </a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
 
-    {recentPosts.length > 0 && (
-      <section id="recent-posts" class="pt-12 pb-6">
-        <h2 class="text-2xl font-semibold tracking-wide">
-          {t.home.recentPosts}
-        </h2>
-        <ul>
-          {recentPosts.slice(0, postsConfig.perIndex).map(data => (
-            <Card variant="h3" {...data} />
-          ))}
-        </ul>
-      </section>
-    )}
+    <section class="app-frame section" aria-labelledby="elsewhere-title">
+      <div class="label">
+        <h2 id="elsewhere-title">{t.home.elsewhere}</h2>
+      </div>
+      <ul class="body elsewhere">
+        {links.map(({ name, url }) => (
+          <li>
+            <a href={url} rel="me">
+              {name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
 
-    <div class="my-8 text-center">
-      <LinkButton href={getRelativeLocaleUrl(locale, "posts")}>
-        {t.home.allPosts}
-        <IconArrowRight class="inline-block rtl:-rotate-180" />
-      </LinkButton>
-    </div>
+    <section id="now" class="app-frame section" aria-labelledby="now-title">
+      <div class="label">
+        <h2 id="now-title">{now.data.title}</h2>
+        {now.data.updated && (
+          <p>
+            <time datetime={now.data.updated.toISOString().slice(0, 10)}>
+              {formatDate(now.data.updated)}
+            </time>
+          </p>
+        )}
+      </div>
+      <div class="body now">
+        <Now />
+      </div>
+    </section>
+
+    <section id="log" class="app-frame section" aria-labelledby="log-title">
+      <div class="label">
+        <h2 id="log-title">{t.home.log}</h2>
+      </div>
+      <ol class="body log">
+        {log.map(({ data }) => (
+          <li>
+            <time datetime={data.date.toISOString().slice(0, 10)}>
+              {formatDate(data.date)}
+            </time>
+            <p>
+              {data.text}
+              {data.url && (
+                <a
+                  href={data.url}
+                  class="link-quiet hover:text-foreground host"
+                >
+                  {new URL(data.url).hostname}
+                </a>
+              )}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="app-frame section" aria-labelledby="off-title">
+      <div class="label">
+        <h2 id="off-title">{offKeyboard.data.title}</h2>
+      </div>
+      <div class="body off">
+        <OffKeyboard />
+      </div>
+    </section>
   </main>
   <Footer />
 </Layout>
 
-<script>
-  document.addEventListener("astro:page-load", () => {
-    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
-      ?.dataset;
-    const baseRoot = import.meta.env.BASE_URL.replace(/\/?$/, "/");
-    if (indexLayout?.layout) {
-      sessionStorage.setItem("backUrl", indexLayout.homePath ?? baseRoot);
+<style>
+  /* ── Intro: the portrait develops like a print in the tray ── */
+  .portrait {
+    position: relative;
+    margin-bottom: -22vw;
+    mask-image: linear-gradient(to top, transparent, #000 45%);
+  }
+  .portrait :global(img) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    animation: develop 2.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @media (min-width: 1024px) {
+    .portrait {
+      position: absolute;
+      inset: 0 0 0 auto;
+      z-index: -1;
+      width: min(52vw, 62rem);
+      margin: 0;
+      mask-image:
+        linear-gradient(to right, transparent, #000 45%),
+        linear-gradient(to top, transparent, #000 30%),
+        linear-gradient(to bottom, transparent, #000 18%);
+      mask-composite: intersect;
     }
-  });
-</script>
+    .portrait :global(img) {
+      height: 100%;
+      aspect-ratio: auto;
+      object-position: 55% 30%;
+    }
+  }
+  @keyframes develop {
+    from {
+      filter: blur(18px) brightness(0.15) contrast(1.6);
+      transform: scale(1.06);
+    }
+    to {
+      filter: none;
+      transform: none;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .portrait :global(img) {
+      animation: none;
+    }
+  }
+
+  /* ── Sections: a heading column and a body column ── */
+  .section {
+    display: grid;
+    gap: 1.75rem;
+    padding-top: 7rem;
+  }
+  @media (min-width: 768px) {
+    .section {
+      grid-template-columns: minmax(10rem, 3fr) 9fr;
+      gap: 2.5rem;
+      padding-top: 10rem;
+    }
+  }
+  .label h2 {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .label p {
+    margin-top: 0.75rem;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Now and Off the keyboard: rendered Markdown ── */
+  .now :global(a),
+  .off :global(a) {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-decoration-color: var(--muted-foreground);
+    text-underline-offset: 0.22em;
+    text-decoration-thickness: 1px;
+    transition: text-decoration-color 0.2s;
+  }
+  .now :global(a:hover),
+  .off :global(a:hover) {
+    text-decoration-color: var(--foreground);
+  }
+  .now {
+    max-width: 44rem;
+    color: var(--soft);
+    font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+    line-height: 1.55;
+  }
+  .now :global(p + ol),
+  .now :global(ol + p) {
+    margin-top: 1.5rem;
+  }
+  .now :global(ol) {
+    counter-reset: launch;
+    border-top: 1px solid var(--border);
+  }
+  .now :global(ol li) {
+    counter-increment: launch;
+    position: relative;
+    padding: 0.875rem 0 0.875rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .now :global(ol li)::before {
+    content: counter(launch);
+    position: absolute;
+    left: 0;
+    font-family: var(--font-display);
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Elsewhere: every profile that claims this site back ── */
+  .elsewhere {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 2rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2.6vw, 2.25rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+  .elsewhere a {
+    display: inline-block;
+    padding-block: 0.25rem;
+    color: var(--soft);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    transition:
+      color 0.2s,
+      text-decoration-color 0.2s;
+  }
+  .elsewhere a:hover {
+    color: var(--foreground);
+    text-decoration-color: var(--foreground);
+  }
+  .off {
+    max-width: 48rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.75rem, 3.4vw, 3rem);
+    font-weight: 500;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    color: var(--soft);
+  }
+
+  /* ── Work: one ledger row per product ── */
+  .work {
+    border-top: 1px solid var(--border);
+  }
+  .work li {
+    display: grid;
+    grid-template-columns: 3rem minmax(0, 1fr);
+    gap: 0.5rem 1.25rem;
+    align-items: center;
+    padding-block: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    transition: background-color 0.3s;
+  }
+  @media (min-width: 640px) {
+    .work li {
+      grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+      gap: 1.75rem;
+      padding-inline: 0.75rem;
+      margin-inline: -0.75rem;
+    }
+  }
+  .work li:hover {
+    background-color: var(--muted);
+  }
+  .icon {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 22%;
+    background: var(--muted);
+    border: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    font-weight: 600;
+    color: var(--soft);
+  }
+  @media (min-width: 640px) {
+    .icon {
+      width: 3.5rem;
+    }
+  }
+  .icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1);
+    transition: filter 0.4s;
+  }
+  .work li:hover .icon img,
+  .work li:focus-within .icon img {
+    filter: none;
+  }
+  .work h3 {
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 2.2vw, 1.875rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  /* The whole row opens the product; Source stays its own link above it. */
+  .stretched::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .meta {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    font-size: 0.875rem;
+    color: var(--muted-foreground);
+  }
+  @media (min-width: 640px) {
+    .meta {
+      grid-column: 3;
+    }
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    padding: 0.2em 0.75em;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--soft);
+  }
+  .status::before {
+    content: "";
+    width: 0.45em;
+    height: 0.45em;
+    border-radius: 50%;
+    border: 1px solid currentColor;
+  }
+  .status.live::before {
+    background: var(--foreground);
+    border-color: var(--foreground);
+  }
+  .status.building::before {
+    display: none;
+  }
+
+  /* ── Log: date, then what happened ── */
+  .log {
+    border-top: 1px solid var(--border);
+  }
+  .log li {
+    display: grid;
+    gap: 0.25rem 2rem;
+    padding-block: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  @media (min-width: 640px) {
+    .log li {
+      grid-template-columns: 8.5rem 1fr;
+    }
+  }
+  .log time {
+    color: var(--muted-foreground);
+    font-variant-numeric: tabular-nums;
+    padding-top: 0.15em;
+  }
+  .log p {
+    color: var(--soft);
+    font-size: 1.125rem;
+    line-height: 1.5;
+    max-width: 40rem;
+  }
+  .log .host {
+    margin-inline-start: 0.5em;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+  }
+</style>

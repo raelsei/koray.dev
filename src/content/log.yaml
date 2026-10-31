@@ -1,0 +1,22 @@
+# Dated events, newest first. Only events recorded in the `## Log` sections of
+# brain/products/*.md; nothing is added from memory.
+- id: 2026-10-17-openmacapps
+  date: 2026-10-17
+  text: Started OpenMacApps and shared it on X as Maco, with 877 open-source Mac apps.
+  url: https://openmacapps.com
+- id: 2026-10-15-cento
+  date: 2026-10-15
+  text: Started Cento, 100 complete multi-page website templates.
+  url: https://cento.koative.com
+- id: 2026-10-05-hyperliquid-go
+  date: 2026-10-05
+  text: Announced hyperliquid-go v0.2, a Go SDK for the Hyperliquid API, on X and LinkedIn.
+  url: https://hyperliquid-go.koative.com
+- id: 2026-09-30-rast
+  date: 2026-09-30
+  text: Started Rast, image compression in the browser with every format side by side.
+  url: https://rast.koative.com
+- id: 2026-09-23-openbucket
+  date: 2026-09-23
+  text: Started OpenBucket, a native macOS app for Amazon S3 and S3-compatible storage.
+  url: https://openbucket.koative.com

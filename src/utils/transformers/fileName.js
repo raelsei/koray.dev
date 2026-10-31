@@ -60,7 +60,7 @@ export const transformerFileName = ({
           accent ? "text-accent border-accent" : "text-foreground",
           hideDot
             ? "px-2"
-            : `pl-4 pr-2 before:inline-block before:size-1 ${accent ? "before:bg-accent" : "before:bg-green-500"} before:rounded-full before:absolute before:top-[45%] before:left-2`,
+            : `pl-4 pr-2 before:inline-block before:size-1 ${accent ? "before:bg-accent" : "before:bg-muted-foreground"} before:rounded-full before:absolute before:top-[45%] before:left-2`,
           style === "v1"
             ? "left-0 -top-6 rounded-t-md border border-b-0 bg-muted/50"
             : "left-2 top-(--file-name-offset) border rounded-md bg-background",

@@ -1,53 +1,25 @@
 ---
-import { getRelativeLocaleUrl } from "astro:i18n";
-import config from "@/config";
-
 type Props = {
-  pageTitle: string | [string, string];
+  pageTitle: string;
   pageDesc?: string;
   class?: string;
-  /**
-   * Local edit. Pairs this h1 with the element that links here, so a View
-   * Transition morphs one into the other instead of cross-fading the whole
-   * page. Both sides must resolve to the same CSS ident; a name present on
-   * only one side animates as an exit and looks like nothing happened.
-   *
-   * The post detail page sets `view-transition-name` on its own h1 because it
-   * does not use this component. Everything that does needs this prop.
-   */
-  titleTransitionName?: string;
 };
 
-const {
-  pageTitle,
-  pageDesc,
-  class: className,
-  titleTransitionName,
-} = Astro.props;
-
-const locale = Astro.currentLocale ?? config.site.lang;
-const backUrl = config.features.showBackButton
-  ? Astro.url.pathname
-  : getRelativeLocaleUrl(locale, "");
+const { pageTitle, pageDesc, class: className } = Astro.props;
 ---
 
 <main
-  data-backUrl={backUrl}
+  data-backUrl={Astro.url.pathname}
   id="main-content"
-  class:list={["app-layout pb-4", className]}
+  class:list={["app-layout pt-10 sm:pt-20", className]}
 >
-  <h1
-    class="text-2xl font-semibold sm:text-3xl"
-    style={
-      titleTransitionName
-        ? { viewTransitionName: titleTransitionName }
-        : undefined
-    }
-  >
+  <h1 class="font-display text-[clamp(2.75rem,7vw,4.5rem)] leading-none font-medium tracking-[-0.035em]">
     {pageTitle}
   </h1>
-  <p class="mt-2 mb-6 italic">{pageDesc}</p>
-  <slot />
+  {pageDesc && <p class="text-soft mt-5 text-lg">{pageDesc}</p>}
+  <div class="mt-12 sm:mt-16">
+    <slot />
+  </div>
 </main>
 
 <script>

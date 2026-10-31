@@ -10,32 +10,54 @@ import { transformerFileName } from "./src/utils/transformers/fileName";
 import { transformerContrast } from "./src/utils/transformers/contrast";
 import config from "./site.config";
 
+// Pages removed in the 2026-10-31 redesign. Each URL was live, so each one
+// lands somewhere instead of 404ing.
+const REMOVED_TO_WRITING = [
+  "/posts",
+  "/posts/2",
+  "/posts/3",
+  "/archives",
+  "/tags",
+  ...["caching", "cloudflare", "correctness", "cost", "llm", "security"].map(
+    tag => `/tags/${tag}`
+  ),
+];
+const REMOVED_TO_HOME = [
+  "/bookmarks",
+  "/projects",
+  ...["arcstack", "keel", "koative", "lumi", "pocketbase-ts-starter"].map(
+    slug => `/projects/${slug}`
+  ),
+];
+
+const redirects: Record<string, string> = {
+  // Posts renamed on 2026-10-04. Each old URL was live, so it keeps working.
+  "/posts/a-missing-capability-beats-a-threshold":
+    "/posts/keep-the-model-call-off-the-request-path/",
+  "/posts/a-signing-key-in-the-browser":
+    "/posts/what-a-non-extractable-key-protects/",
+  "/posts/the-endpoint-that-succeeded-at-doing-nothing":
+    "/posts/fire-and-forget-on-cloudflare-workers/",
+  ...Object.fromEntries(REMOVED_TO_WRITING.map(path => [path, "/writing/"])),
+  ...Object.fromEntries(REMOVED_TO_HOME.map(path => [path, "/"])),
+};
+
 export default defineConfig({
   site: config.site.url,
   // Every canonical URL, sitemap entry and internal link already ends in a
-  // slash; without this, Astro's `paginate()` emits `/posts/2` and a strict
-  // static host answers with a 301 to `/posts/2/`. It also makes the dev server
-  // reject the slash-less form, so the mismatch surfaces locally instead of in
-  // production. Routes with a file extension (`/rss.xml`) are exempt.
+  // slash; a strict static host answers the slash-less form with a 301. It
+  // also makes the dev server reject the slash-less form, so the mismatch
+  // surfaces locally instead of in production. Routes with a file extension
+  // (`/rss.xml`) are exempt.
   trailingSlash: "always",
-  // Posts renamed on 2026-10-04. Each old URL was live, so it keeps working.
-  redirects: {
-    "/posts/a-missing-capability-beats-a-threshold":
-      "/posts/keep-the-model-call-off-the-request-path/",
-    "/posts/a-signing-key-in-the-browser":
-      "/posts/what-a-non-extractable-key-protects/",
-    "/posts/the-endpoint-that-succeeded-at-doing-nothing":
-      "/posts/fire-and-forget-on-cloudflare-workers/",
-  },
+  redirects,
   integrations: [
     sitemap({
+      // /search/ is noindex; listing it in the sitemap is a mixed signal. The
+      // redirect stubs are not pages either.
       filter: page => {
-        // /search/ is noindex; listing it in the sitemap is a mixed signal.
-        if (page.endsWith("/search/")) return false;
-        return (
-          config.features?.showArchives !== false ||
-          !page.endsWith("/archives/")
-        );
+        const path = new URL(page).pathname.replace(/\/$/, "");
+        return path !== "/search" && !(path in redirects);
       },
     }),
   ],
@@ -48,10 +70,9 @@ export default defineConfig({
   },
   markdown: {
     shikiConfig: {
-      // `night-owl` is navy; it reads as a foreign slab against the phosphor
-      // palette. `vitesse-dark` is neutral-dark with olive/sage syntax.
-      themes: { light: "min-light", dark: "vitesse-dark" },
-      defaultColor: false,
+      // One dark theme: the site has one ground. `vitesse-dark` is neutral,
+      // so it sits on the void without a blue or green cast.
+      theme: "vitesse-dark",
       wrap: false,
       transformers: [
         transformerFileName({ style: "v2", hideDot: false }),
@@ -62,39 +83,37 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+  // Clash Grotesk (display) and Switzer (text), Indian Type Foundry, ITF Free
+  // Font License, self-hosted from src/assets/fonts (see LICENSE.md there). The
+  // same files koative.com ships. `block` holds text for the moment the
+  // preloaded files take instead of painting the fallback and swapping.
   fonts: [
     {
-      // What browsers load: one variable woff2 per subset and style, so a
-      // page fetches only the ranges it uses. latin-ext carries İ, ı, ğ, ş.
-      name: "Google Sans Code",
-      cssVariable: "--font-google-sans-code",
-      provider: fontProviders.google(),
-      fallbacks: ["monospace"],
-      weights: [300, 400, 500, 600, 700],
-      styles: ["normal", "italic"],
-      subsets: ["latin", "latin-ext"],
-      formats: ["woff2"],
-      // The whole site is set in this face, so a flash of the Courier New
-      // fallback is the flicker readers notice. With both upright files
-      // preloaded, `block` holds text for the few milliseconds they take to
-      // arrive instead of painting the fallback and swapping; past the
-      // browser's ~3s block period it still falls back, so text never stays
-      // hidden on a bad connection.
+      name: "Clash Grotesk",
+      cssVariable: "--font-clash",
+      provider: fontProviders.local(),
+      fallbacks: ["sans-serif"],
       display: "block",
+      options: {
+        variants: [
+          { src: ["./src/assets/fonts/ClashGrotesk-500.woff2"], weight: 500 },
+          { src: ["./src/assets/fonts/ClashGrotesk-600.woff2"], weight: 600 },
+        ],
+      },
     },
     {
-      // The same face as static ttf, for Satori, which renders the OG images
-      // and cannot read woff2. Build-time only: no <Font> renders it, so no
-      // page ever downloads these files. Kept apart from the web family on
-      // purpose: in one family the ttf faces were declared last with no
-      // unicode-range, so browsers fetched them over the woff2 and swapped.
-      name: "Google Sans Code",
-      cssVariable: "--font-og",
-      provider: fontProviders.google(),
-      fallbacks: [],
-      weights: [400, 700],
-      styles: ["normal"],
-      formats: ["ttf"],
+      name: "Switzer",
+      cssVariable: "--font-switzer",
+      provider: fontProviders.local(),
+      fallbacks: ["sans-serif"],
+      display: "block",
+      options: {
+        variants: [
+          { src: ["./src/assets/fonts/Switzer-400.woff2"], weight: 400 },
+          { src: ["./src/assets/fonts/Switzer-500.woff2"], weight: 500 },
+          { src: ["./src/assets/fonts/Switzer-600.woff2"], weight: 600 },
+        ],
+      },
     },
   ],
   env: {
@@ -103,6 +122,13 @@ export default defineConfig({
         access: "public",
         context: "client",
         optional: true,
+      }),
+      // Where the product cards come from. Overridable so a local build can
+      // point at a file served from disk before koative.com publishes it.
+      PRODUCTS_JSON_URL: envField.string({
+        access: "public",
+        context: "server",
+        default: "https://koative.com/products.json",
       }),
     },
   },

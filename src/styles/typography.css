@@ -1,34 +1,42 @@
 @plugin "@tailwindcss/typography";
 
 @layer base {
-  /* ===== Override default Tailwind Typography styles ===== */
+  /* ===== Prose: posts, /about ===== */
   .app-prose {
-    @apply prose;
+    @apply prose prose-lg max-w-none text-[1.0625rem] leading-[1.7];
 
     h1,
     h2,
     h3,
     h4,
     th {
-      @apply text-foreground mb-3;
+      @apply text-foreground font-display font-semibold tracking-[-0.02em];
+    }
+
+    h2 {
+      @apply mt-14 mb-4 text-[1.625rem] leading-tight;
     }
 
     h3 {
-      @apply italic;
+      @apply mt-10 mb-3 text-xl;
     }
 
     p,
-    strong,
     ol,
     ul,
     figcaption,
-    table,
-    code {
-      @apply text-foreground;
+    table {
+      @apply text-soft;
+    }
+
+    strong,
+    code,
+    th {
+      @apply text-foreground font-medium;
     }
 
     a {
-      @apply text-foreground hover:text-accent wrap-break-word decoration-dashed underline-offset-4 focus-visible:no-underline;
+      @apply text-foreground decoration-muted-foreground hover:decoration-foreground font-normal wrap-break-word underline-offset-[0.22em] transition-[text-decoration-color] duration-200;
     }
 
     ul {
@@ -36,7 +44,7 @@
     }
 
     li {
-      @apply marker:text-accent;
+      @apply marker:text-muted-foreground;
     }
 
     hr {
@@ -48,7 +56,7 @@
     }
 
     figcaption {
-      @apply opacity-75;
+      @apply text-muted-foreground;
     }
 
     table {
@@ -78,18 +86,15 @@
     }
 
     code {
-      @apply bg-muted/75 text-foreground rounded p-1 wrap-break-word before:content-none after:content-none;
+      @apply bg-muted rounded px-1.5 py-0.5 text-[0.875em] wrap-break-word before:content-none after:content-none;
     }
 
     .astro-code code {
-      @apply flex-[1_0_100%] bg-inherit p-0;
+      @apply flex-[1_0_100%] bg-inherit p-0 text-[0.875rem];
     }
 
-    /* Quieter than the body, but through the muted token (5.71:1 light,
-       6.99:1 dark) rather than opacity, which stacks with whatever sits
-       underneath and cannot be measured from the palette. */
     blockquote {
-      @apply border-s-accent/80 wrap-break-word;
+      @apply border-s-border font-normal wrap-break-word not-italic;
 
       p,
       strong,
@@ -97,26 +102,17 @@
         @apply text-muted-foreground;
       }
     }
-
-    pre {
-      @apply focus-visible:outline-accent focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-dashed;
-    }
   }
 
-  /* ===== Code Blocks & Syntax Highlighting ===== */
+  /* ===== Code blocks ===== */
   .astro-code {
-    @apply outline-border flex border bg-(--shiki-light-bg) text-(--shiki-light) [&_span]:text-(--shiki-light);
-  }
-
-  html[data-theme="dark"] .astro-code {
-    @apply bg-(--shiki-dark-bg) text-(--shiki-dark) [&_span]:text-(--shiki-dark);
+    @apply border-border flex rounded-xl border;
   }
 
   /* A fence marked `accent` is the block the post turns on: the output that
-     shows the bug, or the fix. It takes a two-pixel accent edge. Not a tinted
-     background: a 7% wash pulled several syntax colours below 4.5:1. */
+     shows the bug, or the fix. It takes a light edge, not a tinted wash,
+     which would pull syntax colours under 4.5:1. */
   .astro-code.code-accent {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 1px var(--accent);
+    border-color: var(--foreground);
   }
 }

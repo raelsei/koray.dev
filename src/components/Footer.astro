@@ -1,29 +1,42 @@
 ---
-import type { HTMLAttributes } from "astro/types";
-import Socials from "./Socials.astro";
+import Koative from "./Koative.astro";
 import { t } from "@/i18n";
+import config from "@/config";
 
-type Props = {
-  noMarginTop?: boolean;
-} & HTMLAttributes<"footer">;
-
-const { noMarginTop = false, class: className, ...attrs } = Astro.props;
-
-const currentYear = new Date().getFullYear();
+const { email, author } = config.site;
+const year = new Date().getFullYear();
 ---
 
-<footer
-  class:list={["app-layout", { "mt-auto": !noMarginTop }, className]}
-  {...attrs}
->
-  <div class="border-border flex flex-col items-center justify-between border-t py-6 sm:flex-row-reverse sm:py-4">
-    <Socials />
-    <div class="my-2 flex flex-col items-center whitespace-nowrap sm:flex-row">
-      <span>
-        {t.footer.copyright} &#169; {currentYear}
+<footer class="app-frame mt-auto pt-28 pb-10 sm:pt-40">
+  <div class="border-t pt-10 sm:pt-14">
+    <a
+      href="https://koative.com/"
+      class="group font-display inline-flex items-baseline gap-[0.3em] text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.95] font-medium tracking-[-0.035em]"
+    >
+      <span>{t.footer.hire}</span>
+      <Koative />
+      <span
+        aria-hidden="true"
+        class="text-muted-foreground group-hover:text-foreground inline-block transition-transform duration-300 ease-out group-hover:translate-x-[0.12em] motion-reduce:transition-none"
+      >
+        →
       </span>
-      <span class="hidden sm:inline">&nbsp;|&nbsp;</span>
-      <span>{t.footer.allRightsReserved}</span>
+    </a>
+    <div class="text-muted-foreground mt-10 flex flex-col gap-3 text-sm sm:mt-14 sm:flex-row sm:items-center sm:justify-between">
+      <a
+        href={`mailto:${email}`}
+        class="link-quiet text-foreground text-base sm:text-lg"
+      >
+        {email}
+      </a>
+      <p class="flex gap-5">
+        <a href="/rss.xml" class="link-quiet hover:text-foreground">
+          RSS
+        </a>
+        <span>
+          © {year} {author}
+        </span>
+      </p>
     </div>
   </div>
 </footer>

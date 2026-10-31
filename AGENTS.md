@@ -2,12 +2,16 @@
 
 The personal site of Koray Güler. Static Astro build, no server runtime.
 
+Facts come from the `brain` repo (`identity.md`, `brand.md`, `products/`,
+`accounts.md`), never from memory or an older revision of this site. Design
+rules are in `DESIGN.md`, product truth in `PRODUCT.md`.
+
 ## Development
 
 ```sh
 bun install
 bun dev            # localhost:4321
-bun run build      # astro check + astro build + Pagefind index
+bun run build      # astro check + astro build + Pagefind index; fetches products.json
 bunx astro check   # types, components, content schemas
 bun run lint       # ESLint
 bun run format     # Prettier
@@ -19,32 +23,41 @@ manage it with `astro dev stop`, `astro dev status`, `astro dev logs`.
 ## Content
 
 Every editorial string is a Zod-validated content collection, never a literal in
-a component. Posts are `src/content/posts/`, the four standing pages are
-`src/content/pages/` (`home`, `about`, `bookmarks`, `projects`), one file per
-thing built in `src/content/projects/`, and bookmarks are
-`src/content/bookmarks.yaml`. A malformed field fails the build rather than
-shipping blank.
+a component. Posts are `src/content/posts/`; the standing pages are
+`src/content/pages/` (`home`, `now`, `off-the-keyboard`, `about`); the Log is
+`src/content/log.yaml`. A malformed field fails the build rather than shipping
+blank.
 
-Reading time, archive year groups, tag counts, the Pagefind index and the OG
-images are derived at build time. Never hand-author any of them. Reading time
-comes from the Markdown body (`src/utils/getReadingTime.ts`): prose at 230
-words a minute, each line of code counted like a short sentence.
+- **Home intro** (`home.md` → `intro`) is product-first: "I'm Koray Güler, a
+  product engineer in İstanbul. I build software and ship it:", followed
+  directly by the Work list. Do not lead with "founder of koative"; koative
+  appears as the maker line ("Shipped under koative"), the footer ("Hire
+  koative") and in the About bio.
+- **Work** is fetched at build time from `PRODUCTS_JSON_URL` (default
+  `https://koative.com/products.json`, the contract in `src/utils/products.ts`).
+  A failed fetch or a list that does not match the contract fails the build.
+  There is deliberately no committed copy: a stale product list never ships.
+  For a local build before that endpoint is live, serve a file that matches
+  the contract (`python3 -m http.server`) and point the variable at it.
+- **Now** is dated (`updated`); bring it up to date from
+  `brain/products/README.md`.
+- **Log** holds only events recorded in the `## Log` sections of
+  `brain/products/*.md`.
+- **Profiles** live in `site.config.ts`: every account in `brain/accounts.md`
+  that is ours goes into JSON-LD `sameAs` and `<link rel="me">`; `listed` ones
+  are also linked on the home page with `rel="me"`.
+- Products with `public: false` in the brain (Heedok, workk.me) are named,
+  never described.
+
+Reading time, the Pagefind index and the OG images are derived at build time.
+Never hand-author any of them. Reading time comes from the Markdown body
+(`src/utils/getReadingTime.ts`): prose at 230 words a minute, each line of code
+counted like a short sentence.
 
 Code fences take a file name and an optional bare `accent` flag after the
 language, as in `ts file="money.ts" accent`. `accent` marks the block a post
-turns on (the output that shows the bug, or the fix) and draws it with a
-two-pixel accent edge and an accent file label.
-
-Bookmarks carry a favicon, stored once in `public/favicons/<host>.png` and never
-hotlinked, so a reader is not announced to a third party. The path is derived
-from the URL, so adding a link means adding its icon:
-
-```sh
-curl -sL "https://www.google.com/s2/favicons?domain=<host>&sz=64" \
-  -o "public/favicons/<host>.png"
-```
-
-A missing file throws during the build rather than shipping a broken image.
+turns on (the output that shows the bug, or the fix) and draws it with a light
+edge.
 
 ## Honesty
 
@@ -58,13 +71,12 @@ it, and do not derive new claims from an older revision of this file.
 
 The rules that replace it:
 
-- A number needs a live source. No star counts, no usage metrics, no percentages
-  that cannot be re-checked on demand.
-- No employers, clients, testimonials or case studies. `/about` states no career
-  timeline, because the dates have no citable source.
-- koative is an independent software studio, est. 2026, shipping its own
-  products first and taking a few client projects a year. Lumi is an iOS daily
-  ritual app, not a finance product.
+- A number needs a source in the brain repo. No star counts, no usage metrics,
+  no percentages that cannot be re-checked on demand.
+- No clients, testimonials or case studies. The career line on `/about` is the
+  brain's long bio, word for word; do not extend it.
+- Lumi is not on the site. Bookmarks, Archives, Tags and Projects were removed
+  on 2026-10-31; their URLs redirect (`astro.config.ts`).
 
 ## Deploying
 
@@ -90,37 +102,35 @@ attached to. Consequences, each of which has already broken once:
   index ("Failed to load Pagefind metadata"), so every query came back empty
   while the same bundle works on the main thread. Do not remove the flag
   without checking a real query returns results.
-- **The font is two families on purpose.** `--font-google-sans-code` is what
-  pages load: woff2 only, `display: "block"`, and both upright subsets
-  preloaded in `Layout.astro`, which is what stopped the Courier New flash on
-  load. `--font-og` is the same face as static ttf for Satori, which cannot
-  read woff2; nothing renders a `<Font>` for it, so no page downloads it.
-  Merging them back puts ttf faces with no `unicode-range` after the woff2
-  ones, and browsers fetch the ttf and swap mid-page.
+- **Fonts are self-hosted files**, not a provider: Clash Grotesk and Switzer
+  from Fontshare (ITF Free Font License, `src/assets/fonts/LICENSE.md`), the
+  same files koative.com ships. The woff2 load through Astro's local font
+  provider with `display: "block"` and are preloaded in `Layout.astro`; the
+  ttf twins are read only by Satori for the OG images (`src/utils/og.ts`),
+  which cannot read woff2.
 - **TypeScript stays on 6.x.** TypeScript 7's native compiler does not expose
   the programmatic API `astro check` uses, so a bump breaks the type check and
   the build.
 - **`trailingSlash: "always"`.** Every internal link, canonical URL and sitemap
   entry ends in a slash; the dev server rejects the slash-less form on purpose.
   Routes with a file extension are exempt, so `/rss.xml` stays slash-less.
-- **Colour lives only in `src/styles/theme.css`**, as seven role tokens per
-  theme, each with its measured contrast ratio in a comment beside it. Every
-  text token clears 4.5:1 against both the page background and the muted
-  surface. Change a lightness and re-check both grounds.
-- **Syntax colours are patched for contrast.** `min-light` and `vitesse-dark`
-  each ship a few token colours under 4.5:1 (light comments at 1.76:1).
-  `src/utils/transformers/contrast.js` moves exactly those; change a Shiki
-  theme and re-measure every token colour it emits.
+- **Colour lives only in `src/styles/theme.css`**, one dark theme, each text
+  token with its measured contrast ratio beside it. Every text token clears
+  4.5:1 against both the page and the muted surface. The koative blue and
+  coral are for the two dots in `Koative.astro` and nothing else.
+- **Syntax colours are patched for contrast.** `vitesse-dark` ships a few token
+  colours under 4.5:1. `src/utils/transformers/contrast.js` moves exactly
+  those; change the Shiki theme and re-measure every token colour it emits.
 - **English only.** `lang: en`, and no second locale is planned.
-- **No visible breadcrumb.** The nav carries every top-level destination, so a
-  `Home » Bookmarks` trail only repeated it. The `BreadcrumbList` JSON-LD is
-  still emitted for every interior page from the canonical path, because that is
-  what puts the path under the title in a search result. Post pages keep their
-  `Go back` button, which returns to the listing you arrived from.
-- **`/tags/` is reachable from exactly one place**: the `All tags` link on a
-  single-tag page. Tags are not in the nav, and `Tag.astro` links straight to a
-  tag, so removing that link orphans the index.
+- **No visible breadcrumb.** The nav carries every top-level destination. The
+  `BreadcrumbList` JSON-LD is still emitted for every interior page from the
+  canonical path. Post pages keep their `Go back` button, which returns to the
+  listing you arrived from.
+- **Old URLs keep working.** `/posts/<slug>/` is permanent (the GitHub profile
+  README links posts); the old `/posts/` listing, `/archives/`, `/tags/*`,
+  `/bookmarks/` and `/projects/*` are redirect stubs listed in
+  `astro.config.ts`. Removing a page means adding its URLs there.
 - Accessibility floor to preserve: the skip link is the first focusable element
-  and moves focus to `#main-content`, the theme toggle is a real button with
-  `aria-live="polite"`, and the focus ring is set globally so a new component
-  cannot opt out by omission.
+  and moves focus to `#main-content`, the focus ring is set globally so a new
+  component cannot opt out by omission, and the portrait animation stops under
+  `prefers-reduced-motion`.

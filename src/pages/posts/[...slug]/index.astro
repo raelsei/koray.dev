@@ -4,10 +4,8 @@ import PostLayout from "@/layouts/PostLayout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Datetime from "@/components/Datetime.astro";
-import Tag from "@/components/Tag.astro";
 import { getPostSlug, getPostUrl } from "@/utils/getPostPaths";
 import { getSortedPosts } from "@/utils/getSortedPosts";
-import { slugifyStr } from "@/utils/slugify";
 import { toTransitionName } from "@/utils/toTransitionName";
 import { getReadingTime } from "@/utils/getReadingTime";
 import ShareLinks from "./_components/ShareLinks.astro";
@@ -114,47 +112,33 @@ const ogImage = ogImageUrl
     class:list={["app-layout", { "mt-8": !config.features.showBackButton }]}
     data-pagefind-body
   >
-    <h1
-      style={{ viewTransitionName: toTransitionName(post.id) }}
-      class="text-accent inline-block text-2xl font-bold sm:text-3xl"
-    >
-      {title}
-    </h1>
-
     <Datetime
       {pubDatetime}
       {modDatetime}
       {timezone}
       readingTime={getReadingTime(post.body)}
-      size="lg"
       transitionName={`${toTransitionName(post.id)}-date`}
-      class="my-2"
+      class="mt-6"
     />
 
-    <article
-      id="article"
-      class:list={[
-        "mt-8 w-full",
-        "app-prose max-w-app",
-        "prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)",
-      ]}
+    <h1
+      style={{ viewTransitionName: toTransitionName(post.id) }}
+      class="font-display mt-3 text-[clamp(2.25rem,5.5vw,3.5rem)] leading-[1.04] font-medium tracking-[-0.03em]"
     >
+      {title}
+    </h1>
+
+    <article id="article" class="app-prose mt-12 w-full">
       <Content />
     </article>
 
-    <hr class="my-8 border-dashed" />
+    <hr class="my-12" />
 
     <BackToTopButton />
 
-    <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
-      {tags.map(tag => (
-        <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />
-      ))}
-    </ul>
-
     <ShareLinks />
 
-    <hr class="my-8 border-dashed" />
+    <hr class="my-12" />
 
     <AdjacentPostNav {prevPost} {nextPost} />
   </main>

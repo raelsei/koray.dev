@@ -1,23 +1,19 @@
 ---
-import IconCalendar from "@/assets/icons/IconCalendar.svg";
-import config from "@/config";
+import { formatDate } from "@/utils/formatDate";
 import { t } from "@/i18n";
 
 type Props = {
   class?: string;
-  size?: "sm" | "lg";
-  pubDatetime: string | Date;
+  pubDatetime: Date;
   timezone?: string;
-  modDatetime?: string | Date | null;
+  modDatetime?: Date | null;
   /** Minutes, from `getReadingTime`; omitted where a date stands alone. */
   readingTime?: number;
   /**
-   * Local edit. Without this the post title morphs to the detail page while
-   * the date directly beneath it cross-fades with the rest of the page, so the
-   * block splits mid-flight. Naming both sides moves them together.
-   *
-   * Must be unique per page and present on both the listing and the detail, or
-   * it animates as an exit. See `toTransitionName`.
+   * Without this the post title morphs to the detail page while the date
+   * beneath it cross-fades with the rest of the page, so the block splits
+   * mid-flight. Must be unique per page and present on both the listing and
+   * the detail, or it animates as an exit. See `toTransitionName`.
    */
   transitionName?: string;
 };
@@ -25,57 +21,28 @@ type Props = {
 const {
   pubDatetime,
   modDatetime,
-  size = "sm",
-  class: className = "",
-  timezone: postTimezone,
+  class: className,
+  timezone,
   readingTime,
   transitionName,
 } = Astro.props;
 
 const isModified = modDatetime && modDatetime > pubDatetime;
-const datetime = new Date(isModified ? modDatetime : pubDatetime);
-
-// "4 Jul, 2026", in the post's zone (or the site's), not the build machine's.
-const parts = Object.fromEntries(
-  new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: postTimezone ?? config.site.timezone,
-  })
-    .formatToParts(datetime)
-    .map(({ type, value }) => [type, value])
-);
-const date = `${parts.day} ${parts.month}, ${parts.year}`;
+const datetime = isModified ? modDatetime : pubDatetime;
 ---
 
-<div
-  class:list={["text-muted-foreground flex items-center gap-x-2", className]}
+<p
+  class:list={["text-muted-foreground text-sm tabular-nums", className]}
   style={transitionName ? { viewTransitionName: transitionName } : undefined}
 >
-  <IconCalendar
-    class:list={[
-      "inline-block size-6 min-w-5.5",
-      { "scale-90": size === "sm" },
-    ]}
-  />
-  {isModified && (
-    <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
-      {t.post.updatedAt}:
-    </span>
-  )}
-  <time
-    class:list={["text-sm", { "sm:text-base": size === "lg" }]}
-    datetime={datetime.toISOString()}
-  >
-    {date}
+  {isModified && <span>{t.post.updatedAt} </span>}
+  <time datetime={datetime.toISOString()}>
+    {formatDate(datetime, timezone)}
   </time>
   {readingTime !== undefined && (
     <>
-      <span aria-hidden="true">·</span>
-      <span class:list={["text-sm", { "sm:text-base": size === "lg" }]}>
-        {t.post.readingTime(readingTime)}
-      </span>
+      <span aria-hidden="true">&ensp;·&ensp;</span>
+      <span>{t.post.readingTime(readingTime)}</span>
     </>
   )}
-</div>
+</p>

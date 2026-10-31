@@ -26,32 +26,45 @@ const trimEnd = (u: string) => u.replace(/\/+$/, "");
 
 /** Path segment -> breadcrumb label. The site is English-only by constraint. */
 const SEGMENT_LABELS: Record<string, string> = {
-  posts: "Posts",
-  tags: "Tags",
+  posts: "Writing",
+  writing: "Writing",
   about: "About",
-  bookmarks: "Bookmarks",
-  projects: "Projects",
-  archives: "Archives",
   search: "Search",
 };
+
+/** Segments whose own URL is a redirect: the crumb points where it lands. */
+const SEGMENT_PATHS: Record<string, string> = { "/posts": "/writing" };
+
+/** koative.com declares this entity in full; here it is only referenced. */
+const KOATIVE_ORG = "https://koative.com/#org";
 
 /**
  * The two sitewide entities. `sameAs` carries only real profile URLs — a
  * `mailto:` is not a profile, and Google treats a bad `sameAs` as a bad signal.
  */
-export function identity(config: ResolvedConfig): Node[] {
-  const { site, socials } = config;
+export function identity(
+  config: ResolvedConfig,
+  { image }: { image: string }
+): Node[] {
+  const { site, profiles } = config;
   const base = trimEnd(site.url);
-
-  const sameAs = socials.map(s => s.url).filter(u => /^https?:\/\//.test(u));
 
   return [
     {
       "@type": "Person",
       "@id": ids.person(base),
       name: site.author,
-      url: site.profile ?? `${base}/`,
-      ...(sameAs.length && { sameAs }),
+      url: `${base}/`,
+      image,
+      email: site.email,
+      jobTitle: "Founder",
+      worksFor: {
+        "@type": "Organization",
+        "@id": KOATIVE_ORG,
+        name: "koative",
+        url: "https://koative.com/",
+      },
+      sameAs: profiles.map(p => p.url),
     },
     {
       "@type": "WebSite",
@@ -106,7 +119,7 @@ export function breadcrumb(
       position: i + 2,
       name,
       // The current page is its own position; naming an `item` for it is noise.
-      ...(last ? {} : { item: `${base}${walked}/` }),
+      ...(last ? {} : { item: `${base}${SEGMENT_PATHS[walked] ?? walked}/` }),
     });
   });
 
@@ -193,49 +206,20 @@ export function blogPosting(
   };
 }
 
-/**
- * One thing I built. A repository is literally source code; anything else is a
- * work with a creator, and both hang off the same Person node so the entity
- * graph stays connected instead of introducing a second author.
- */
-export function project(
-  config: ResolvedConfig,
-  canonical: string,
-  item: {
-    name: string;
-    description?: string;
-    url?: string;
-    repo?: string;
-    lang?: string;
-    tags?: string[];
-  }
-): Node {
-  const base = trimEnd(config.site.url);
-  return {
-    "@type": item.repo ? "SoftwareSourceCode" : "CreativeWork",
-    "@id": `${canonical}#project`,
-    mainEntityOfPage: { "@id": ids.page(canonical) },
-    name: item.name,
-    ...(item.description && { description: item.description }),
-    ...(item.url && { url: item.url }),
-    ...(item.repo && { codeRepository: item.repo }),
-    ...(item.lang && { programmingLanguage: item.lang }),
-    ...(item.tags?.length && { keywords: item.tags }),
-    inLanguage: config.site.lang,
-    creator: { "@id": ids.person(base) },
-    isPartOf: { "@id": ids.website(base) },
-  };
-}
-
 /** Compose the document's single graph. */
 export function graph(
   config: ResolvedConfig,
   canonical: string,
-  nodes: Node[] = []
+  nodes: Node[],
+  person: { image: string }
 ) {
   const crumb = breadcrumb(config, canonical);
   return {
     "@context": "https://schema.org",
-    "@graph": [...identity(config), ...nodes, ...(crumb ? [crumb] : [])],
+    "@graph": [
+      ...identity(config, person),
+      ...nodes,
+      ...(crumb ? [crumb] : []),
+    ],
   };
 }

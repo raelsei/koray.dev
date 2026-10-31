@@ -1,14 +1,14 @@
 interface SiteConfig {
   /** Deployed URL of the site, e.g. "https://example.com" */
   url: string;
-  /** Blog title shown in header and meta tags */
+  /** Shown in the header, the document title and meta tags */
   title: string;
   /** Short description used in SEO meta and RSS feed */
   description: string;
   /** Default post author name */
   author: string;
-  /** Author profile URL (used in structured data) */
-  profile?: string;
+  /** Public contact address, without `mailto:` */
+  email: string;
   /** Fallback OG image filename in /public, e.g. "og.jpg" */
   ogImage?: string;
   /** HTML lang attribute, defaults to "en" */
@@ -22,10 +22,6 @@ interface SiteConfig {
 }
 
 interface PostsConfig {
-  /** Posts per page on paginated listing pages */
-  perPage?: number;
-  /** Posts shown on the index/home page */
-  perIndex?: number;
   /**
    * Scheduled posts within this window (ms) of their pubDatetime
    * are shown as published. Defaults to 15 minutes.
@@ -34,16 +30,12 @@ interface PostsConfig {
 }
 
 interface FeaturesConfig {
-  /** Enable light/dark mode toggle. Defaults to true. */
-  lightAndDarkMode?: boolean;
   /**
    * Generate dynamic OG images per post and provide `/og.png` when the static
    * `public/{site.ogImage}` file is absent. When false, that file is required
    * for the default layout OG image (build fails if missing).
    */
   dynamicOgImage?: boolean;
-  /** Show the /archives page and link it in nav. Defaults to true. */
-  showArchives?: boolean;
   /** Show back button on post detail pages. Defaults to true. */
   showBackButton?: boolean;
   /**
@@ -53,19 +45,12 @@ interface FeaturesConfig {
   search?: "pagefind" | false;
 }
 
-interface SocialLink {
-  /**
-   * Must match an SVG filename in src/assets/icons/socials/.
-   * e.g. "github" → src/assets/icons/socials/github.svg
-   */
+interface Profile {
+  /** Visible label, e.g. "GitHub" */
   name: string;
   url: string;
-  /**
-   * Accessible label for the icon link (aria-label, title attribute).
-   * Auto-generated if omitted: "{site.title} on GitHub", "Send an email to {site.title}", etc.
-   * Override when the default wording doesn't fit.
-   */
-  linkTitle?: string;
+  /** Also a visible link on the home page, not only `sameAs`/`rel="me"`. */
+  listed?: boolean;
 }
 
 interface ShareLink {
@@ -88,8 +73,8 @@ interface UserConfig {
   site: SiteConfig;
   posts?: PostsConfig;
   features?: FeaturesConfig;
-  /** Social profile links shown in header/footer */
-  socials?: SocialLink[];
+  /** Every profile of the person: JSON-LD `sameAs` and `rel="me"` */
+  profiles?: Profile[];
   /** Share links shown on post detail pages */
   shareLinks?: ShareLink[];
 }
@@ -101,19 +86,20 @@ type ResolvedSiteConfig = Required<
     | "title"
     | "description"
     | "author"
+    | "email"
     | "lang"
     | "timezone"
     | "dir"
     | "ogImage"
   >
 > &
-  Pick<SiteConfig, "profile" | "googleVerification">;
+  Pick<SiteConfig, "googleVerification">;
 
 export interface ResolvedConfig {
   site: ResolvedSiteConfig;
   posts: Required<PostsConfig>;
   features: Required<FeaturesConfig>;
-  socials: SocialLink[];
+  profiles: Profile[];
   shareLinks: ShareLink[];
 }
 

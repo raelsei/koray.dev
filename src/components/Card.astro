@@ -5,30 +5,30 @@ import { toTransitionName } from "@/utils/toTransitionName";
 import { getReadingTime } from "@/utils/getReadingTime";
 import Datetime from "./Datetime.astro";
 
-type Props = {
-  variant?: "h2" | "h3";
-} & CollectionEntry<"posts">;
+type Props = CollectionEntry<"posts">;
 
-const { variant: Heading = "h2", id, data, filePath, body } = Astro.props;
-
-const { title, description, ...props } = data;
+const { id, data, filePath, body } = Astro.props;
+const { title, description, pubDatetime, modDatetime, timezone } = data;
 ---
 
-<li class="my-6">
-  <a
-    href={getPostUrl(id, filePath, Astro.currentLocale)}
-    class:list={[
-      "text-accent inline-block text-lg font-medium",
-      "decoration-dashed underline-offset-4 hover:underline",
-      "focus-visible:no-underline focus-visible:underline-offset-0",
-    ]}
-  >
-    <Heading transition:name={toTransitionName(id)}>{title}</Heading>
-  </a>
+<li class="group relative border-b py-8">
   <Datetime
-    {...props}
+    {pubDatetime}
+    {modDatetime}
+    {timezone}
     readingTime={getReadingTime(body)}
     transitionName={`${toTransitionName(id)}-date`}
   />
-  <p>{description}</p>
+  <h2
+    class="font-display mt-2 text-[1.625rem] leading-tight font-medium tracking-[-0.02em]"
+    transition:name={toTransitionName(id)}
+  >
+    <a
+      href={getPostUrl(id, filePath, Astro.currentLocale)}
+      class="link-quiet after:absolute after:inset-0"
+    >
+      {title}
+    </a>
+  </h2>
+  <p class="text-soft mt-2">{description}</p>
 </li>
