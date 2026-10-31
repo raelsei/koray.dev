@@ -2,33 +2,20 @@
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import LinkButton from "@/components/LinkButton.astro";
-import { getRelativeLocaleUrl } from "astro:i18n";
 import { t } from "@/i18n";
 import config from "@/config";
-
-const locale = Astro.currentLocale ?? config.site.lang;
 ---
 
 <Layout title={`${t.notFound.title} | ${config.site.title}`} noindex>
   <Header />
-
-  <main
-    id="main-content"
-    class="app-layout my-1 flex flex-1 items-center justify-center"
-  >
-    <div class="mb-14 flex flex-col items-center justify-center">
-      <h1 class="text-accent text-9xl font-bold">404</h1>
-      <span aria-hidden="true"> ¯\_(ツ)_/¯ </span>
-      <p class="mt-4 text-2xl sm:text-3xl">{t.notFound.message}</p>
-      <LinkButton
-        href={getRelativeLocaleUrl(locale, "")}
-        class="my-6 text-lg underline decoration-dashed underline-offset-8"
-      >
-        {t.notFound.goHome}
-      </LinkButton>
-    </div>
+  <main id="main-content" class="app-frame pt-16 sm:pt-28">
+    <h1 class="font-display text-[clamp(5rem,16vw,12rem)] leading-none font-medium tracking-[-0.04em]">
+      404
+    </h1>
+    <p class="text-soft mt-6 text-xl">{t.notFound.message}</p>
+    <a href="/" class="link-quiet mt-4 inline-block text-lg">
+      {t.notFound.goHome}
+    </a>
   </main>
-
   <Footer />
 </Layout>

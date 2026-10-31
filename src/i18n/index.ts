@@ -5,13 +5,18 @@
  */
 export const t = {
   nav: {
-    posts: "Posts",
-    tags: "Tags",
+    work: "Work",
+    log: "Log",
+    writing: "Writing",
     about: "About",
-    projects: "Projects",
-    bookmarks: "Bookmarks",
-    archives: "Archives",
     search: "Search",
+  },
+  home: {
+    work: "Work",
+    shippedUnder: "Shipped under",
+    elsewhere: "Elsewhere",
+    log: "Log",
+    source: "Source",
   },
   post: {
     updatedAt: "Updated",
@@ -21,52 +26,24 @@ export const t = {
     sharePostViaEmail: "Share this post via email",
     backToTop: "Back to top",
     goBack: "Go back",
-    previousPost: "Previous Post",
-    nextPost: "Next Post",
-  },
-  pagination: {
-    prev: "Prev",
-    next: "Next",
-    page: "Page",
-  },
-  home: {
-    socialLinks: "Social Links",
-    featured: "Featured",
-    recentPosts: "Recent Posts",
-    allPosts: "All Posts",
+    previousPost: "Previous post",
+    nextPost: "Next post",
   },
   footer: {
-    copyright: "Copyright",
-    allRightsReserved: "All rights reserved.",
+    hire: "Hire",
   },
   pages: {
-    tagTitle: "Tag",
-    tagDesc: "All the articles with the tag",
-
-    tagsTitle: "Tags",
-    tagsDesc: "All the tags used in posts.",
-    allTags: "All tags",
-
-    postsTitle: "Posts",
-    postsDesc: "All the articles I've posted.",
-
-    archivesTitle: "Archives",
-    archivesDesc: "All the articles I've archived.",
-
+    writingTitle: "Writing",
+    writingDesc: "Posts by Koray Güler.",
     searchTitle: "Search",
-    searchDesc: "Search any article ...",
+    searchDesc: "Search the posts.",
   },
   a11y: {
     skipToContent: "Skip to content",
-    openMenu: "Open menu",
-    closeMenu: "Close menu",
-    toggleTheme: "Toggle theme",
-    goToPreviousPage: "Go to previous page",
-    goToNextPage: "Go to next page",
   },
   notFound: {
     title: "404 Not Found",
-    message: "Page Not Found",
-    goHome: "Go back home",
+    message: "This page does not exist.",
+    goHome: "Go to the home page",
   },
 } as const;

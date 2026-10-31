@@ -1,0 +1,36 @@
+---
+/**
+ * The word koative with the studio's two dots in front of it: the only colour
+ * on the site (brain/brand.md, "Koray (personal)"). Sized in em, so it sits
+ * at whatever scale the sentence around it is set.
+ */
+---
+
+<span class="koative">
+  <span class="dots" aria-hidden="true">
+    <i></i>
+    <i></i>
+  </span>
+  koative
+</span>
+
+<style>
+  .koative {
+    white-space: nowrap;
+  }
+  .dots {
+    display: inline-flex;
+    gap: 0.07em;
+    margin-inline-end: 0.16em;
+    vertical-align: 0.1em;
+  }
+  .dots i {
+    width: 0.4em;
+    height: 0.4em;
+    border-radius: 50%;
+    background: var(--koative-blue);
+  }
+  .dots i + i {
+    background: var(--koative-coral);
+  }
+</style>

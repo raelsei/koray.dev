@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T08:15:00Z",
+  "title": "Design System: koray.dev",
+  "extensions": {
+    "colorMeta": {
+      "void": { "role": "neutral", "displayName": "Void", "canonical": "#08080a" },
+      "light": { "role": "primary", "displayName": "Light", "canonical": "#f2f1ee" },
+      "soft": { "role": "neutral", "displayName": "Soft grey", "canonical": "#a9a9b0" },
+      "muted-foreground": { "role": "neutral", "displayName": "Meta grey", "canonical": "#8a8a91" },
+      "muted": { "role": "neutral", "displayName": "Surface", "canonical": "#141417" },
+      "border": { "role": "neutral", "displayName": "Hairline", "canonical": "#26262b" },
+      "koative-blue": { "role": "accent", "displayName": "koative blue (dot only)", "canonical": "#2f3bff" },
+      "koative-coral": { "role": "accent", "displayName": "koative coral (dot only)", "canonical": "#ff5b45" }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The home intro sentence and page titles." },
+      "section-title": { "displayName": "Section title", "purpose": "Heading column of home sections." },
+      "row-title": { "displayName": "Row title", "purpose": "Product names and post titles in ledgers." },
+      "body": { "displayName": "Body", "purpose": "Prose in posts and About." },
+      "meta": { "displayName": "Meta", "purpose": "Dates, badges, secondary links." }
+    },
+    "motion": [
+      { "name": "develop", "value": "2.2s cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Portrait settles from blur and low exposure on load; disabled under reduced motion." },
+      { "name": "link", "value": "0.2s", "purpose": "Underline colour and text colour on hover." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "koative mark",
+      "kind": "custom",
+      "description": "Two dots, blue then coral, in front of the word koative. The only colour on the site.",
+      "html": "<span class=\"ds-koative\"><span class=\"ds-dots\"><i></i><i></i></span>koative</span>",
+      "css": ".ds-koative { font-family: 'Clash Grotesk', sans-serif; font-size: 2rem; color: #f2f1ee; white-space: nowrap; } .ds-dots { display: inline-flex; gap: 0.07em; margin-inline-end: 0.16em; vertical-align: 0.1em; } .ds-dots i { width: 0.4em; height: 0.4em; border-radius: 50%; background: #2f3bff; } .ds-dots i + i { background: #ff5b45; }"
+    },
+    {
+      "name": "Status badge",
+      "kind": "chip",
+      "refersTo": "status-badge",
+      "description": "Product status from products.json: Live (filled dot), Beta (ring), Coming soon (no dot).",
+      "html": "<span class=\"ds-status ds-live\">Live</span> <span class=\"ds-status\">Beta</span>",
+      "css": ".ds-status { display: inline-flex; align-items: center; gap: 0.45em; padding: 0.2em 0.75em; border: 1px solid #26262b; border-radius: 999px; color: #a9a9b0; font: 400 0.875rem Switzer, sans-serif; } .ds-status::before { content: ''; width: 0.45em; height: 0.45em; border-radius: 50%; border: 1px solid currentColor; } .ds-live::before { background: #f2f1ee; border-color: #f2f1ee; }"
+    },
+    {
+      "name": "Ledger row",
+      "kind": "card",
+      "refersTo": "ledger-row-hover",
+      "description": "One product, log entry or post: hairlines above and below, whole row clickable.",
+      "html": "<a class=\"ds-row\" href=\"#\"><span class=\"ds-row-title\">OpenMacApps</span><span class=\"ds-row-text\">An app-store-style catalogue of open-source Mac apps.</span></a>",
+      "css": ".ds-row { display: grid; gap: 0.25rem; padding: 1.5rem 0.75rem; border-block: 1px solid #26262b; text-decoration: none; transition: background-color 0.3s; } .ds-row:hover { background: #141417; } .ds-row:focus-visible { outline: 2px solid #f2f1ee; outline-offset: 4px; } .ds-row-title { font: 500 1.875rem/1.1 'Clash Grotesk', sans-serif; letter-spacing: -0.02em; color: #f2f1ee; } .ds-row-text { font: 400 1rem Switzer, sans-serif; color: #a9a9b0; }"
+    },
+    {
+      "name": "Quiet link",
+      "kind": "nav",
+      "description": "Nav and meta links: read as text until hovered, then underline in light.",
+      "html": "<a class=\"ds-link\" href=\"#\">Writing</a>",
+      "css": ".ds-link { color: #a9a9b0; font: 400 1rem Switzer, sans-serif; text-decoration: underline 1px transparent; text-underline-offset: 0.22em; transition: text-decoration-color 0.2s, color 0.2s; } .ds-link:hover { color: #f2f1ee; text-decoration-color: #f2f1ee; } .ds-link:focus-visible { outline: 2px solid #f2f1ee; outline-offset: 4px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The contact sheet",
+    "overview": "One B&W portrait and one plain sentence, then ledgers of real things. Light on the koative void, in greys; the koative dots are the only colour.",
+    "keyCharacteristics": ["Monochrome", "Clash Grotesk display, Switzer text", "Hairline ledgers", "Portrait that develops on load"],
+    "rules": [
+      { "name": "Two dots only", "body": "Blue and coral appear only as the dots in front of the word koative.", "section": "colors" },
+      { "name": "Names in Clash", "body": "Anything that is a name or heading is Clash Grotesk; reading text is Switzer.", "section": "typography" }
+    ],
+    "dos": ["Do let real products and dates carry the page."],
+    "donts": ["Don't add a light theme, gradient or second accent.", "Don't put an eyebrow above a heading."]
+  }
+}

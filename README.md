@@ -1,29 +1,24 @@
-<div align="center">
+# koray.dev
 
-![koray.dev](.github/readme/banner.svg)
-
-**Koray Güler**, product engineer in İstanbul, founder of
+The personal site of Koray Güler, product engineer in İstanbul:
+[koray.dev](https://koray.dev). Products are shipped under
 [koative](https://koative.com).
 
-[![live](https://img.shields.io/badge/koray.dev-live-9ccc47?labelColor=08090a)](https://koray.dev)
 [![deploy](https://github.com/raelsei/koray.dev/actions/workflows/deploy.yml/badge.svg)](https://github.com/raelsei/koray.dev/actions/workflows/deploy.yml)
 
-</div>
+## Content
 
-My corner of the internet. I write about the bugs that never raise an
-exception: green build, no alert, wrong answer. And I keep a list of the
-things I actually shipped.
+Facts come from the `brain` repo. Posts live in `src/content/posts/`, one
+Markdown file each, and keep their `/posts/<slug>/` URLs. The home page
+sections (`home`, `now`, `off-the-keyboard`) and `/about` are in
+`src/content/pages/`; the Log is `src/content/log.yaml`.
 
-## Writing
+The Work list is not in this repo: it is fetched at build time from
+`https://koative.com/products.json` (override with `PRODUCTS_JSON_URL`). If
+that fetch fails, the build fails.
 
-Posts live in `src/content/posts/`, one Markdown file each. The standing pages
-(`home`, `about`, `bookmarks`, `projects`) are in `src/content/pages/`, the
-things I built are one file each in `src/content/projects/`, and the bookmarks
-are a YAML list. No copy lives in a component, so nothing here can be edited
-from two places at once.
-
-Reading time, archive years, tag counts, the search index and the social
-preview images are all derived at build time. Do not hand-author any of them.
+Reading time, the search index and the social preview images are derived at
+build time. Do not hand-author any of them.
 
 ## Deploying
 
@@ -39,11 +34,10 @@ Two things follow from that, and both bite quietly:
   the site 404s. Without the second, the domain unbinds. The workflow refuses
   to publish if either is missing.
 
-The rest of it (why the output lives in another repository, the content rules,
-the palette, the things that have already broken once) is in
-[`AGENTS.md`](AGENTS.md).
+The rest (content rules, palette, what has already broken once) is in
+[`AGENTS.md`](AGENTS.md); the visual system is in [`DESIGN.md`](DESIGN.md).
 
 ## Licence
 
-Code: [`LICENSE`](LICENSE). The writing and the palette are mine, and are not
-part of it.
+Code: [`LICENSE`](LICENSE). The writing, the portrait and the palette are mine,
+and are not part of it. Fonts: see `src/assets/fonts/LICENSE.md`.

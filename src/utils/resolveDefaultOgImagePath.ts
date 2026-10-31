@@ -18,9 +18,7 @@ function existsInPublic(filename: string): boolean {
  *   otherwise falls back to the generated `/og.png`.
  * - When disabled, requires `public/{site.ogImage}` to exist.
  */
-export function resolveDefaultOgImagePath(
-  config: ResolvedConfig
-): string {
+export function resolveDefaultOgImagePath(config: ResolvedConfig): string {
   const filename = config.site.ogImage;
   if (
     filename.includes("..") ||

@@ -2,37 +2,60 @@
 @import "./theme.css";
 @import "./typography.css";
 
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
-
 @layer base {
   * {
-    @apply border-border outline-accent/75;
-    scrollbar-width: auto;
-    scrollbar-color: var(--color-muted) transparent;
+    @apply border-border;
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-border) transparent;
+  }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: var(--foreground);
+    color: var(--background);
   }
   a,
   button,
+  pre,
   #main-content {
-    @apply outline-accent outline-offset-1 focus-visible:no-underline focus-visible:outline-2 focus-visible:outline-dashed;
+    @apply outline-offset-4 focus-visible:outline-2 focus-visible:outline-(--foreground);
   }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
   }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
 }
 
+/* The wide frame: header, footer and the home page. */
+@utility app-frame {
+  @apply mx-auto w-full max-w-[80rem] px-5 sm:px-8 lg:px-12;
+}
+
+/* The reading column: posts, about, writing, search. */
 @utility max-w-app {
-  @apply max-w-3xl;
+  @apply max-w-[42rem];
 }
 
 @utility app-layout {
-  @apply max-w-app mx-auto w-full px-4;
+  @apply max-w-app mx-auto w-full px-5 sm:px-0;
 }
 
-@utility active-nav {
-  @apply underline decoration-wavy decoration-2 underline-offset-8;
+/* A link that reads as text until it is pointed at. */
+@utility link-quiet {
+  @apply decoration-muted-foreground/0 hover:decoration-foreground underline decoration-1 underline-offset-[0.22em] transition-[text-decoration-color] duration-200;
 }
 
 :target {
-  scroll-margin-block: 1rem;
+  scroll-margin-block: 2rem;
 }

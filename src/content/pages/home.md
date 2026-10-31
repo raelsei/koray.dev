@@ -1,16 +1,4 @@
 ---
-title: "I build small software, and keep it quiet."
-seoTitle: "koray.dev · product engineering from İstanbul"
-description: "Koray Güler builds product at koative, an independent software studio in İstanbul. Notes on typed edges, small dependency lists and shipping calm software."
+title: "Koray Güler — product engineer in İstanbul. OpenMacApps, OpenBucket, Cento, Rast."
+intro: "I'm Koray Güler, a product engineer in İstanbul. I build software and ship it:"
 ---
-
-Founder of [koative](https://koative.com), an independent software studio in
-İstanbul that ships its own products first. Currently building
-[Lumi](https://koative.com/lumi/): one card, one mood check and one line about
-the day, on iOS.
-
-TypeScript end to end: React and Next in front, Bun, Express and PocketBase
-behind. I write about the correctness bugs that never raise an exception.
-
-koative takes on a few client projects a year.
-[Mail me](mailto:hello@koray.dev). Replies within 48h.
