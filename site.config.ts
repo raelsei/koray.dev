@@ -5,7 +5,7 @@ export default defineSiteConfig({
     url: "https://koray.dev",
     title: "Koray Güler",
     description:
-      "Koray Güler — product engineer in İstanbul. OpenMacApps, OpenBucket, Cento, Rast.",
+      "Koray Güler — product engineer in İstanbul. OpenMacApps, Bucketdeck, Cento, Rast.",
     author: "Koray Güler",
     email: "hello@koray.dev",
     lang: "en",

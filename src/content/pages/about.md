@@ -12,7 +12,7 @@ mobile apps and trading tools. In 2026 I started koative to build my own.
 
 - [OpenMacApps](https://openmacapps.com): a catalogue of 900+ open-source Mac
   apps, each with its license and official download checked.
-- [OpenBucket](https://openbucket.koative.com): a native Mac app for S3 and
+- [Bucketdeck](https://bucketdeck.com): a native Mac app for S3 and
   S3-compatible storage.
 - Heedok and workk.me: in development.
 

@@ -63,7 +63,7 @@ const el = (
 
 // The home page's lead, product first (Koray, 2026-10-31).
 const ROLE = "Product engineer in İstanbul";
-const PRODUCTS = "OpenMacApps · OpenBucket · Cento · Rast";
+const PRODUCTS = "OpenMacApps · Bucketdeck · Cento · Rast";
 
 const host = new URL(config.site.url).hostname;
 
