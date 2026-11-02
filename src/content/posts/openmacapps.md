@@ -1,6 +1,6 @@
 ---
-title: I checked the license of 904 Mac apps by hand
-description: "Ten open-source Mac app lists gave me 1,901 repositories. Reading the actual license files, not GitHub's license field, is what decided which 904 made it into OpenMacApps."
+title: "OpenMacApps: 1,023 open-source Mac apps, each license read by hand"
+description: "Ten open-source Mac app lists and Homebrew's install data gave me the leads. Reading the actual license files, not GitHub's license field, decided which 1,023 apps made it into OpenMacApps."
 pubDatetime: 2026-11-11T08:00:00.000Z
 tags: [openmacapps, open-source, macos]
 ---
@@ -16,10 +16,12 @@ myself.
 
 ## The numbers
 
-- 10 directories scanned, 1,901 unique repositories after removing duplicates.
-- 904 apps published: 890 open source, 14 source available.
-- 431 of them install with a single Homebrew command.
-- 1,118 leads still waiting. Not rejected, just not reviewed yet.
+- 10 directories scanned, 1,975 unique repositories after removing duplicates.
+- 382 more leads from Homebrew: casks installed at least 500 times in a year
+  whose source is on GitHub.
+- 1,023 apps published: 1,009 open source, 14 source available.
+- 547 of them install with a single Homebrew command.
+- 1,191 leads from the lists still waiting. Not rejected, just not reviewed yet.
 
 ## What "checked" means
 
@@ -76,7 +78,7 @@ host installers.
 
 ## What's next
 
-I'm working through the 1,118 leads. If your app belongs in the catalogue, open
+I'm working through the 1,191 leads. If your app belongs in the catalogue, open
 a pull request with a link to its license. If an entry is wrong, open an issue
 and I'll fix it.
 
