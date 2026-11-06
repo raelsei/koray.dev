@@ -1,12 +1,12 @@
 ---
 title: "OpenMacApps: 1,000+ open-source Mac apps, each license read by hand"
-description: "Ten open-source Mac app lists and Homebrew's install data gave me the leads. Reading the actual license files, not GitHub's license field, decided which 1,000+ apps made it into OpenMacApps."
+description: "Eleven open-source Mac app lists and Homebrew's install data gave me the leads. Reading the actual license files, not GitHub's license field, decided which 1,000+ apps made it into OpenMacApps."
 pubDatetime: 2026-11-11T08:00:00.000Z
 tags: [openmacapps, open-source, macos]
 ---
 
 I wanted one place to find open-source Mac apps I could trust. The lists
-already exist: awesome-mac, open-source-mac-os-apps and at least eight more.
+already exist: awesome-mac, open-source-mac-os-apps and nine more.
 But a list is a lead, not proof. An entry tells you someone once thought the
 app was open source and ran on a Mac. It doesn't tell you what the license says
 today.
@@ -14,14 +14,16 @@ today.
 So I built [OpenMacApps](https://openmacapps.com) and checked every entry
 myself.
 
-## The numbers (1 November 2026)
+## The numbers (6 November 2026)
 
-- 10 directories scanned, 1,975 unique repositories after removing duplicates.
+- 11 directories scanned, 2,791 unique repositories after removing duplicates.
 - 382 more leads from Homebrew: casks installed at least 500 times in a year
   whose source is on GitHub.
-- 1,023 apps published: 1,009 open source, 14 source available.
+- 1,025 apps published: 1,011 open source, 14 source available.
 - 547 of them install with a single Homebrew command.
-- 1,191 leads from the lists still waiting. Not rejected, just not reviewed yet.
+- 1,994 list leads aren't in the catalogue: libraries, duplicates and
+  closed-source downloads I turned down, plus leads from the newest list
+  that I haven't reviewed yet.
 
 ## What "checked" means
 
@@ -78,8 +80,9 @@ host installers.
 
 ## What's next
 
-I'm working through the 1,191 leads. If your app belongs in the catalogue, open
-a pull request with a link to its license. If an entry is wrong, open an issue
-and I'll fix it.
+I'm working through the leads from the newest list. New apps show up at
+[openmacapps.com/new](https://openmacapps.com/new/) as they're added, and in the
+RSS feed. If your app belongs in the catalogue, open a pull request with a link
+to its license. If an entry is wrong, open an issue and I'll fix it.
 
 [openmacapps.com](https://openmacapps.com)
