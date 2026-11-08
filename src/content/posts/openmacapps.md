@@ -1,6 +1,6 @@
 ---
-title: "OpenMacApps: 1,000+ open-source Mac apps, each license read by hand"
-description: "Eleven open-source Mac app lists and Homebrew's install data gave me the leads. Reading the actual license files, not GitHub's license field, decided which 1,000+ apps made it into OpenMacApps."
+title: "OpenMacApps: 1,800+ open-source Mac apps, each license read by hand"
+description: "Eleven open-source Mac app lists and Homebrew's install data gave me the leads. Reading the actual license files, not GitHub's license field, decided which 1,800+ apps made it into OpenMacApps."
 pubDatetime: 2026-11-11T08:00:00.000Z
 tags: [openmacapps, open-source, macos]
 ---
