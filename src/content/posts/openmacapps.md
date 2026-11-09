@@ -1,5 +1,5 @@
 ---
-title: "OpenMacApps: 1,800+ open-source Mac apps, each license read by hand"
+title: "OpenMacApps: 1,800+ open-source Mac apps, checked against their license files"
 description: "Eleven open-source Mac app lists and Homebrew's install data gave me the leads. Reading the actual license files, not GitHub's license field, decided which 1,800+ apps made it into OpenMacApps."
 pubDatetime: 2026-11-11T08:00:00.000Z
 tags: [openmacapps, open-source, macos]
@@ -12,25 +12,24 @@ app was open source and ran on a Mac. It doesn't tell you what the license says
 today.
 
 So I built [OpenMacApps](https://openmacapps.com) and checked every entry
-myself.
+against its source.
 
-## The numbers (6 November 2026)
+## The numbers (9 November 2026)
 
-- 11 directories scanned, 2,791 unique repositories after removing duplicates.
+- 11 directories scanned, 2,842 unique repositories after removing duplicates.
 - 382 more leads from Homebrew: casks installed at least 500 times in a year
   whose source is on GitHub.
-- 1,025 apps published: 1,011 open source, 14 source available.
-- 547 of them install with a single Homebrew command.
-- 1,994 list leads aren't in the catalogue: libraries, duplicates and
-  closed-source downloads I turned down, plus leads from the newest list
-  that I haven't reviewed yet.
+- 1,869 apps published: 1,837 open source, 32 source available.
+- 571 of them install with a single Homebrew command.
+- 1,224 list leads aren't in the catalogue: libraries, duplicates,
+  command-line tools and closed-source downloads that were turned down.
 
 ## What "checked" means
 
 An app goes in only when I can point to all four:
 
 1. The repository actually contains the app's source, not just a download page.
-2. A license file I read, linked, with the date I read it.
+2. A license file, linked, with the date it was checked.
 3. An official download or release that runs on macOS.
 4. A description written for the catalogue, not copied from a list.
 
@@ -49,7 +48,7 @@ components. That's enough to confuse the detector, and not enough to change
 what the code is licensed under.
 
 A catalogue that trusted the API would either drop four of the best Mac apps or
-guess. I read the file.
+guess. OpenMacApps reads the file.
 
 ## Open source that isn't quite
 
@@ -80,7 +79,7 @@ host installers.
 
 ## What's next
 
-I'm working through the leads from the newest list. New apps show up at
+New leads come in as the lists grow. New apps show up at
 [openmacapps.com/new](https://openmacapps.com/new/) as they're added, and in the
 RSS feed. If your app belongs in the catalogue, open a pull request with a link
 to its license. If an entry is wrong, open an issue and I'll fix it.
