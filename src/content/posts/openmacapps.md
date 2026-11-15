@@ -1,7 +1,7 @@
 ---
 title: "OpenMacApps: 1,800+ open-source Mac apps, checked against their license files"
 description: "Eleven open-source Mac app lists and Homebrew's install data gave me the leads. Reading the actual license files, not GitHub's license field, decided which 1,800+ apps made it into OpenMacApps."
-pubDatetime: 2026-11-11T08:00:00.000Z
+pubDatetime: 2026-11-15T02:00:00.000Z
 tags: [openmacapps, open-source, macos]
 ---
 
@@ -14,13 +14,13 @@ today.
 So I built [OpenMacApps](https://openmacapps.com) and checked every entry
 against its source.
 
-## The numbers (9 November 2026)
+## The numbers (15 November 2026)
 
 - 11 directories scanned, 2,842 unique repositories after removing duplicates.
 - 382 more leads from Homebrew: casks installed at least 500 times in a year
   whose source is on GitHub.
-- 1,869 apps published: 1,837 open source, 32 source available.
-- 571 of them install with a single Homebrew command.
+- 1,900 apps published: 1,868 open source, 32 source available.
+- 573 of them install with a single Homebrew command.
 - 1,224 list leads aren't in the catalogue: libraries, duplicates,
   command-line tools and closed-source downloads that were turned down.
 
