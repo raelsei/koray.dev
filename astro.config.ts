@@ -31,13 +31,6 @@ const REMOVED_TO_HOME = [
 ];
 
 const redirects: Record<string, string> = {
-  // Posts renamed on 2026-10-04. Each old URL was live, so it keeps working.
-  "/posts/a-missing-capability-beats-a-threshold":
-    "/posts/keep-the-model-call-off-the-request-path/",
-  "/posts/a-signing-key-in-the-browser":
-    "/posts/what-a-non-extractable-key-protects/",
-  "/posts/the-endpoint-that-succeeded-at-doing-nothing":
-    "/posts/fire-and-forget-on-cloudflare-workers/",
   ...Object.fromEntries(REMOVED_TO_WRITING.map(path => [path, "/writing/"])),
   ...Object.fromEntries(REMOVED_TO_HOME.map(path => [path, "/"])),
 };
